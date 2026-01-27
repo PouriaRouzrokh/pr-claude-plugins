@@ -1,6 +1,16 @@
-# pr-dev Commit Log
+# pr-claude-plugins Commit Log
 
-This file tracks significant commits and changes to the pr-dev plugin.
+This file tracks significant commits and changes to the pr-claude-plugins marketplace.
+
+---
+
+### 1/27/2026 (main)
+
+- **Add marketplace configuration and simplify installation docs**
+  - Created `.claude-plugin/marketplace.json` with marketplace name `pr-cloud-plugins`
+  - Simplified README with GitHub-based installation instructions
+  - Removed local testing and development installation sections
+  - Updated git remote to `git@github.com:PouriaRouzrokh/pr-claude-plugins.git`
 
 ---
 
