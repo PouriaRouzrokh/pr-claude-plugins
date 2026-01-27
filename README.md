@@ -20,8 +20,8 @@ Inside Claude Code, run:
 
 ## Available Plugins
 
-| Plugin | Description |
-| ------ | ----------- |
+| Plugin      | Description                                                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [pr](./pr/) | Personal development toolkit with commands for feature development, MVP development, code cleanup, documentation, deployment, and git operations |
 
 ## Updating
