@@ -6,6 +6,17 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ### 1/27/2026 (main)
 
+- **Workaround: Embed skill content into commands due to Claude Code bug**
+  - Embedded full skill content, templates, and examples directly into `create-prd.md` and `create-snapshot.md` commands
+  - This is a workaround for [claude-code#15178](https://github.com/anthropics/claude-code/issues/15178) where skills are not directly readable
+  - Original skill files retained for future reversion when bug is fixed
+  - Condensed snapshot template for brevity while keeping all 19 sections
+  - Updated README.md with Known Limitations section documenting the bug
+
+---
+
+### 1/27/2026 (main)
+
 - **Add initial checkpoint-1 snapshot**
   - Created `.claude/checkpoints/checkpoint-1/snapshot.md` - first technical snapshot of the codebase
   - Documents complete plugin architecture, commands, agents, skills, and patterns

@@ -69,6 +69,10 @@ This plugin uses a structured documentation approach in projects:
 - `/pr:create-snapshot` - Capture current state
 - `/pr:commit-push --pr` - Commit and create PR
 
+## Known Limitations
+
+**Skills not directly readable by Claude Code**: Due to a [known bug](https://github.com/anthropics/claude-code/issues/15178), skill files in plugins are not directly accessible to Claude Code at runtime. As a workaround, the content from skill files (templates, examples, instructions) has been embedded directly into the corresponding command files (`create-prd.md`, `create-snapshot.md`). The original skill files are retained for when this bug is resolved.
+
 ## Version
 
 1.0.0
