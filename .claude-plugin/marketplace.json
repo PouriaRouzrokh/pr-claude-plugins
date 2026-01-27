@@ -1,0 +1,24 @@
+{
+  "name": "pr-cloud-plugins",
+  "owner": {
+    "name": "Pouria Rouzrokh",
+    "email": "pouria.rouzrokh@gmail.com"
+  },
+  "metadata": {
+    "description": "Personal development toolkit plugins for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "pr",
+      "source": "./pr",
+      "description": "Personal development toolkit with commands for feature development, MVP development, code cleanup, documentation, deployment, and git operations",
+      "version": "1.0.0",
+      "author": {
+        "name": "Pouria Rouzrokh"
+      },
+      "category": "development",
+      "keywords": ["feature-development", "mvp", "code-review", "documentation", "git"]
+    }
+  ]
+}

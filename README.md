@@ -4,118 +4,33 @@ A personal development toolkit that extends Claude Code with commands for featur
 
 ## Installation
 
-### Option 1: Test During Development (Recommended First)
-
-Use the `--plugin-dir` flag to load your plugin without installing it:
-
-```bash
-claude --plugin-dir /path/to/pr-dev
-```
-
-For example, if your plugin is at `~/plugins/pr-dev`:
-
-```bash
-claude --plugin-dir ~/plugins/pr-dev
-```
-
-This lets you iterate quickly - just restart Claude Code to pick up changes.
-
-### Option 2: Install Permanently
-
-#### Step 1: Create a Local Marketplace
-
-Create a `marketplace.json` file in a directory (e.g., `~/my-marketplaces/`):
-
-```json
-{
-  "plugins": [
-    {
-      "name": "pr-dev",
-      "source": "/absolute/path/to/pr-dev"
-    }
-  ]
-}
-```
-
-#### Step 2: Add the Marketplace to Claude Code
+### Step 1: Add the Marketplace
 
 Inside Claude Code, run:
 
 ```
-/plugin marketplace add ~/my-marketplaces/marketplace.json
+/plugin marketplace add PouriaRouzrokh/pr-claude-plugins
 ```
 
-#### Step 3: Install the Plugin
+### Step 2: Install the Plugin
 
 ```
-/plugin install pr-dev
+/plugin install pr@pr-cloud-plugins
 ```
 
-Or via CLI:
-
-```bash
-claude plugin install pr-dev --scope user
-```
+That's it! The plugin is now installed and ready to use.
 
 ---
 
 ## Verify It's Working
 
-Once Claude Code is running with your plugin:
-
-### 1. Check available commands
-
-Type `/` and look for your command:
+Type `/` and look for commands under the `pr` namespace:
 
 ```
-/pr-dev:feature
+/pr:feature-dev
 ```
 
-### 2. Run the help command
-
-```
-/help
-```
-
-Your plugin commands should appear under the `pr-dev` namespace.
-
-### 3. Test the command
-
-```
-/pr-dev:feature Add user authentication to the app
-```
-
-### 4. Check for errors
-
-Inside Claude Code:
-
-```
-/plugin
-```
-
-Then go to the Errors tab to see any loading issues.
-
-### Debug Mode
-
-If something isn't working, run Claude Code with debug output:
-
-```bash
-claude --debug --plugin-dir ~/plugins/pr-dev
-```
-
-This shows:
-- Plugin loading status
-- Any manifest errors
-- Command/agent registration
-
-### Quick Checklist
-
-| Check | Command |
-| ----- | ------- |
-| Plugin structure correct? | Verify `.claude-plugin/plugin.json` exists at root |
-| Commands visible? | Type `/pr-dev:` and see if feature appears |
-| Agents loaded? | Type `/agents` to see if your agents appear |
-| Any errors? | Check `/plugin` → Errors tab |
+Or run `/help` to see all available commands.
 
 ## Commands
 
