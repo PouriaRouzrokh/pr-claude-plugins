@@ -6,6 +6,14 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ### 1/27/2026 (main)
 
+- **Separate README files for marketplace and plugin**
+  - Root README now focuses on marketplace installation and plugin listing
+  - Created `pr/README.md` with plugin-specific documentation (commands, skills, agents, workflows)
+
+---
+
+### 1/27/2026 (main)
+
 - **Add marketplace configuration and simplify installation docs**
   - Created `.claude-plugin/marketplace.json` with marketplace name `pr-cloud-plugins`
   - Simplified README with GitHub-based installation instructions
