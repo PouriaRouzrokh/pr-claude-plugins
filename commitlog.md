@@ -4,6 +4,17 @@ This file tracks significant commits and changes to the pr-dev plugin.
 
 ---
 
+### 1/27/2026 - 00:30 (main)
+
+- **Release v1.0.0: Add commitlog.md and standardize commit log naming**
+  - Updated version to 1.0.0 in plugin.json and README.md
+  - Created commitlog.md to track project changes
+  - Updated commit-push.md command to use commitlog.md instead of commit-log.md
+  - Added Phase 0.5 to detect and rename commit log file variations (commit_log.md, commit-log.md, COMMIT_LOG.md, etc.)
+  - Normalized reference filenames (removed spaces)
+
+---
+
 ### 1/27/2026 - 00:09 (main)
 
 - **Initial Release: pr plugin v1.0.0**
