@@ -13,13 +13,8 @@ A personal development toolkit that extends Claude Code with commands for featur
 | `/pr:update-docs [path] [focus]`         | Update project documentation based on codebase changes                                                 |
 | `/pr:run-local [instructions]`           | Start and run the application locally for development                                                  |
 | `/pr:run-public [instructions]`          | Deploy and run the application publicly                                                                |
-
-## Skills
-
-| Skill                        | Description                                                                              |
-| ---------------------------- | ---------------------------------------------------------------------------------------- |
-| `/pr:create-snapshot [path]` | Generate a comprehensive technical snapshot of the codebase for handoff or documentation |
-| `/pr:create-prd [ideas]`     | Generate a Product Requirements Document through interactive discovery and research      |
+| `/pr:create-prd [ideas]`                 | Generate a Product Requirements Document through interactive discovery and research                    |
+| `/pr:create-snapshot [path]`             | Generate a comprehensive technical snapshot of the codebase for handoff or documentation               |
 
 ## Agents
 

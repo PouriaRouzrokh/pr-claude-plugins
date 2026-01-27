@@ -4,57 +4,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-This is the **pr** plugin for Claude Code - a personal development toolkit that extends Claude with commands for feature development, MVP development, code cleanup, documentation, deployment, and git operations.
+This is the **pr-cloud-plugins** marketplace - a Claude Code plugin repository containing the **pr** plugin, a personal development toolkit for feature development, MVP development, code cleanup, documentation, deployment, and git operations.
 
-## Plugin Architecture
+## Repository Structure
 
 ```
-pr/
+pr-claude-plugins/
 ├── .claude-plugin/
-│   └── plugin.json          # Plugin manifest (name, version, author)
-├── agents/                   # Subagent definitions (launched by commands)
-│   ├── code-explorer.md     # Yellow - analyzes existing code, traces execution
-│   ├── code-architect.md    # Green - designs implementations, creates blueprints
-│   └── code-reviewer.md     # Red - reviews code, reports issues with confidence >= 80
-├── commands/                 # Slash commands (invoked as /pr:command-name)
-│   ├── feature-dev.md       # Single feature development with RFD tracking
-│   ├── mvp-dev.md           # Full MVP development from PRD
-│   ├── commit-push.md       # Git commit, push, merge, PR creation
-│   ├── clean-codebase.md    # Code cleanup using code-reviewer
-│   ├── update-docs.md       # Documentation updates using code-explorer
-│   ├── run-local.md         # Start app locally
-│   └── run-public.md        # Deploy publicly
-└── skills/                   # Skills with supporting files
-    ├── create-snapshot/
-    │   ├── SKILL.md         # Codebase snapshot generation
-    │   └── template.md      # Snapshot template
-    └── create-prd/
-        └── SKILL.md         # PRD generation through discovery
+│   └── marketplace.json     # Marketplace manifest (name: pr-cloud-plugins)
+├── pr/                       # The pr plugin
+│   ├── .claude-plugin/
+│   │   └── plugin.json      # Plugin manifest (name, version, author)
+│   ├── agents/              # Subagents launched by commands
+│   ├── commands/            # Slash commands (/pr:command-name)
+│   └── skills/              # Skills with supporting files
+├── commitlog.md             # Project commit history
+└── README.md                # Marketplace installation docs
 ```
 
 ## Key Concepts
 
 ### RFD (Request for Development)
-Documents that track feature requests and implementation progress. Located in `.claude/checkpoints/checkpoint-{N}/rfd/{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`. Status values: Planning, In Progress, Completed, On Hold.
+Documents tracking feature requests and implementation. Path: `.claude/checkpoints/checkpoint-{N}/rfd/{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`. Status: Planning, In Progress, Completed, On Hold.
 
 ### PRD (Product Requirements Document)
-Product vision and requirements document. Always located at `.claude/checkpoints/checkpoint-0/prd.md`.
+Product vision document at `.claude/checkpoints/checkpoint-0/prd.md`.
 
 ### Checkpoints
-Point-in-time documentation of project state. checkpoint-0 is pre-development (contains PRD), checkpoint-1+ contain snapshots and RFDs created during development.
+Point-in-time project documentation. checkpoint-0 is pre-development (PRD), checkpoint-1+ contain snapshots and RFDs.
 
-## Agent Usage Pattern
+## Agent Colors and Purposes
 
-Commands launch agents with specific prompts and wait for results:
-- **code-explorer**: Returns 5-10 key files to read + analysis
-- **code-architect**: Returns implementation blueprint with file paths
-- **code-reviewer**: Returns issues with confidence scores (only >= 80 reported)
+| Agent | Color | Purpose |
+|-------|-------|---------|
+| code-explorer | Yellow | Traces execution paths, maps architecture, returns 5-10 key files |
+| code-architect | Green | Designs implementations, creates blueprints with file paths |
+| code-reviewer | Red | Reviews code, reports issues with confidence >= 80 |
 
 Commands typically launch 2-3 agents in parallel with different focuses, then consolidate findings.
 
-## Command/Skill Format
+## Plugin Component Formats
 
-Commands use YAML frontmatter:
+**Commands** (`commands/*.md`):
 ```yaml
 ---
 description: Brief description
@@ -62,7 +53,7 @@ argument-hint: "[optional: hint text]"
 ---
 ```
 
-Skills use YAML frontmatter with additional fields:
+**Skills** (`skills/*/SKILL.md`):
 ```yaml
 ---
 name: skill-name
@@ -71,7 +62,7 @@ argument-hint: "[hint]"
 ---
 ```
 
-Agents use:
+**Agents** (`agents/*.md`):
 ```yaml
 ---
 name: agent-name
@@ -81,3 +72,21 @@ model: sonnet
 color: yellow|green|red
 ---
 ```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `/pr:feature-dev [desc]` | Single feature dev with RFD tracking |
+| `/pr:mvp-dev [focus]` | MVP from PRD |
+| `/pr:commit-push [path] [--merge\|--pr]` | Commit, push, optionally merge/PR |
+| `/pr:clean-codebase [path]` | Code cleanup via code-reviewer |
+| `/pr:update-docs [path] [focus]` | Update documentation based on changes |
+| `/pr:run-local [instructions]` | Start app locally for development |
+| `/pr:run-public [instructions]` | Deploy and run app publicly |
+| `/pr:create-prd [ideas]` | Generate PRD through discovery |
+| `/pr:create-snapshot [path]` | Technical codebase snapshot |
+
+## Working with commitlog.md
+
+The `/pr:commit-push` command maintains `commitlog.md` in the project root. It auto-renames variations (commit-log.md, COMMIT_LOG.md, etc.) to `commitlog.md` for consistency.

@@ -6,6 +6,17 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ### 1/27/2026 (main)
 
+- **Add commands for create-prd and create-snapshot skills**
+  - Created `pr/commands/create-prd.md` - wrapper command for PRD generation skill
+  - Created `pr/commands/create-snapshot.md` - wrapper command for snapshot generation skill
+  - Skills are now directly invocable as `/pr:create-prd` and `/pr:create-snapshot`
+  - Updated pr/README.md to list all 9 commands (removed separate Skills section)
+  - Updated CLAUDE.md with complete command list and improved documentation
+
+---
+
+### 1/27/2026 (main)
+
 - **Separate README files for marketplace and plugin**
   - Root README now focuses on marketplace installation and plugin listing
   - Created `pr/README.md` with plugin-specific documentation (commands, skills, agents, workflows)
