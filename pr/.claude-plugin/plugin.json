@@ -1,7 +1,7 @@
 {
   "name": "pr",
   "description": "Personal development toolkit with commands for feature development, MVP development, code cleanup, documentation, deployment, and git operations. Includes specialized agents for codebase exploration, architecture design, and quality review with comprehensive RFD/PRD/checkpoint documentation management.",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "author": {
     "name": "Pouria Rouzrokh"
   }

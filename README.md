@@ -18,7 +18,7 @@ Add this plugin to your Claude Code configuration by adding the path to your `~/
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `/pr:feature-dev [description]`          | Develop a single feature with RFD tracking, codebase exploration, architecture design, and code review |
 | `/pr:mvp-dev [focus]`                    | Develop an entire MVP from a PRD file, creating RFDs for each feature                                  |
-| `/pr:commit-push [path] [--merge\|--pr]` | Commit changes, update commit-log.md, push to remote, optionally merge or create PR                    |
+| `/pr:commit-push [path] [--merge\|--pr]` | Commit changes, update commitlog.md, push to remote, optionally merge or create PR                     |
 | `/pr:clean-codebase [path]`              | Clean and professionalize code using automated review to identify issues                               |
 | `/pr:update-docs [path] [focus]`         | Update project documentation based on codebase changes                                                 |
 | `/pr:run-local [instructions]`           | Start and run the application locally for development                                                  |
@@ -86,7 +86,7 @@ This plugin uses a structured documentation approach in projects:
 
 ## Version
 
-2.0.0
+1.0.0
 
 ## Author
 

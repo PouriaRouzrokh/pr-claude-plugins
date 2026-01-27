@@ -10,7 +10,8 @@ Commit changes, update commit log, and push to remote repository.
 ## Core Principles
 
 - **Show before committing**: Always display what will be committed before taking action
-- **Update commit-log.md**: Maintain a running log of all commits for project history
+- **Update commitlog.md**: Maintain a running log of all commits for project history
+- **Standardize commit log naming**: Automatically rename variations to `commitlog.md`
 - **Safe by default**: Never commit sensitive files, never force push without explicit request
 - **Respect workflow**: Support both direct merge and PR-based workflows
 
@@ -30,7 +31,7 @@ The arguments may contain any combination of:
 4. **Free text** - description of what was changed (used for commit message context)
 
 **Examples**:
-- `/pr:commit-push` → Commit all changes, update commit-log.md, push
+- `/pr:commit-push` → Commit all changes, update commitlog.md, push
 - `/pr:commit-push src/auth` → Commit only changes in src/auth folder
 - `/pr:commit-push --merge` → Commit, push, then merge to main/master
 - `/pr:commit-push --pr` → Commit, push, then create a PR
@@ -38,6 +39,39 @@ The arguments may contain any combination of:
 - `/pr:commit-push src/api added new search endpoints --merge` → Scoped with merge
 
 If both `--merge` and `--pr` are provided, prefer `--pr` (safer workflow).
+
+---
+
+## Phase 0.5: Standardize Commit Log File
+
+**Goal**: Ensure consistent commit log naming across codebases
+
+**Actions**:
+
+1. Search for existing commit log file variations in the project root:
+   - `commit_log.md`
+   - `commit-log.md`
+   - `COMMIT_LOG.md`
+   - `COMMITLOG.md`
+   - `CommitLog.md`
+   - `Commit_Log.md`
+   - `commit_log.MD`
+   - Any other case variations
+
+2. If a variation is found (and `commitlog.md` does NOT exist):
+   - Rename the existing file to `commitlog.md` using `git mv` (preserves history)
+   - Inform the user: "Renamed [old-name] to commitlog.md for consistency"
+
+3. If both a variation AND `commitlog.md` exist:
+   - **Ask the user** which file to keep
+   - Merge contents if user requests, or delete the duplicate
+
+4. If no commit log file exists, it will be created in Phase 2
+
+```bash
+# Example detection
+ls -1 | grep -iE '^commit[-_]?log\.md$' | head -1
+```
 
 ---
 
@@ -55,13 +89,13 @@ If both `--merge` and `--pr` are provided, prefer `--pr` (safer workflow).
 
 ---
 
-## Phase 2: Update commit-log.md
+## Phase 2: Update commitlog.md
 
 **Goal**: Maintain project commit history
 
 **Actions**:
 
-1. Check if `commit-log.md` exists in the project root
+1. Check if `commitlog.md` exists in the project root
 
 2. **If it does NOT exist**, create it with this template:
 
@@ -108,7 +142,7 @@ This file tracks significant commits and changes to the project.
 1. **Stage changes**:
    - If a path scope was provided, stage only files in that scope: `git add [path]`
    - If no scope, stage specific files (avoid `git add -A` to prevent accidentally staging sensitive files)
-   - Always include the updated `commit-log.md` in the commit
+   - Always include the updated `commitlog.md` in the commit
    - **NEVER stage sensitive files** (.env, credentials, secrets, API keys) - warn and skip them
 
 2. **Create commit** with a clear, descriptive message using HEREDOC format:
@@ -126,7 +160,7 @@ EOF
 
 - Summarize the changes concisely
 - Use conventional commit format if the project uses it
-- Reference the changes documented in commit-log.md
+- Reference the changes documented in commitlog.md
 
 ---
 
@@ -167,12 +201,12 @@ EOF
 
 **Actions**:
 
-1. Use `gh pr create` with the commit-log.md entry as basis for PR description:
+1. Use `gh pr create` with the commitlog.md entry as basis for PR description:
 
 ```bash
 gh pr create --title "[PR Title]" --body "$(cat <<'EOF'
 ## Summary
-[Bullet points from commit-log.md entry]
+[Bullet points from commitlog.md entry]
 
 ## Changes
 [List of changed files/features]
@@ -208,7 +242,7 @@ Present to user:
 - Force push (`--force`) unless explicitly requested
 - Push to main/master directly if `--pr` flag is used
 - Merge without checking for conflicts first
-- Skip the commit-log.md update
+- Skip the commitlog.md update
 
 **ALWAYS:**
 - Show the user what will be committed before committing
