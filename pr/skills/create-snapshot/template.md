@@ -278,46 +278,335 @@ mainFunction(params);
 
 ---
 
-## 8. Design & UX
+## 8. User Interface (UI) Design
 
-### 8.1 Design System
+This section documents all visual design aspects that developers need to recreate or maintain the UI.
 
-| Aspect             | Implementation                 |
-| ------------------ | ------------------------------ |
-| UI Framework       | {shadcn/ui, Material UI, etc.} |
-| Component Location | `{path}`                       |
-| Design Tokens      | `{path to theme/tokens}`       |
+### 8.1 Design System Overview
 
-### 8.2 Theming
+| Aspect               | Implementation                 | Notes                          |
+| -------------------- | ------------------------------ | ------------------------------ |
+| UI Framework/Library | {shadcn/ui, Material UI, etc.} | {version}                      |
+| Component Location   | `{path}`                       |                                |
+| Design Tokens        | `{path to theme/tokens}`       |                                |
+| CSS Architecture     | {Tailwind, CSS Modules, etc.}  | {Configuration file location}  |
 
-- **Dark Mode**: {Yes/No} — {Implementation details}
-- **Theme Config**: `{path}`
-- **CSS Variables**: {Yes/No}
+### 8.2 Color Palette
 
-### 8.3 Responsive Design
+**Primary Colors**:
 
-| Breakpoint | Width  | Target        |
-| ---------- | ------ | ------------- |
-| sm         | 640px  | Mobile        |
-| md         | 768px  | Tablet        |
-| lg         | 1024px | Desktop       |
-| xl         | 1280px | Large Desktop |
+| Name      | Hex Code    | CSS Variable          | Usage                        |
+| --------- | ----------- | --------------------- | ---------------------------- |
+| Primary   | `#{hex}`    | `--color-primary`     | Main brand color, CTAs       |
+| Secondary | `#{hex}`    | `--color-secondary`   | Secondary actions            |
+| Accent    | `#{hex}`    | `--color-accent`      | Highlights, notifications    |
 
-**Approach**: {Mobile-first / Desktop-first}
+**Neutral Colors**:
 
-### 8.4 Accessibility
+| Name       | Hex Code    | CSS Variable           | Usage                        |
+| ---------- | ----------- | ---------------------- | ---------------------------- |
+| Background | `#{hex}`    | `--color-background`   | Page backgrounds             |
+| Surface    | `#{hex}`    | `--color-surface`      | Card/container backgrounds   |
+| Border     | `#{hex}`    | `--color-border`       | Dividers, borders            |
+| Text       | `#{hex}`    | `--color-text`         | Primary text                 |
+| Text Muted | `#{hex}`    | `--color-text-muted`   | Secondary/helper text        |
 
-- [ ] Semantic HTML
-- [ ] ARIA labels
-- [ ] Keyboard navigation
-- [ ] Screen reader tested
-- [ ] Color contrast compliant
+**Semantic Colors**:
+
+| Name    | Hex Code    | CSS Variable        | Usage                     |
+| ------- | ----------- | ------------------- | ------------------------- |
+| Success | `#{hex}`    | `--color-success`   | Success states, confirms  |
+| Warning | `#{hex}`    | `--color-warning`   | Warnings, cautions        |
+| Error   | `#{hex}`    | `--color-error`     | Errors, destructive       |
+| Info    | `#{hex}`    | `--color-info`      | Informational messages    |
+
+**Theme Configuration File**: `{path to where colors are defined}`
+
+### 8.3 Typography
+
+**Font Families**:
+
+| Purpose    | Font Family                  | Fallback Stack                        | CSS Variable       |
+| ---------- | ---------------------------- | ------------------------------------- | ------------------ |
+| Headings   | {Inter, Roboto, etc.}        | `-apple-system, sans-serif`           | `--font-heading`   |
+| Body       | {Inter, system-ui, etc.}     | `-apple-system, sans-serif`           | `--font-body`      |
+| Monospace  | {Fira Code, JetBrains, etc.} | `monospace`                           | `--font-mono`      |
+
+**Font Sizes**:
+
+| Name  | Size    | Line Height | Usage                          |
+| ----- | ------- | ----------- | ------------------------------ |
+| xs    | {12px}  | {1.4}       | Small labels, captions         |
+| sm    | {14px}  | {1.5}       | Secondary text, inputs         |
+| base  | {16px}  | {1.6}       | Body text                      |
+| lg    | {18px}  | {1.6}       | Large body, subheadings        |
+| xl    | {20px}  | {1.5}       | Small headings                 |
+| 2xl   | {24px}  | {1.4}       | Section headings               |
+| 3xl   | {30px}  | {1.3}       | Page headings                  |
+| 4xl   | {36px}  | {1.2}       | Hero headings                  |
+
+**Font Weights**: `{300 light, 400 regular, 500 medium, 600 semibold, 700 bold}`
+
+### 8.4 Spacing System
+
+**Base Unit**: `{4px / 0.25rem}`
+
+| Token | Value   | Usage                            |
+| ----- | ------- | -------------------------------- |
+| 1     | {4px}   | Tight spacing, icon gaps         |
+| 2     | {8px}   | Related elements                 |
+| 3     | {12px}  | Form field gaps                  |
+| 4     | {16px}  | Standard padding                 |
+| 6     | {24px}  | Section padding                  |
+| 8     | {32px}  | Large gaps                       |
+| 12    | {48px}  | Section margins                  |
+| 16    | {64px}  | Page sections                    |
+
+### 8.5 Component Styles
+
+#### Buttons
+
+| Variant   | Background    | Text Color    | Border        | Hover State                   |
+| --------- | ------------- | ------------- | ------------- | ----------------------------- |
+| Primary   | `{color}`     | `{color}`     | none          | {Darken 10%, scale up 1.02}   |
+| Secondary | `{color}`     | `{color}`     | `{1px solid}` | {Background opacity change}   |
+| Ghost     | transparent   | `{color}`     | none          | {Light background}            |
+| Danger    | `{color}`     | white         | none          | {Darken red}                  |
+
+**Button Sizes**: `{sm: 32px, md: 40px, lg: 48px height}`
+
+**Border Radius**: `{4px / 8px / full for pills}`
+
+#### Form Elements
+
+| Element      | Border        | Focus State              | Error State            |
+| ------------ | ------------- | ------------------------ | ---------------------- |
+| Input        | `{1px solid}` | `{ring color/width}`     | `{border color}`       |
+| Select       | `{1px solid}` | `{ring color/width}`     | `{border color}`       |
+| Checkbox     | `{radius}`    | `{ring color/width}`     | `{styling}`            |
+| Radio        | `{styling}`   | `{ring color/width}`     | `{styling}`            |
+
+#### Cards & Containers
+
+| Element  | Background    | Border        | Shadow                      | Border Radius |
+| -------- | ------------- | ------------- | --------------------------- | ------------- |
+| Card     | `{color}`     | `{styling}`   | `{shadow values}`           | `{radius}`    |
+| Modal    | `{color}`     | `{styling}`   | `{shadow values}`           | `{radius}`    |
+| Dropdown | `{color}`     | `{styling}`   | `{shadow values}`           | `{radius}`    |
+
+### 8.6 Icons & Visual Assets
+
+**Icon System**:
+
+| Aspect        | Implementation                    |
+| ------------- | --------------------------------- |
+| Icon Library  | {Lucide, Heroicons, custom, etc.} |
+| Default Size  | `{24px}`                          |
+| Location      | `{path}`                          |
+| Usage Pattern | `{<IconName className="..." />}`  |
+
+**Image Assets**:
+
+| Type      | Location                | Format             | Notes              |
+| --------- | ----------------------- | ------------------ | ------------------ |
+| Logo      | `{path}`                | {SVG/PNG}          | {Variants}         |
+| Icons     | `{path}`                | {SVG}              |                    |
+| Images    | `{path}`                | {WebP/PNG/JPG}     | {Optimization}     |
+| Favicons  | `{path}`                | {ICO/PNG/SVG}      |                    |
+
+### 8.7 Animations & Transitions
+
+**Transition Defaults**:
+
+| Property     | Duration | Easing                      | Usage               |
+| ------------ | -------- | --------------------------- | ------------------- |
+| All          | {150ms}  | `{ease-in-out}`             | General transitions |
+| Transform    | {200ms}  | `{cubic-bezier(...)}`       | Scale, rotate       |
+| Opacity      | {150ms}  | `{ease-out}`                | Fade effects        |
+| Colors       | {100ms}  | `{ease}`                    | Hover states        |
+
+**Animation Patterns**:
+
+| Animation     | Duration | Description                          |
+| ------------- | -------- | ------------------------------------ |
+| fadeIn        | {200ms}  | Opacity 0 → 1                        |
+| slideUp       | {300ms}  | Translate Y with fade                |
+| scaleIn       | {150ms}  | Scale from 0.95 to 1                 |
+| {custom}      | {time}   | {description}                        |
+
+### 8.8 Theming (Light/Dark Mode)
+
+**Implementation**: {CSS variables / Tailwind dark: / Theme provider}
+
+**Light Theme**:
+```css
+/* Key light theme values */
+--background: {value};
+--foreground: {value};
+--card: {value};
+/* etc. */
+```
+
+**Dark Theme**:
+```css
+/* Key dark theme values */
+--background: {value};
+--foreground: {value};
+--card: {value};
+/* etc. */
+```
+
+**Theme Toggle**: `{Location and method of theme switching}`
 
 ---
 
-## 9. Development Guidelines
+## 9. User Experience (UX) Design
 
-### 9.1 Coding Conventions
+This section documents interaction patterns, user flows, and experience considerations.
+
+### 9.1 Navigation Patterns
+
+**Primary Navigation**:
+
+| Element        | Type                    | Location         | Behavior                    |
+| -------------- | ----------------------- | ---------------- | --------------------------- |
+| Main Nav       | {Top bar / Sidebar}     | `{component}`    | {Sticky / Fixed / Static}   |
+| Mobile Nav     | {Hamburger / Bottom}    | `{component}`    | {Slide-in / Overlay}        |
+| Breadcrumbs    | {Yes/No}                | `{component}`    | {Auto-generated / Manual}   |
+
+**Navigation Structure**:
+
+```
+├── Home
+├── {Section 1}
+│   ├── {Subsection}
+│   └── {Subsection}
+├── {Section 2}
+└── {Settings / Profile}
+```
+
+### 9.2 User Flows
+
+**Primary User Journey**:
+
+```
+{Start} → {Step 1} → {Step 2} → {Step 3} → {Goal}
+   │
+   └──[Alternative path]──→ {Alternative outcome}
+```
+
+**Key Flows Documented**:
+
+| Flow Name        | Entry Point     | Steps | Success Criteria            |
+| ---------------- | --------------- | ----- | --------------------------- |
+| {Onboarding}     | {Landing page}  | {N}   | {User completes setup}      |
+| {Core Action}    | {Dashboard}     | {N}   | {Action completed}          |
+| {Authentication} | {Login page}    | {N}   | {User authenticated}        |
+
+### 9.3 Interaction Patterns
+
+**Loading States**:
+
+| Context          | Pattern                  | Implementation        |
+| ---------------- | ------------------------ | --------------------- |
+| Page Load        | {Skeleton / Spinner}     | `{component}`         |
+| Button Action    | {Spinner / Disabled}     | {Inline / Replace}    |
+| Data Fetch       | {Skeleton / Placeholder} | `{component}`         |
+
+**Empty States**:
+
+| Context          | Content                         | Action Provided       |
+| ---------------- | ------------------------------- | --------------------- |
+| No Data          | {Illustration + message}        | {CTA to create}       |
+| Search No Result | {Message + suggestions}         | {Clear / Modify}      |
+| Error            | {Error message}                 | {Retry / Contact}     |
+
+**Feedback Patterns**:
+
+| Action Type      | Feedback Method               | Duration / Behavior   |
+| ---------------- | ----------------------------- | --------------------- |
+| Success          | {Toast / Inline message}      | {3s auto-dismiss}     |
+| Error            | {Toast / Modal / Inline}      | {Persistent / 5s}     |
+| Warning          | {Toast / Confirmation modal}  | {User dismisses}      |
+| Progress         | {Progress bar / Spinner}      | {Until complete}      |
+
+### 9.4 Responsive Behavior
+
+**Breakpoints**:
+
+| Name   | Width     | Target Device     | Layout Changes                         |
+| ------ | --------- | ----------------- | -------------------------------------- |
+| sm     | {640px}   | Mobile            | {Single column, stacked nav}           |
+| md     | {768px}   | Tablet            | {2-column where appropriate}           |
+| lg     | {1024px}  | Desktop           | {Full layout, sidebar visible}         |
+| xl     | {1280px}  | Large Desktop     | {Max-width container, wider spacing}   |
+| 2xl    | {1536px}  | Extra Large       | {Optional wider content}               |
+
+**Approach**: {Mobile-first / Desktop-first}
+
+**Responsive Patterns**:
+
+| Component    | Mobile                | Tablet              | Desktop              |
+| ------------ | --------------------- | ------------------- | -------------------- |
+| Navigation   | {Hamburger menu}      | {Collapsed sidebar} | {Full sidebar}       |
+| Grid         | {1 column}            | {2 columns}         | {3-4 columns}        |
+| Tables       | {Card view / Scroll}  | {Horizontal scroll} | {Full table}         |
+
+### 9.5 Accessibility
+
+**Compliance Target**: {WCAG 2.1 AA / AAA}
+
+**Implemented Features**:
+
+| Feature                | Status | Implementation Notes                  |
+| ---------------------- | ------ | ------------------------------------- |
+| Semantic HTML          | {✓/○}  | {Details}                             |
+| ARIA Labels            | {✓/○}  | `{aria-label, aria-describedby}`      |
+| Keyboard Navigation    | {✓/○}  | {Tab order, focus management}         |
+| Focus Indicators       | {✓/○}  | `{outline / ring styles}`             |
+| Screen Reader Support  | {✓/○}  | {Tested with: VoiceOver, NVDA, etc.}  |
+| Color Contrast         | {✓/○}  | {Ratio: 4.5:1 minimum}                |
+| Reduced Motion         | {✓/○}  | `{prefers-reduced-motion support}`    |
+| Alt Text               | {✓/○}  | {All images have descriptive alt}     |
+
+**Skip Links**: `{Yes/No - location}`
+
+**Focus Management**: `{How focus is managed during navigation, modals, etc.}`
+
+### 9.6 Error Handling UX
+
+**Error Display Patterns**:
+
+| Error Type       | Display Method          | User Actions Available      |
+| ---------------- | ----------------------- | --------------------------- |
+| Form Validation  | {Inline below field}    | {Correct and resubmit}      |
+| API Error        | {Toast / Error page}    | {Retry / Go back}           |
+| 404 Not Found    | {Custom 404 page}       | {Go home / Search}          |
+| 500 Server Error | {Error page}            | {Retry / Contact support}   |
+| Network Error    | {Inline / Toast}        | {Retry when online}         |
+
+### 9.7 Multimedia Components
+
+**Audio/Video**:
+
+| Type    | Implementation           | Controls                    | Location        |
+| ------- | ------------------------ | --------------------------- | --------------- |
+| Video   | {Native / YouTube / etc} | {Custom / Native controls}  | `{path}`        |
+| Audio   | {Native / Custom player} | {Play/pause, volume, etc.}  | `{path}`        |
+
+**Other Media**:
+
+| Component   | Purpose              | Implementation          |
+| ----------- | -------------------- | ----------------------- |
+| Image Zoom  | {Product images}     | {Library used}          |
+| Carousel    | {Image galleries}    | {Library / Custom}      |
+| Maps        | {Location display}   | {Google Maps / Mapbox}  |
+
+---
+
+## 10. Development Guidelines
+
+### 10.1 Coding Conventions
 
 **Style Configuration**: `{.eslintrc / .prettierrc / etc.}`
 
@@ -337,7 +626,7 @@ mainFunction(params);
 5. Types
 6. Styles
 
-### 9.2 Patterns & Best Practices
+### 10.2 Patterns & Best Practices
 
 **Error Handling**:
 
@@ -351,7 +640,7 @@ mainFunction(params);
 // Example state pattern
 ```
 
-### 9.3 Environment Setup
+### 10.3 Environment Setup
 
 **Prerequisites**:
 
@@ -383,7 +672,7 @@ cd {project}
 
 ---
 
-## 10. Testing Strategy
+## 11. Testing Strategy
 
 | Type        | Framework                 | Location   | Command     |
 | ----------- | ------------------------- | ---------- | ----------- |
@@ -395,9 +684,9 @@ cd {project}
 
 ---
 
-## 11. Deployment & Operations
+## 12. Deployment & Operations
 
-### 11.1 Build Process
+### 12.1 Build Process
 
 ```bash
 # Production build
@@ -407,7 +696,7 @@ cd {project}
 {output path}
 ```
 
-### 11.2 Deployment
+### 12.2 Deployment
 
 **Target**: {Platform}
 
@@ -423,7 +712,7 @@ cd {project}
 {rollback command or procedure}
 ```
 
-### 11.3 Monitoring
+### 12.3 Monitoring
 
 | Aspect  | Tool          | Configuration |
 | ------- | ------------- | ------------- |
@@ -433,7 +722,7 @@ cd {project}
 
 ---
 
-## 12. Security Considerations
+## 13. Security Considerations
 
 | Area             | Implementation         |
 | ---------------- | ---------------------- |
@@ -447,7 +736,7 @@ cd {project}
 
 ---
 
-## 13. Dependencies & Third-Party Services
+## 14. Dependencies & Third-Party Services
 
 ### Critical Dependencies
 
@@ -463,7 +752,7 @@ cd {project}
 
 ---
 
-## 14. Known Issues & Technical Debt
+## 15. Known Issues & Technical Debt
 
 ### Open Issues
 
@@ -481,7 +770,7 @@ cd {project}
 
 ---
 
-## 15. RFD Summary
+## 16. RFD Summary
 
 *All RFDs found in checkpoint documentation:*
 
@@ -492,7 +781,7 @@ cd {project}
 
 ---
 
-## 16. References Summary
+## 17. References Summary
 
 *All reference documents found in `.claude/references/`:*
 
@@ -505,7 +794,7 @@ cd {project}
 
 ---
 
-## 17. Glossary
+## 18. Glossary
 
 | Term           | Definition                                                      |
 | -------------- | --------------------------------------------------------------- |
@@ -517,7 +806,7 @@ cd {project}
 
 ---
 
-## 18. Quick Reference
+## 19. Quick Reference
 
 ### Common Commands
 

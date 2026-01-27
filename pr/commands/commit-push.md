@@ -42,7 +42,25 @@ If both `--merge` and `--pr` are provided, prefer `--pr` (safer workflow).
 
 ---
 
-## Phase 0.5: Standardize Commit Log File
+## Phase 0.5: Handle .claude/ in Version Control
+
+**Goal**: Include Claude documentation in version control by default (for team collaboration)
+
+**Default Behavior**: `.claude/` and `CLAUDE.md` are **included** in git by default.
+
+**Actions**:
+
+1. If the user explicitly requests to ignore `.claude/` (e.g., "ignore .claude", "don't commit .claude", "add .claude to gitignore"):
+   - Add `.claude/` to `.gitignore`
+   - Inform the user: "Added .claude/ to .gitignore as requested"
+
+2. Otherwise, proceed normally - `.claude/` will be committed along with other project files
+
+**Rationale**: The `.claude/` directory contains valuable project documentation (checkpoints, snapshots, RFDs, PRDs) that helps team members and future Claude sessions understand the project. Sharing this context improves collaboration. Users who prefer to keep it private can explicitly opt out.
+
+---
+
+## Phase 0.6: Standardize Commit Log File
 
 **Goal**: Ensure consistent commit log naming across codebases
 

@@ -14,6 +14,8 @@ Generate a comprehensive technical snapshot of a codebase that serves as a compl
 - **Use agents for depth**: Launch code-explorer agents to understand codebase deeply
 - **Be specific**: Use actual file paths, function names, and code references
 - **Track evolution**: Note how things have changed from previous checkpoints
+- **Clarity over brevity**: Prioritize clear, thorough communication over keeping things concise. A snapshot should be comprehensive enough that any developer can fully understand the project without needing to ask questions. Avoid unnecessary summarization that loses important details.
+- **Capture the full picture**: Include UI/UX, design, aesthetics, and multimedia aspects—not just backend logic
 
 ---
 
@@ -95,7 +97,7 @@ find {project_root}/.claude/references -name "*.md" 2>/dev/null | sort
 
 **Actions**:
 
-1. Launch 3 code-explorer agents in parallel with different focuses:
+1. Launch 4 code-explorer agents in parallel with different focuses:
 
    **Agent 1 - Architecture Overview**:
    ```
@@ -130,6 +132,25 @@ find {project_root}/.claude/references -name "*.md" 2>/dev/null | sort
    - Known issues and technical debt
 
    Return a list of 5-10 key development files to read.
+   ```
+
+   **Agent 4 - UI/UX & Design Analysis**:
+   ```
+   Analyze the UI, UX, and visual design aspects of this codebase. Focus on:
+   - Design system and component library used (e.g., shadcn/ui, Material UI, custom)
+   - Color palette, themes, and color variables/tokens
+   - Typography: fonts, sizes, weights, line heights
+   - Spacing system and layout patterns
+   - Button styles, form elements, and interactive components
+   - Icons, images, and multimedia assets
+   - Animation and transition patterns
+   - Responsive design breakpoints and mobile considerations
+   - Accessibility features (ARIA, keyboard nav, screen reader support)
+   - Dark mode / light mode implementation
+   - CSS architecture (Tailwind, CSS modules, styled-components, etc.)
+   - Design tokens and theming configuration files
+
+   Return a list of 5-10 key design/style files to read (CSS, theme configs, component files with significant styling).
    ```
 
 2. Wait for all agents to complete
@@ -177,17 +198,18 @@ Key sections to include:
 5. **Features Inventory** - Completed, in-progress, and planned features
 6. **Architecture & System Design** - High-level architecture, tech stack, data flow
 7. **Key Components Deep Dive** - Detailed component documentation
-8. **Design & UX** - Design system, theming, responsive design, accessibility
-9. **Development Guidelines** - Coding conventions, patterns, environment setup
-10. **Testing Strategy** - Test framework, types, coverage
-11. **Deployment & Operations** - Build process, deployment, monitoring
-12. **Security Considerations** - Auth, authorization, data protection
-13. **Dependencies & Third-Party Services** - Critical dependencies, external services
-14. **Known Issues & Technical Debt** - Open issues, TODOs, tech debt
-15. **RFD Summary** - Table of all RFDs with status
-16. **References Summary** - Table of all reference documents
-17. **Glossary** - Project-specific terms
-18. **Quick Reference** - Common commands, important files
+8. **User Interface (UI) Design** - Visual design system, colors, typography, components, styling architecture
+9. **User Experience (UX) Design** - Interaction patterns, user flows, navigation, accessibility, responsive behavior
+10. **Development Guidelines** - Coding conventions, patterns, environment setup
+11. **Testing Strategy** - Test framework, types, coverage
+12. **Deployment & Operations** - Build process, deployment, monitoring
+13. **Security Considerations** - Auth, authorization, data protection
+14. **Dependencies & Third-Party Services** - Critical dependencies, external services
+15. **Known Issues & Technical Debt** - Open issues, TODOs, tech debt
+16. **RFD Summary** - Table of all RFDs with status
+17. **References Summary** - Table of all reference documents
+18. **Glossary** - Project-specific terms
+19. **Quick Reference** - Common commands, important files
 
 ---
 
@@ -218,6 +240,9 @@ Key sections to include:
 7. **Reference RFDs**: When discussing features, reference their RFD documents if available
 8. **Track Evolution**: Note how things have changed from previous checkpoints
 9. **Document References**: List all available reference documents so developers know what resources exist
+10. **Prioritize Clarity Over Brevity**: Write thorough explanations. Do NOT over-summarize or condense information just to save space. A complete picture is more valuable than a short document. If explaining something fully takes 3 paragraphs, use 3 paragraphs.
+11. **Capture Visual/Design Details**: Document colors (with hex codes), fonts, spacing values, animation timings, and other design specifics. Developers recreating the UI need these exact values.
+12. **Include Multimedia Context**: Note any images, icons, videos, audio, or other media assets used, where they're stored, and how they're integrated.
 
 ---
 
