@@ -4,6 +4,16 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 1/28/2026 (main)
+
+- **RFD-1: Skill-command consolidation (complete)**
+  - Phase 1: Removed 1014 lines of duplicate embedded content from commands (`c6e24ce`)
+  - Phase 2: Re-added thin wrapper commands (7 lines each) that delegate to skills
+  - Commands provide frontmatter for discoverability; skills provide implementation
+  - Created RFD-1 documenting the consolidation (`1182cd4`)
+
+---
+
 ### 1/27/2026 (main)
 
 - **Workaround: Embed skill content into commands due to Claude Code bug**
