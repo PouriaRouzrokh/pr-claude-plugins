@@ -4,6 +4,20 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 1/28/2026 - 22:00 (main)
+
+- **Feature: Add /pr:update-claude-md command (RFD-2)**
+  - New command to update CLAUDE.md files with project state and development principles
+  - Enforces required sections: Development Principles, Documentation Hierarchy
+  - Development Principles include: RFD workflow, Context7 MCP for docs, agent-browser for UI testing, testing requirements
+  - Reads from existing checkpoints/snapshots (no agent exploration needed)
+  - Target: keep CLAUDE.md under 200 lines to avoid context bloat
+  - Removed CLAUDE.md handling from /pr:update-docs (Phase 5.5 removed)
+  - Added Skills section to project CLAUDE.md
+  - Created RFD-2 documenting the feature
+
+---
+
 ### 1/28/2026 (main)
 
 - **Add agent-browser skill from vercel-labs**

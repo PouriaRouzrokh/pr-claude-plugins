@@ -44,9 +44,9 @@ If arguments are ambiguous, ask the user to clarify.
 
 **Actions**:
 
-1. **Check for CLAUDE.md**:
-   - Look for `CLAUDE.md` in the project root or within the scope path
-   - If found, mark it for potential update (see Phase 5.5)
+1. **Note about CLAUDE.md**:
+   - CLAUDE.md updates are handled by the `/pr:update-claude-md` skill
+   - This command focuses on project documentation (README, API docs, checkpoints, references)
 
 2. **Check standard locations**:
    - `README.md` at project root
@@ -180,63 +180,6 @@ If arguments are ambiguous, ask the user to clarify.
 
 ---
 
-## Phase 5.5: Update CLAUDE.md (if found)
-
-**Goal**: Keep CLAUDE.md up to date with project information
-
-**Condition**: CLAUDE.md was found during Phase 1 discovery
-
-**Actions**:
-
-1. **Read the current CLAUDE.md** to understand its structure
-
-2. **Update project-specific sections** with new information discovered:
-   - New commands, scripts, or development workflows
-   - Changed project structure or organization
-   - Updated technology stack or dependencies
-   - New patterns or conventions adopted
-   - Key files or entry points that changed
-
-3. **Ensure Documentation Hierarchy section exists**:
-   - If CLAUDE.md doesn't have a documentation hierarchy section, add one
-   - Use the template below for the hierarchy section
-
-4. **Keep CLAUDE.md concise but complete**:
-   - Don't duplicate information that belongs in snapshots or RFDs
-   - Focus on information Claude needs for effective assistance
-   - Reference other docs rather than copying their content
-
-**Documentation Hierarchy Section Template** (add to CLAUDE.md if missing):
-
-```markdown
-## Documentation Hierarchy
-
-This project uses a structured documentation system in `.claude/`:
-
-### Checkpoints (`.claude/checkpoints/`)
-Point-in-time documentation of project state:
-- **checkpoint-0/**: Pre-development (contains PRD)
-- **checkpoint-N/**: Development milestones (contain snapshots and RFDs)
-
-### Key Documents
-- **prd.md**: Product Requirements Document (checkpoint-0) - project vision and requirements
-- **snapshot.md**: Technical codebase snapshot - comprehensive project state at a checkpoint
-- **rfd/**: Request for Development documents - feature requests and implementation tracking
-
-### References (`.claude/references/`)
-Supporting documentation not tied to specific checkpoints:
-- Team guidelines, package docs, workflows, API specs
-
-### Document Relationships
-```
-PRD (vision) → RFDs (features) → Snapshots (state) → CLAUDE.md (quick reference)
-```
-
-For full project context, read the latest snapshot. For specific features, check relevant RFDs.
-```
-
----
-
 ## Phase 6: Update Checkpoint Documents
 
 **Goal**: Maintain .claude/checkpoints/ documentation
@@ -317,11 +260,5 @@ Summarize to user:
 - Modify reference documents (.claude/references/) without user confirmation
 - Update documentation for code outside the specified scope (if scope was provided)
 - Fabricate features - only document what actually exists in the code
-- Make CLAUDE.md excessively long - keep it as a quick reference, not comprehensive documentation
 
-**DO:**
-- Update CLAUDE.md with new project information when running globally and CLAUDE.md is found
-- Add the Documentation Hierarchy section to CLAUDE.md if it's missing
-- Keep CLAUDE.md balanced: detailed enough to be useful, concise enough to be scannable
-
-**NOTE**: This command focuses on standalone documentation files (markdown, etc.). Inline documentation within code files (JSDoc, TSDoc, docstrings) is handled by the `/pr:clean-codebase` command as part of code maintenance.
+**NOTE**: This command focuses on standalone documentation files (markdown, etc.). For CLAUDE.md updates, use `/pr:update-claude-md`. Inline documentation within code files (JSDoc, TSDoc, docstrings) is handled by the `/pr:clean-codebase` command as part of code maintenance.

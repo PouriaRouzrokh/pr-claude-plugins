@@ -81,11 +81,20 @@ color: yellow|green|red
 | `/pr:mvp-dev [focus]` | MVP from PRD |
 | `/pr:commit-push [path] [--merge\|--pr]` | Commit, push, optionally merge/PR |
 | `/pr:clean-codebase [path]` | Code cleanup via code-reviewer |
-| `/pr:update-docs [path] [focus]` | Update documentation based on changes |
+| `/pr:update-docs [path] [focus]` | Update project documentation (not CLAUDE.md) |
+| `/pr:update-claude-md [path]` | Update CLAUDE.md files with project state and dev principles |
 | `/pr:run-local [instructions]` | Start app locally for development |
 | `/pr:run-public [instructions]` | Deploy and run app publicly |
 | `/pr:create-prd [ideas]` | Generate PRD through discovery |
 | `/pr:create-snapshot [path]` | Technical codebase snapshot |
+
+## Skills
+
+| Skill | Description |
+|-------|-------------|
+| `/pr:agent-browser` | Browser automation for UI testing and web interactions |
+| `/pr:create-prd [ideas]` | Generate PRD through interactive discovery |
+| `/pr:create-snapshot [path]` | Generate technical codebase snapshot |
 
 ## Working with commitlog.md
 
