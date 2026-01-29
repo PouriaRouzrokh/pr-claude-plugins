@@ -1,47 +1,78 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Claude Code plugin marketplace containing the **pr** plugin - a personal development toolkit for feature development, MVP development, code cleanup, documentation, deployment, and git operations.
 
-## What This Is
+## Quick Commands
 
-This is the **pr-cloud-plugins** marketplace - a Claude Code plugin repository containing the **pr** plugin, a personal development toolkit for feature development, MVP development, code cleanup, documentation, deployment, and git operations.
+| Command | Description |
+|---------|-------------|
+| `/pr:feature-dev [desc]` | Feature dev with RFD tracking |
+| `/pr:mvp-dev [focus]` | MVP from PRD |
+| `/pr:commit-push [path] [--merge\|--pr]` | Commit, push, merge/PR |
+| `/pr:clean-codebase [path]` | Code cleanup |
+| `/pr:update-docs [path]` | Update documentation |
+| `/pr:update-claude-md [path]` | Update CLAUDE.md files |
+| `/pr:create-prd [ideas]` | Generate PRD |
+| `/pr:create-snapshot [path]` | Technical snapshot |
+
+## Development Principles
+
+### RFD Documentation
+For significant changes (features, bug fixes, architectural changes - not one-line fixes), create or update an RFD:
+- **Path**: `.claude/checkpoints/checkpoint-{N}/rfd/{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`
+- **Workflow**: Write question → Document plan → Implement → Update RFD with results
+
+### Planning First
+Always plan before implementation:
+- Write RFD first for features requiring them
+- Think through approach before coding
+- Consider edge cases, error handling, testing upfront
+
+### Package Documentation
+When working with unfamiliar packages:
+1. **First**: Use Context7 MCP tool for up-to-date documentation
+2. **Second**: Search online if Context7 lacks the answer
+3. **Third**: Ask the user for clarification
+
+### UI/Web Testing
+For frontend development:
+- Use `/pr:agent-browser` skill to interact with and test the UI
+- Take screenshots to verify visual changes
+- Test user flows and form interactions
+
+### Testing Requirements
+Before handing off work:
+- Run all relevant tests
+- Verify changes work as expected
+- Fix any failures or regressions
+
+## Documentation Hierarchy
+
+```
+.claude/checkpoints/
+├── checkpoint-0/          # Pre-development
+│   └── prd.md             # Product Requirements Document
+└── checkpoint-N/          # Development milestones
+    ├── snapshot.md        # Technical codebase snapshot
+    └── rfd/               # Feature tracking
+```
+
+**Document relationships**: PRD (vision) → RFDs (features) → Snapshots (state) → CLAUDE.md (quick reference)
 
 ## Repository Structure
 
 ```
 pr-claude-plugins/
-├── .claude-plugin/
-│   └── marketplace.json     # Marketplace manifest (name: pr-cloud-plugins)
-├── pr/                       # The pr plugin
-│   ├── .claude-plugin/
-│   │   └── plugin.json      # Plugin manifest (name, version, author)
-│   ├── agents/              # Subagents launched by commands
-│   ├── commands/            # Slash commands (/pr:command-name)
-│   └── skills/              # Skills with supporting files
-├── commitlog.md             # Project commit history
-└── README.md                # Marketplace installation docs
+├── .claude-plugin/marketplace.json   # Marketplace manifest
+├── pr/                               # The pr plugin
+│   ├── .claude-plugin/plugin.json    # Plugin manifest
+│   ├── agents/                       # code-explorer, code-architect, code-reviewer
+│   ├── commands/                     # Slash commands
+│   └── skills/                       # Skills with supporting files
+├── CLAUDE.md
+├── commitlog.md
+└── README.md
 ```
-
-## Key Concepts
-
-### RFD (Request for Development)
-Documents tracking feature requests and implementation. Path: `.claude/checkpoints/checkpoint-{N}/rfd/{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`. Status: Planning, In Progress, Completed, On Hold.
-
-### PRD (Product Requirements Document)
-Product vision document at `.claude/checkpoints/checkpoint-0/prd.md`.
-
-### Checkpoints
-Point-in-time project documentation. checkpoint-0 is pre-development (PRD), checkpoint-1+ contain snapshots and RFDs.
-
-## Agent Colors and Purposes
-
-| Agent | Color | Purpose |
-|-------|-------|---------|
-| code-explorer | Yellow | Traces execution paths, maps architecture, returns 5-10 key files |
-| code-architect | Green | Designs implementations, creates blueprints with file paths |
-| code-reviewer | Red | Reviews code, reports issues with confidence >= 80 |
-
-Commands typically launch 2-3 agents in parallel with different focuses, then consolidate findings.
 
 ## Plugin Component Formats
 
@@ -58,7 +89,6 @@ argument-hint: "[optional: hint text]"
 ---
 name: skill-name
 description: Description
-argument-hint: "[hint]"
 ---
 ```
 
@@ -66,36 +96,23 @@ argument-hint: "[hint]"
 ```yaml
 ---
 name: agent-name
-description: Description
 tools: Glob, Grep, Read, ...
 model: sonnet
 color: yellow|green|red
 ---
 ```
 
-## Commands
+## Agent Colors
 
-| Command | Description |
-|---------|-------------|
-| `/pr:feature-dev [desc]` | Single feature dev with RFD tracking |
-| `/pr:mvp-dev [focus]` | MVP from PRD |
-| `/pr:commit-push [path] [--merge\|--pr]` | Commit, push, optionally merge/PR |
-| `/pr:clean-codebase [path]` | Code cleanup via code-reviewer |
-| `/pr:update-docs [path] [focus]` | Update project documentation (not CLAUDE.md) |
-| `/pr:update-claude-md [path]` | Update CLAUDE.md files with project state and dev principles |
-| `/pr:run-local [instructions]` | Start app locally for development |
-| `/pr:run-public [instructions]` | Deploy and run app publicly |
-| `/pr:create-prd [ideas]` | Generate PRD through discovery |
-| `/pr:create-snapshot [path]` | Technical codebase snapshot |
+| Agent | Color | Purpose |
+|-------|-------|---------|
+| code-explorer | Yellow | Traces execution paths, returns 5-10 key files |
+| code-architect | Green | Designs implementations with blueprints |
+| code-reviewer | Red | Reviews code, reports issues ≥80% confidence |
 
-## Skills
+## Key Concepts
 
-| Skill | Description |
-|-------|-------------|
-| `/pr:agent-browser` | Browser automation for UI testing and web interactions |
-| `/pr:create-prd [ideas]` | Generate PRD through interactive discovery |
-| `/pr:create-snapshot [path]` | Generate technical codebase snapshot |
-
-## Working with commitlog.md
-
-The `/pr:commit-push` command maintains `commitlog.md` in the project root. It auto-renames variations (commit-log.md, COMMIT_LOG.md, etc.) to `commitlog.md` for consistency.
+- **RFD**: Request for Development - tracks feature requests and implementation
+- **PRD**: Product Requirements Document - project vision at `checkpoint-0/prd.md`
+- **Checkpoint**: Point-in-time documentation (checkpoint-0 = pre-dev, checkpoint-1+ = development)
+- **commitlog.md**: Project commit history maintained by `/pr:commit-push`
