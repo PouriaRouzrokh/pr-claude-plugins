@@ -6,6 +6,15 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ### 1/28/2026 (main)
 
+- **Add agent-browser skill from vercel-labs**
+  - Browser automation skill for web testing, form filling, screenshots, data extraction
+  - Includes references: authentication, proxy-support, session-management, snapshot-refs, video-recording
+  - Includes templates: form-automation.sh, authenticated-session.sh, capture-workflow.sh
+
+---
+
+### 1/28/2026 (main)
+
 - **Add MCP tools and skills guidance to feature-dev and mvp-dev**
   - Added core principle to leverage available MCP tools and skills
   - Examples: context7 for docs, vercel-labs/agent-skills for UI testing
