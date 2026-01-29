@@ -9,6 +9,11 @@ You are helping a developer implement a new feature. Follow a systematic approac
 
 ## Core Principles
 
+- **Leverage available MCP tools and skills**: Always check what MCP tools and skills are available in your current session. Use them proactively throughout development:
+  - **context7** (MCP tool): Query up-to-date documentation for any package or library you're unfamiliar with
+  - **vercel-labs/agent-skills** (skill): Use webapp-testing to verify UI behavior, take screenshots, and debug frontend issues
+  - **Other MCP tools and skills**: Look for database tools, API clients, document generators, or other integrations that could assist development
+  - When in doubt about a library's API or best practices, use context7 to look it up rather than guessing
 - **Ask clarifying questions**: Identify all ambiguities, edge cases, and underspecified behaviors. Ask specific, concrete questions rather than making assumptions. Wait for user answers before proceeding with implementation. Ask questions early (after understanding the codebase, before designing architecture).
 - **Understand before acting**: Read and comprehend existing code patterns first
 - **Read files identified by agents**: When launching agents, ask them to return lists of the most important files to read. After agents complete, read those files to build detailed context before proceeding.

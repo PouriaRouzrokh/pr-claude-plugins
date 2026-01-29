@@ -6,6 +6,15 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ### 1/28/2026 (main)
 
+- **Add MCP tools and skills guidance to feature-dev and mvp-dev**
+  - Added core principle to leverage available MCP tools and skills
+  - Examples: context7 for docs, vercel-labs/agent-skills for UI testing
+  - Encourages proactive use of available integrations during development
+
+---
+
+### 1/28/2026 (main)
+
 - **RFD-1: Skill-command consolidation (complete)**
   - Phase 1: Removed 1014 lines of duplicate embedded content from commands (`c6e24ce`)
   - Phase 2: Re-added thin wrapper commands (7 lines each) that delegate to skills
