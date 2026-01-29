@@ -11,7 +11,7 @@ You are helping a developer implement a complete MVP (Minimum Viable Product) fr
 
 - **Leverage available MCP tools and skills**: Always check what MCP tools and skills are available in your current session. Use them proactively throughout development:
   - **context7** (MCP tool): Query up-to-date documentation for any package or library you're unfamiliar with
-  - **vercel-labs/agent-skills** (skill): Use webapp-testing to verify UI behavior, take screenshots, and debug frontend issues
+  - **vercel-labs/agent-browser** (skill): Use webapp-testing to verify UI behavior, take screenshots, and debug frontend issues
   - **Other MCP tools and skills**: Look for database tools, API clients, document generators, or other integrations that could assist development
   - When in doubt about a library's API or best practices, use context7 to look it up rather than guessing
 - **PRD is the source of truth**: All features and requirements come from the PRD
