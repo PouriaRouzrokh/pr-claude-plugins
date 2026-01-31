@@ -5,21 +5,18 @@ argument-hint: "[optional: feature description]"
 
 # Feature Development with RFD Management
 
-You are helping a developer implement a new feature. Follow a systematic approach: understand the codebase deeply, manage RFD documentation, identify and ask about all underspecified details, design elegant architectures, then implement.
+Implement features systematically: understand the codebase, manage RFD documentation, clarify requirements, design architecture, then implement.
 
 ## Core Principles
 
-- **Leverage available MCP tools and skills**: Always check what MCP tools and skills are available in your current session. Use them proactively throughout development:
-  - **context7** (MCP tool): Query up-to-date documentation for any package or library you're unfamiliar with
-  - **vercel-labs/agent-browser** (skill): Use webapp-testing to verify UI behavior, take screenshots, and debug frontend issues
-  - **Other MCP tools and skills**: Look for database tools, API clients, document generators, or other integrations that could assist development
-  - When in doubt about a library's API or best practices, use context7 to look it up rather than guessing
-- **Ask clarifying questions**: Identify all ambiguities, edge cases, and underspecified behaviors. Ask specific, concrete questions rather than making assumptions. Wait for user answers before proceeding with implementation. Ask questions early (after understanding the codebase, before designing architecture).
-- **Understand before acting**: Read and comprehend existing code patterns first
-- **Read files identified by agents**: When launching agents, ask them to return lists of the most important files to read. After agents complete, read those files to build detailed context before proceeding.
-- **Simple and elegant**: Prioritize readable, maintainable, architecturally sound code
-- **Use TodoWrite**: Track all progress throughout
-- **Manage RFDs**: Create or update Request for Development documents to track feature requests and implementation progress
+- **Use available tools**: Check what MCP servers and skills are available. Use frontend-design for UIs, browser automation for testing, Context7 for package documentation.
+- **Ask clarifying questions**: Identify ambiguities, edge cases, and underspecified behaviors. Ask specific questions early—after exploring the codebase, before designing.
+- **Understand before acting**: Read existing code patterns first.
+- **Read files from agents**: Ask agents to return 5-10 key files. Read those files before proceeding.
+- **Simple and elegant**: Write readable, maintainable code.
+- **Use TodoWrite**: Track progress throughout.
+- **Manage RFDs**: Create or update RFDs to track feature requests and implementation.
+- **Write clearly**: Use `writing-clearly-and-concisely` for RFDs. Active voice, omit needless words, avoid AI-isms (pivotal, crucial, leverage).
 
 ---
 
@@ -74,40 +71,36 @@ Initial request: $ARGUMENTS
 
 ## Phase 2: Codebase Exploration
 
-**Goal**: Understand relevant existing code and patterns at both high and low levels
+**Goal**: Understand existing code and patterns
 
 **Actions**:
 
-1. Launch 2-3 code-explorer agents in parallel. Each agent should:
-   - Trace through the code comprehensively and focus on getting a comprehensive understanding of abstractions, architecture and flow of control
-   - Target a different aspect of the codebase (eg. similar features, high level understanding, architectural understanding, user experience, etc)
-   - Include a list of 5-10 key files to read
+1. Launch 2-3 code-explorer agents in parallel, each targeting a different aspect:
+   - Similar features and their implementation
+   - Architecture and abstractions
+   - UI patterns, testing, or extension points
 
-   **Example agent prompts**:
-   - "Find features similar to [feature] and trace through their implementation comprehensively"
-   - "Map the architecture and abstractions for [feature area], tracing through the code comprehensively"
-   - "Analyze the current implementation of [existing feature/area], tracing through the code comprehensively"
-   - "Identify UI patterns, testing approaches, or extension points relevant to [feature]"
+   Each agent should return 5-10 key files to read.
 
-2. Once the agents return, please read all files identified by agents to build deep understanding
-3. Present comprehensive summary of findings and patterns discovered
+2. Read all files identified by agents
+3. Summarize findings and patterns
 
 ---
 
 ## Phase 3: Clarifying Questions
 
-**Goal**: Fill in gaps and resolve all ambiguities before designing
+**Goal**: Resolve ambiguities before designing
 
-**CRITICAL**: This is one of the most important phases. DO NOT SKIP.
+**CRITICAL**: Do not skip this phase.
 
 **Actions**:
 
-1. Review the codebase findings and original feature request
-2. Identify underspecified aspects: edge cases, error handling, integration points, scope boundaries, design preferences, backward compatibility, performance needs
-3. **Present all questions to the user in a clear, organized list**
-4. **Wait for answers before proceeding to architecture design**
+1. Review codebase findings and original request
+2. Identify underspecified aspects: edge cases, error handling, integration points, scope boundaries, backward compatibility
+3. Present all questions in a clear list
+4. Wait for answers before designing
 
-If the user says "whatever you think is best", provide your recommendation and get explicit confirmation.
+If the user says "use your judgment", provide your recommendation and get confirmation.
 
 ---
 
@@ -201,15 +194,15 @@ If the user says "whatever you think is best", provide your recommendation and g
 
 ## Phase 5: Architecture Design
 
-**Goal**: Design multiple implementation approaches with different trade-offs
+**Goal**: Design implementation approaches with trade-offs
 
 **Actions**:
 
-1. Launch 2-3 code-architect agents in parallel with different focuses: minimal changes (smallest change, maximum reuse), clean architecture (maintainability, elegant abstractions), or pragmatic balance (speed + quality)
-2. Review all approaches and form your opinion on which fits best for this specific task (consider: small fix vs large feature, urgency, complexity, team context)
-3. Present to user: brief summary of each approach, trade-offs comparison, **your recommendation with reasoning**, concrete implementation differences
-4. **Ask user which approach they prefer**
-5. **Update RFD** with chosen architecture and detailed implementation phases
+1. Launch 2-3 code-architect agents with different focuses: minimal changes, clean architecture, or pragmatic balance
+2. Form your recommendation (consider: fix vs feature, urgency, complexity)
+3. Present to user: summary of each approach, trade-offs, your recommendation, implementation differences
+4. Ask which approach they prefer
+5. Update RFD with chosen architecture and implementation phases
 
 ---
 
@@ -217,55 +210,41 @@ If the user says "whatever you think is best", provide your recommendation and g
 
 **Goal**: Build the feature
 
-**DO NOT START WITHOUT USER APPROVAL**
+**Wait for user approval before starting.**
 
 **Actions**:
 
-1. Wait for explicit user approval
-2. Read all relevant files identified in previous phases
-3. Implement following chosen architecture
-4. Follow codebase conventions strictly
-5. Write clean, well-documented code
-6. Update todos as you progress
-7. **Update RFD progress log** with implementation milestones:
-   - When starting implementation
-   - When completing major components
-   - When encountering significant decisions or blockers
+1. Read all relevant files from previous phases
+2. Implement following chosen architecture
+3. Follow codebase conventions
+4. Update todos as you progress
+5. Update RFD progress log with milestones
 
 ---
 
 ## Phase 7: Quality Review
 
-**Goal**: Ensure code is simple, DRY, elegant, easy to read, and functionally correct
+**Goal**: Verify code quality and correctness
 
 **Actions**:
 
-1. Launch 3 code-reviewer agents in parallel with different focuses: simplicity/DRY/elegance, bugs/functional correctness, project conventions/abstractions
-2. Consolidate findings and identify highest severity issues that you recommend fixing
-3. **Present findings to user and ask what they want to do** (fix now, fix later, or proceed as-is)
-4. Address issues based on user decision
-5. **Update RFD** with any significant issues found and how they were addressed
+1. Launch 3 code-reviewer agents: simplicity/DRY, bugs/correctness, conventions/abstractions
+2. Consolidate findings and identify high-severity issues
+3. Present findings and ask user: fix now, fix later, or proceed?
+4. Address issues based on decision
+5. Update RFD with significant issues and resolutions
 
 ---
 
 ## Phase 8: Summary & RFD Finalization
 
-**Goal**: Document what was accomplished and finalize RFD
+**Goal**: Document completion and finalize RFD
 
 **Actions**:
 
 1. Mark all todos complete
-2. **Finalize RFD**:
-   - Update status to "Completed"
-   - Add final progress log entry summarizing completion
-   - Document any follow-up items or technical debt introduced
-   - List all files created/modified
-3. Summarize to user:
-   - What was built
-   - Key decisions made
-   - Files modified
-   - RFD location for future reference
-   - Suggested next steps
+2. Finalize RFD: update status to "Completed", add completion summary, list files changed
+3. Summarize to user: what was built, key decisions, files modified, RFD location, next steps
 
 ---
 

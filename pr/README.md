@@ -2,6 +2,31 @@
 
 A personal development toolkit that extends Claude Code with commands for feature development, MVP development, code cleanup, documentation, deployment, and git operations.
 
+## Prerequisites
+
+This plugin relies on external tools that should be installed before use. Some are required, others enhance specific skills.
+
+### Required
+
+| Tool | Type | Used By | Installation |
+|------|------|---------|--------------|
+| [agent-browser](https://github.com/vercel-labs/agent-browser) | NPX package | `agent-browser` skill, UI testing | `npx agent-browser` (auto-installs on first use) |
+| [Context7](https://github.com/upstash/context7) | MCP server | Package documentation lookup | Add to MCP settings, no API key needed |
+
+### Optional
+
+| Tool | Type | Used By | Installation |
+|------|------|---------|--------------|
+| Gemini API | API | `generate-image-nb` skill | Requires `GEMINI_API_KEY` environment variable |
+| [Agentation](https://github.com/benjitaylor/agentation) | Next.js component | `agentation` skill | Installed per-project via skill |
+
+### Setup Notes
+
+- **agent-browser**: Runs headless Chrome for browser automation. First run downloads browser binaries.
+- **Context7**: Provides up-to-date documentation for any library. Add to your `.claude/settings.json` MCP servers.
+- **Gemini API**: The `generate-image-nb` skill uses the Gemini Nano Banana API for image generation. Get an API key from Google AI Studio.
+- **Agentation**: Adds visual feedback toolbar to Next.js projects. Installed automatically when skill is used.
+
 ## Commands
 
 | Command                                  | Description                                                                                            |
@@ -11,10 +36,22 @@ A personal development toolkit that extends Claude Code with commands for featur
 | `/pr:commit-push [path] [--merge\|--pr]` | Commit changes, update commitlog.md, push to remote, optionally merge or create PR                     |
 | `/pr:clean-codebase [path]`              | Clean and professionalize code using automated review to identify issues                               |
 | `/pr:update-docs [path] [focus]`         | Update project documentation based on codebase changes                                                 |
+| `/pr:update-claude-md [path]`            | Update CLAUDE.md files with current project state and development principles                           |
 | `/pr:run-local [instructions]`           | Start and run the application locally for development                                                  |
 | `/pr:run-public [instructions]`          | Deploy and run the application publicly                                                                |
 | `/pr:create-prd [ideas]`                 | Generate a Product Requirements Document through interactive discovery and research                    |
 | `/pr:create-snapshot [path]`             | Generate a comprehensive technical snapshot of the codebase for handoff or documentation               |
+
+## Skills
+
+| Skill | Description |
+|-------|-------------|
+| `agent-browser` | Browser automation for web testing, form filling, screenshots, and data extraction |
+| `agentation` | Add Agentation visual feedback toolbar to Next.js projects |
+| `create-prd` | Interactive PRD generation with web research |
+| `frontend-design` | Create distinctive, production-grade frontend interfaces with high design quality |
+| `generate-image-nb` | Generate and edit images via Gemini Nano Banana API |
+| `writing-clearly-and-concisely` | Clear, direct prose following Strunk's principles |
 
 ## Agents
 
@@ -66,12 +103,9 @@ This plugin uses a structured documentation approach in projects:
 
 - `/pr:clean-codebase` - Clean up code
 - `/pr:update-docs` - Update documentation
+- `/pr:update-claude-md` - Update CLAUDE.md files
 - `/pr:create-snapshot` - Capture current state
 - `/pr:commit-push --pr` - Commit and create PR
-
-## Known Limitations
-
-**Skills not directly readable by Claude Code**: Due to a [known bug](https://github.com/anthropics/claude-code/issues/15178), skill files in plugins are not directly accessible to Claude Code at runtime. As a workaround, the content from skill files (templates, examples, instructions) has been embedded directly into the corresponding command files (`create-prd.md`, `create-snapshot.md`). The original skill files are retained for when this bug is resolved.
 
 ## Version
 

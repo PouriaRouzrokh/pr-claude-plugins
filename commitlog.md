@@ -4,6 +4,24 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 1/31/2026 - 12:20 (main)
+
+- **Feature: Add new skills and update generate-image-nb**
+  - Updated `generate-image-nb` skill to use Gemini Nano Banana API directly
+    - Replaced outdated Gemini CLI extension commands with Python/JavaScript scripts
+    - Added `scripts/generate_image.py` and `scripts/generate_image.mjs`
+    - Supports text-to-image, image editing, aspect ratios, model selection (flash/pro)
+    - Uses `google-genai` (Python) and `@google/genai` (JavaScript) packages
+  - Added new skills:
+    - `agentation`: Add visual feedback toolbar to Next.js projects
+    - `frontend-design`: Production-grade frontend interfaces (Apache 2.0, based on Anthropic skill)
+    - `writing-clearly-and-concisely`: Clear prose following Strunk's principles
+  - Removed `create-snapshot` skill files (functionality moved to command)
+  - Updated README files with current skills list and corrected prerequisites
+  - Various command file updates from prior sessions
+
+---
+
 ### 1/28/2026 - 22:07 (main)
 
 - **Feature: Add /pr:update-claude-md command (RFD-2)**

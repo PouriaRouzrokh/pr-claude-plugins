@@ -5,14 +5,15 @@ argument-hint: "[path] [description of what to document]"
 
 # Update Documentation
 
-Update project documentation to reflect the current state of the codebase, using code-explorer agents to understand recent changes.
+Update project documentation to reflect current codebase state, using code-explorer agents to understand changes.
 
 ## Core Principles
 
-- **Explore before updating**: Use code-explorer agents to understand what has changed
-- **Accuracy over completeness**: Only document what actually exists in the code
-- **Respect existing structure**: Don't reorganize documentation without asking
-- **Checkpoint awareness**: Understand and maintain .claude/checkpoints/ structure
+- **Write clearly**: Use `writing-clearly-and-concisely`. Active voice, omit needless words, avoid AI-isms.
+- **Explore before updating**: Use code-explorer agents to understand changes.
+- **Accuracy over completeness**: Only document what exists in code.
+- **Respect existing structure**: Don't reorganize without asking.
+- **Checkpoint awareness**: Maintain `.claude/checkpoints/` structure.
 
 ---
 
@@ -203,21 +204,14 @@ If arguments are ambiguous, ask the user to clarify.
 
 ## Phase 7: Update Reference Documents
 
-**Goal**: Keep .claude/references/ current (with caution)
+**Goal**: Keep `.claude/references/` current (with caution)
 
-Reference documents provide context and guidelines but are NOT directly tied to code changes. Handle them differently:
+References provide context but aren't tied to code changes. Update only when:
+- User explicitly requests it
+- A described process has clearly changed
+- Package docs are outdated
 
-- **team-guidelines/**: Update only if coding standards or team processes have changed
-- **package-docs/**: Update if internal package APIs or usage patterns have changed
-- **workflows/**: Update if deployment, hotfix, or other procedures have changed
-- **api-specs/**: Update if external API integrations have changed
-
-**Important**: References are generally stable documents. Only update when:
-- The user explicitly requests updates to references
-- A workflow or process described has clearly changed
-- Internal package documentation is outdated relative to current implementation
-
-**Ask the user for confirmation before updating references** since these often reflect team decisions rather than code state.
+**Ask user before updating references**—they often reflect team decisions.
 
 ---
 

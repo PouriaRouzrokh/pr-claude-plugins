@@ -6,14 +6,14 @@ argument-hint: "[optional: path/to/ideas.md or free-text description]"
 
 # Product Requirements Document Generator
 
-Generate a comprehensive PRD through interactive discovery, web research, and intelligent synthesis. This skill guides users through a structured interview, researches best practices and current specifications, then produces a professional requirements document.
+Generate a PRD through interactive discovery, web research, and synthesis. Interview users, research best practices, then produce a professional requirements document.
 
 ## Core Principles
 
-- **Interview first**: Ask focused questions, one topic at a time
-- **Research while interviewing**: When user mentions something, search for context
-- **Accept uncertainty**: "Use your best judgment" is a valid answer
-- **Synthesize intelligently**: Don't just list search results, provide recommendations
+- **Interview first**: Focused questions, one topic at a time.
+- **Research while interviewing**: Search for context when user mentions something.
+- **Accept uncertainty**: "Use your judgment" is valid.
+- **Synthesize**: Provide recommendations, not just search results.
 
 ---
 
@@ -49,12 +49,11 @@ Generate a comprehensive PRD through interactive discovery, web research, and in
 
 ### Interview Philosophy
 
-- Ask focused questions, one topic at a time
-- Don't overwhelm with multiple questions per message
-- Offer suggestions when the user seems uncertain
-- Accept "use your best judgment" as a valid answer
-- Track what's been covered vs. what needs clarification
-- **Research while interviewing** - When user mentions something, search for context
+- Focused questions, one topic at a time
+- Don't overwhelm with multiple questions
+- Offer suggestions when user seems uncertain
+- Accept "use your judgment" as valid
+- Research while interviewing—search for context
 
 ### Interview Stages
 
@@ -96,11 +95,7 @@ Generate a comprehensive PRD through interactive discovery, web research, and in
 
 ### When to Stop Interviewing
 
-Stop and generate the PRD when:
-- User says "use your best judgment" or similar
-- User indicates they've shared everything
-- All critical sections have enough information
-- Continuing would delay progress without adding value
+Stop when: user says "use your judgment", indicates they've shared everything, critical sections have enough information, or continuing adds no value.
 
 ---
 

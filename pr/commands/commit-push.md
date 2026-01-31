@@ -9,11 +9,12 @@ Commit changes, update commit log, and push to remote repository.
 
 ## Core Principles
 
-- **Show before committing**: Always display what will be committed before taking action
-- **Update commitlog.md**: Maintain a running log of all commits for project history
-- **Standardize commit log naming**: Automatically rename variations to `commitlog.md`
-- **Safe by default**: Never commit sensitive files, never force push without explicit request
-- **Respect workflow**: Support both direct merge and PR-based workflows
+- **Write clearly**: Use `writing-clearly-and-concisely` for commit messages and PR descriptions. Active voice, omit needless words, avoid AI-isms.
+- **Show before committing**: Display what will be committed before acting.
+- **Update commitlog.md**: Maintain commit history log.
+- **Standardize naming**: Rename commit log variations to `commitlog.md`.
+- **Safe by default**: Never commit sensitive files or force push without request.
+- **Support workflows**: Handle both direct merge and PR-based workflows.
 
 ---
 
@@ -44,52 +45,27 @@ If both `--merge` and `--pr` are provided, prefer `--pr` (safer workflow).
 
 ## Phase 0.5: Handle .claude/ in Version Control
 
-**Goal**: Include Claude documentation in version control by default (for team collaboration)
-
-**Default Behavior**: `.claude/` and `CLAUDE.md` are **included** in git by default.
+**Default**: `.claude/` and `CLAUDE.md` are included in git (for team collaboration).
 
 **Actions**:
 
-1. If the user explicitly requests to ignore `.claude/` (e.g., "ignore .claude", "don't commit .claude", "add .claude to gitignore"):
-   - Add `.claude/` to `.gitignore`
-   - Inform the user: "Added .claude/ to .gitignore as requested"
+1. If user explicitly requests to ignore `.claude/`, add it to `.gitignore`
+2. Otherwise, commit `.claude/` with other files
 
-2. Otherwise, proceed normally - `.claude/` will be committed along with other project files
-
-**Rationale**: The `.claude/` directory contains valuable project documentation (checkpoints, snapshots, RFDs, PRDs) that helps team members and future Claude sessions understand the project. Sharing this context improves collaboration. Users who prefer to keep it private can explicitly opt out.
+`.claude/` contains documentation (checkpoints, snapshots, RFDs) that helps team collaboration. Users can opt out explicitly.
 
 ---
 
 ## Phase 0.6: Standardize Commit Log File
 
-**Goal**: Ensure consistent commit log naming across codebases
+**Goal**: Consistent commit log naming
 
 **Actions**:
 
-1. Search for existing commit log file variations in the project root:
-   - `commit_log.md`
-   - `commit-log.md`
-   - `COMMIT_LOG.md`
-   - `COMMITLOG.md`
-   - `CommitLog.md`
-   - `Commit_Log.md`
-   - `commit_log.MD`
-   - Any other case variations
-
-2. If a variation is found (and `commitlog.md` does NOT exist):
-   - Rename the existing file to `commitlog.md` using `git mv` (preserves history)
-   - Inform the user: "Renamed [old-name] to commitlog.md for consistency"
-
-3. If both a variation AND `commitlog.md` exist:
-   - **Ask the user** which file to keep
-   - Merge contents if user requests, or delete the duplicate
-
-4. If no commit log file exists, it will be created in Phase 2
-
-```bash
-# Example detection
-ls -1 | grep -iE '^commit[-_]?log\.md$' | head -1
-```
+1. Search for commit log variations: `commit_log.md`, `commit-log.md`, `COMMITLOG.md`, etc.
+2. If variation found and `commitlog.md` doesn't exist, rename with `git mv`
+3. If both exist, ask user which to keep
+4. If none exists, create in Phase 2
 
 ---
 

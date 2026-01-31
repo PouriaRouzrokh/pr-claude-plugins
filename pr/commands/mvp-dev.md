@@ -5,23 +5,21 @@ argument-hint: "[optional: specific focus or priority features]"
 
 # MVP Development with PRD and RFD Management
 
-You are helping a developer implement a complete MVP (Minimum Viable Product) from a Product Requirements Document. Follow a systematic approach: understand the PRD deeply, break it into features, explore the codebase (if existing), design architecture, and implement feature by feature with RFD tracking.
+Implement an MVP from a PRD systematically: understand the PRD, break it into features, design architecture, and implement feature by feature with RFD tracking.
 
 ## Core Principles
 
-- **Leverage available MCP tools and skills**: Always check what MCP tools and skills are available in your current session. Use them proactively throughout development:
-  - **context7** (MCP tool): Query up-to-date documentation for any package or library you're unfamiliar with
-  - **vercel-labs/agent-browser** (skill): Use webapp-testing to verify UI behavior, take screenshots, and debug frontend issues
-  - **Other MCP tools and skills**: Look for database tools, API clients, document generators, or other integrations that could assist development
-  - When in doubt about a library's API or best practices, use context7 to look it up rather than guessing
-- **PRD is the source of truth**: All features and requirements come from the PRD
-- **One RFD per feature**: Each MVP feature gets its own RFD in checkpoint-0
-- **Ask clarifying questions**: Identify ambiguities and get user input before implementing
-- **Understand before acting**: Read and comprehend existing code patterns first (if any)
-- **Read files identified by agents**: When launching agents, ask them to return lists of the most important files to read
-- **Simple and elegant**: Prioritize readable, maintainable, architecturally sound code
-- **Use TodoWrite**: Track all progress throughout
-- **Sequential feature development**: Complete one feature before moving to the next
+- **Use available tools**: Check MCP servers and skills. Use frontend-design for UIs, browser automation for testing, Context7 for documentation.
+- **PRD is source of truth**: All features come from the PRD.
+- **Sequential development**: ONE feature at a time. Test, review, and approve before moving on. User can pause and resume.
+- **RFD-first**: Create the RFD before starting any feature. It tracks the entire lifecycle.
+- **Test thoroughly**: Both you and user must test each feature before proceeding.
+- **Ask clarifying questions**: Resolve ambiguities before implementing.
+- **Understand before acting**: Read existing code patterns first.
+- **Read files from agents**: Ask agents to return 5-10 key files.
+- **Simple and elegant**: Write readable, maintainable code.
+- **Write clearly**: Use `writing-clearly-and-concisely` for RFDs. Active voice, omit needless words, avoid AI-isms.
+- **Use TodoWrite**: Track progress throughout.
 
 ---
 
@@ -91,52 +89,19 @@ find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
 
 ## Phase 2: Architecture Planning
 
-**Goal**: Design the overall MVP architecture before implementing any features
+**Goal**: Design MVP architecture before implementing features
 
 **Actions**:
 
-1. If existing codebase:
-   - Launch 2 code-explorer agents to understand existing patterns
-   - Read key files identified by agents
-   - Note existing conventions to follow
+1. If existing codebase, launch 2 code-explorer agents to understand patterns
 
-2. Launch 2 code-architect agents in parallel:
+2. Launch 2 code-architect agents:
+   - **Foundation Architecture**: Project structure, tech stack, shared components, database schema, API patterns
+   - **Feature Architecture Map**: How features fit together, shared code, integration points, build sequence
 
-   **Agent 1 - Foundation Architecture**:
-   ```
-   Based on the PRD requirements for [project], design the foundational architecture:
-   - Project structure and organization
-   - Technology stack setup (from PRD)
-   - Shared components and utilities
-   - Database schema for all MVP features
-   - API structure and patterns
+3. Form recommendation and present to user. Ask for approval.
 
-   Make decisive architectural choices. Return file structure and setup steps.
-   ```
-
-   **Agent 2 - Feature Architecture Map**:
-   ```
-   Based on the PRD requirements, create an architecture map for all MVP features:
-   - How each feature fits into the overall architecture
-   - Shared code between features
-   - Integration points between features
-   - Build sequence for optimal development
-
-   Return a feature-by-feature implementation blueprint.
-   ```
-
-3. Review architecture proposals and form recommendation
-
-4. Present to user:
-   - Overall architecture design
-   - How features will be structured
-   - Build sequence recommendation
-   - **Ask user to approve architecture before proceeding**
-
-5. **Create Architecture RFD** (RFD-0):
-   - Create `.claude/checkpoints/checkpoint-0/rfd/0-architecture/rfd-{YYYY-MM-DD}-{HHMM}.md`
-   - Document the chosen architecture, tech stack, and overall structure
-   - This RFD tracks the foundational architecture decisions
+4. Create Architecture RFD (RFD-0) at `.claude/checkpoints/checkpoint-0/rfd/0-architecture/`
 
 ---
 
@@ -167,20 +132,29 @@ find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
 
 ## Phase 4: Feature Development Loop
 
-**Goal**: Implement each feature systematically with its own RFD
+**Goal**: Implement each feature with its own RFD, testing and approval before moving on
 
-**For each feature in priority order, execute this loop:**
+Sequential process: complete, test, and approve each feature before starting the next. User can pause and resume later.
 
-### 4.1: Feature Discovery
+---
+
+### For each feature, execute Steps 4.1 through 4.8:
+
+---
+
+### 4.1: Create Feature RFD (Before Any Work)
+
+Create the RFD first—it tracks the entire feature lifecycle.
 
 **Actions**:
 
-1. Re-read relevant PRD section for this feature
-2. Identify specific requirements and acceptance criteria
-3. Create feature RFD:
-   - Path: `.claude/checkpoints/checkpoint-0/rfd/{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`
-   - Include: feature request from PRD, requirements, acceptance criteria
-   - Status: Planning
+1. Announce: "Starting Feature {N}: {Feature Name}"
+2. Re-read relevant PRD section
+3. Create RFD at `.claude/checkpoints/checkpoint-0/rfd/{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`
+   - Include: feature request, acceptance criteria (checkboxes), status: Planning
+4. Confirm RFD creation with user
+
+---
 
 ### 4.2: Feature Exploration (if existing code)
 
@@ -198,7 +172,9 @@ find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
    ```
 
 2. Read files identified by agents
-3. Update RFD with context about existing code
+3. **Update RFD** → Add "Context" section with exploration findings
+
+---
 
 ### 4.3: Feature Clarification
 
@@ -214,9 +190,11 @@ find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
 3. **Present clarifying questions to user**
 4. **Wait for answers before proceeding**
 
-5. Update RFD with clarified requirements
+5. **Update RFD** → Add clarified requirements and out-of-scope items
 
-### 4.4: Feature Architecture
+---
+
+### 4.4: Feature Architecture & Planning
 
 **Actions**:
 
@@ -234,13 +212,19 @@ find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
 
 2. Review and select approach
 
-3. Present to user:
-   - Implementation approach
-   - Files that will be created/modified
-   - **Ask for approval to proceed**
+3. **Update RFD** → Add complete implementation plan:
+   - Chosen architecture
+   - Files to create/modify
+   - Step-by-step implementation phases (as checkboxes)
 
-4. Update RFD with chosen architecture and implementation plan
-5. Update RFD status: In Progress
+4. Present to user:
+   - Implementation approach summary
+   - Files that will be created/modified
+   - **Ask for approval to proceed with implementation**
+
+5. **Update RFD status: In Progress**
+
+---
 
 ### 4.5: Feature Implementation
 
@@ -250,41 +234,99 @@ find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
 2. Follow codebase conventions strictly
 3. Write clean, well-documented code
 4. Update todos as you progress
-5. Update RFD progress log with milestones
+5. **Update RFD progress log** with milestones as you complete implementation phases
+6. Check off implementation phases in RFD as they're completed
 
-### 4.6: Feature Review
+---
 
-**Actions**:
+### 4.6: Testing & Verification
 
-1. Launch 2 code-reviewer agents:
-   ```
-   Review the implementation of [feature] for:
-   - Bugs and logic errors
-   - Code quality and conventions
-   - Security issues
-   - Acceptance criteria compliance
-
-   Only report issues with confidence >= 80.
-   ```
-
-2. Present findings to user
-3. Fix any critical issues
-
-4. Update RFD with review findings and fixes
-
-### 4.7: Feature Completion
+Both you AND the user must verify the feature works.
 
 **Actions**:
 
-1. Verify all acceptance criteria are met
-2. Update RFD:
-   - Status: Completed
-   - Add completion log entry
+1. **Your testing**:
+   - Use browser automation skills for UI, screenshots, behavior verification
+   - Test API endpoints for backend features
+   - Run existing test suites
+   - Check off acceptance criteria in RFD
+
+2. Launch 2 code-reviewer agents for bugs, quality, security (confidence >= 80)
+
+3. Fix issues found
+
+4. Update RFD with testing results
+
+5. Present to user: summary, how to test, screenshots. Ask for feedback.
+
+6. Wait for user feedback
+
+---
+
+### 4.7: User Feedback & Iteration
+
+**Actions**:
+
+1. Address any issues or changes requested by user
+2. Re-test after making changes
+3. **Update RFD** → Document feedback received and changes made
+4. Repeat until user confirms they're satisfied with the feature
+
+---
+
+### 4.8: Feature Completion & Checkpoint
+
+**This is a formal checkpoint before moving to the next feature.**
+
+**Actions**:
+
+1. **Finalize RFD**:
+   - Update status: **Completed**
+   - Verify all acceptance criteria are checked off
+   - Add final progress log entry with completion summary
    - List all files created/modified
+   - Document any technical debt or future improvements noted
 
-3. **Suggest commit** for this feature
+2. **Present completion summary to user**:
+   ```
+   ## Feature {N} Complete: {Feature Name}
 
-4. Move to next feature in priority order
+   ### What was built
+   [Summary]
+
+   ### Files created/modified
+   [List]
+
+   ### RFD location
+   [Path to RFD]
+
+   ### Ready to commit and continue?
+   ```
+
+3. **Ask user for permission to commit**:
+   - "Ready to commit this feature? (You can run /pr:commit-push)"
+   - Wait for user to confirm commit
+
+4. **After commit, ask about next steps**:
+   - If more features remain: "Ready to start Feature {N+1}: {Next Feature Name}? Or would you like to pause and continue later?"
+   - If this was the last feature: Proceed to Phase 5 (MVP Integration)
+
+5. **If user wants to pause**:
+   - Summarize current MVP progress
+   - Note which feature is next
+   - Inform user: "You can resume MVP development anytime by running /pr:mvp-dev again. I'll detect the existing RFDs and continue from Feature {N+1}."
+
+---
+
+### Resuming MVP Development
+
+When user runs /pr:mvp-dev on a project with existing RFDs:
+
+1. Read all existing RFDs in checkpoint-0
+2. Identify completed features (Status: Completed)
+3. Identify the next feature to implement
+4. Present status: "Found existing MVP progress. Features 1-{N} are complete. Ready to continue with Feature {N+1}: {Feature Name}?"
+5. Resume from Step 4.1 for the next feature
 
 ---
 
@@ -412,18 +454,42 @@ Each feature RFD should follow this structure:
 2. [ ] {Phase 2}
 3. [ ] ...
 
+## Testing
+
+### Claude Testing
+- [ ] Tested with available testing skills
+- [ ] Screenshots/verification captured
+- [ ] All acceptance criteria verified
+- {Test results and notes}
+
+### Code Review
+- [ ] Code review agents run
+- {Issues found and fixed}
+
+### User Testing
+- [ ] User tested the feature
+- [ ] User approved the feature
+- {User feedback and changes made}
+
 ## Progress Log
 
 ### {Date} - Initial Planning
 - Created RFD from PRD requirements
 - Clarified requirements with user
 
+### {Date} - Architecture Approved
+- User approved implementation plan
+
 ### {Date} - Implementation Started
 - {Progress notes}
 
-### {Date} - Implementation Complete
+### {Date} - Testing Complete
+- All tests passed
+- User verified and approved
+
+### {Date} - Feature Complete
 - All acceptance criteria met
-- Code reviewed and issues fixed
+- Committed with message: {commit message}
 
 ## Notes & Decisions
 
@@ -443,31 +509,33 @@ Each feature RFD should follow this structure:
 
 ## Important Notes
 
+### Sequential Feature Development
+- One feature at a time—complete, test, approve before starting the next
+- Each feature ends with a checkpoint: user reviews, approves, commits
+- User can pause and resume—RFDs preserve progress
+- Always create the RFD before any feature work
+
+### RFD as Central Document
+The RFD tracks the entire lifecycle: planning → implementation → testing → completion. Log requirements, progress, test results, and final status.
+
 ### RFD Organization
-- All MVP RFDs go in `checkpoint-0/rfd/` because MVP development happens before the first snapshot
-- RFD-0 is always the Architecture RFD
-- Feature RFDs are numbered 1, 2, 3... in implementation order
-- After MVP is complete, future features will go in subsequent checkpoints
+- MVP RFDs go in `checkpoint-0/rfd/` (before first snapshot)
+- RFD-0 = Architecture RFD; features numbered 1, 2, 3...
+- Post-MVP features go in subsequent checkpoints
 
-### Handling PRD Changes
-If user wants to change requirements mid-development:
-1. Note the change in the relevant RFD
-2. Update affected RFDs
-3. Reassess implementation order if needed
-4. Continue with updated requirements
-
-### When to Ask User
+### When to Wait for User
 - Before starting each feature
-- When requirements are ambiguous
-- When making significant architectural decisions
-- When choosing between implementation approaches
-- Before committing major changes
+- After clarification questions (before designing)
+- After architecture design (before implementing)
+- After implementation (for user testing)
+- Before committing and before next feature
 
-### Progress Tracking
-- Update RFD status as you progress
-- Log milestones in RFD progress log
-- Keep todos current
-- Provide regular status updates to user
+### Testing Requirements
+Feature completion requires:
+1. Your testing with available skills
+2. Code review agents
+3. User testing and confirmation
+4. All acceptance criteria checked in RFD
 
 ---
 

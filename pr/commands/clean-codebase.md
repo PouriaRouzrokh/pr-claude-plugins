@@ -5,14 +5,14 @@ argument-hint: "[optional: path/to/scope]"
 
 # Clean Codebase
 
-Clean and professionalize the codebase to make it production-ready, using code-reviewer agents to systematically identify issues.
+Clean and professionalize the codebase using code-reviewer agents to identify issues systematically.
 
 ## Core Principles
 
-- **Review before removing**: Use code-reviewer agents to identify issues with high confidence
-- **Verify usage**: Always search for references before removing any code
-- **Preserve functionality**: Never change behavior, only clean up code
-- **Ask when uncertain**: If there's doubt about usage, ask the user
+- **Review before removing**: Use code-reviewer agents with high confidence thresholds.
+- **Verify usage**: Search for references before removing code.
+- **Preserve functionality**: Clean up code without changing behavior.
+- **Ask when uncertain**: If unsure about usage, ask the user.
 
 ---
 
@@ -112,27 +112,22 @@ For each confirmed dead code item:
 
 **Goal**: Clean up comments to professional standards
 
-**Actions**:
-
-**Remove these types of comments**:
-- References to past versions ("this replaces the old implementation")
-- Boilerplate comments that add no value
-- TODO comments that are already done
-- Commented-out code with notes like "keeping for reference"
-- Obvious comments that restate what code does (`i++ // increment i`)
+**Remove**:
+- References to past versions
+- Boilerplate adding no value
+- Completed TODOs
+- Commented-out code "for reference"
+- Obvious comments restating code
 - Personal notes or temporary markers
 
-**Keep and maintain these**:
-- Documentation comments for public APIs, functions, and classes
-- Complex logic explanations where the "why" isn't obvious
-- Important warnings or caveats
-- License headers (do not modify)
-- JSDoc/TSDoc/docstrings that provide genuine value
+**Keep**:
+- Documentation for public APIs
+- Complex logic explanations (the "why")
+- Important warnings
+- License headers
+- Valuable JSDoc/TSDoc/docstrings
 
-**Ensure balance**:
-- Not excessive (every line doesn't need a comment)
-- Not too sparse (complex logic should be explained)
-- Professional tone throughout
+**Balance**: Not excessive, not too sparse, professional tone.
 
 ---
 

@@ -5,14 +5,14 @@ argument-hint: "[optional: specific instructions]"
 
 # Run Public
 
-Deploy and run the application publicly (internet-accessible) for testing or production use.
+Deploy and run the application publicly for testing or production.
 
 ## Core Principles
 
-- **Restart by default**: Redeploy fresh unless instructed otherwise
-- **Abstract commands first**: Look for project-specific deploy commands before platform-specific commands
-- **Verify before and after**: Confirm environment configuration and deployment success
-- **Never expose secrets**: Never log or display credentials in output
+- **Restart by default**: Redeploy fresh unless instructed otherwise.
+- **Abstract commands first**: Look for project deploy commands before platform-specific ones.
+- **Verify before and after**: Confirm configuration and deployment success.
+- **Never expose secrets**: Never log credentials.
 
 ---
 
@@ -64,26 +64,16 @@ Deploy and run the application publicly (internet-accessible) for testing or pro
 
 **Goal**: Identify the best way to deploy
 
-**Priority 1 - Project-Specific Deployment Commands**:
+**Priority 1 - Abstract Commands** (use if available):
+- Makefile: `make deploy`, `make release`
+- package.json: `npm run deploy`, `npm run deploy:prod`
+- Shell scripts: `./deploy.sh`, `./release.sh`
+- Task runners, CI/CD triggers
 
-Check these locations for commands that handle the entire deployment:
-- **Makefile**: `make deploy`, `make deploy-prod`, `make release`, `make publish`
-- **package.json scripts**: `npm run deploy`, `npm run deploy:prod`, `npm run release`
-- **Shell scripts**: `./deploy.sh`, `./release.sh`, `scripts/deploy.sh`, `scripts/deploy-prod.sh`
-- **Task runners**: `task deploy`, `just deploy` (Taskfile.yml, Justfile)
-- **CI/CD triggers**: May just need to push to main or create a tag
-
-**If you find an abstract deployment command, use that.**
-
-**Priority 2 - Platform Configuration Files** (fallback):
-
-Look for deployment configuration in:
-- `vercel.json`, `netlify.toml`
-- `fly.toml`, `railway.json`, `render.yaml`
+**Priority 2 - Platform Config** (fallback):
+- `vercel.json`, `netlify.toml`, `fly.toml`, `railway.json`
 - `Dockerfile`, `docker-compose.prod.yml`
-- `.github/workflows/` (CI/CD pipelines)
-- `Procfile` (Heroku)
-- README.md deployment instructions
+- `.github/workflows/`, `Procfile`
 
 ---
 

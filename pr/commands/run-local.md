@@ -9,10 +9,10 @@ Start and run the application locally for development and testing.
 
 ## Core Principles
 
-- **Restart by default**: Kill existing processes and start fresh unless instructed otherwise
-- **Abstract commands first**: Look for project-specific commands (make dev, npm run dev:all) before individual micro-commands
-- **Environment setup**: Ensure virtual environments and dependencies are properly configured
-- **Start in order**: Launch services in dependency order (database → backend → frontend)
+- **Restart by default**: Kill existing processes and start fresh unless instructed otherwise.
+- **Abstract commands first**: Look for project commands (`make dev`, `npm run dev:all`) before individual commands.
+- **Environment setup**: Configure virtual environments and dependencies.
+- **Start in order**: Database → backend → frontend.
 
 ---
 
@@ -82,77 +82,34 @@ Start and run the application locally for development and testing.
 
 **Goal**: Find the best way to start the application
 
-**Priority 1 - Project-Specific Abstract Commands**:
+**Priority 1 - Abstract Commands** (use if available):
+- Makefile: `make dev`, `make run`, `make start`
+- package.json: `npm run dev:all`, `npm run local`
+- Shell scripts: `./run.sh`, `./dev.sh`
+- docker-compose, task runners (Taskfile.yml, Justfile)
 
-Check these locations for commands that start everything at once:
-- **Makefile**: `make dev`, `make run`, `make start`, `make local`, `make up`
-- **package.json scripts**: `npm run dev:all`, `npm run start:all`, `npm run local`
-- **Shell scripts**: `./run.sh`, `./start-local.sh`, `./dev.sh`, `scripts/dev.sh`
-- **docker-compose**: `docker-compose up`
-- **Task runners**: `task dev`, `just dev` (Taskfile.yml, Justfile)
-- **README.md**: Check for documented "quick start" or "run locally" commands
-
-**If you find an abstract command that handles all services, use that.**
-
-**Priority 2 - Individual Commands** (fallback only):
-
-```bash
-# Node.js / JavaScript
-npm run dev / npm start / yarn dev / pnpm dev
-
-# Python
-python manage.py runserver          # Django
-flask run                           # Flask
-uvicorn main:app --reload          # FastAPI
-python app.py
-
-# Docker
-docker-compose up
-docker-compose -f docker-compose.dev.yml up
-
-# Go
-go run . / go run main.go
-
-# Rust
-cargo run
-```
+**Priority 2 - Individual Commands** (fallback):
+- Node: `npm run dev`, `yarn dev`
+- Python: `python manage.py runserver`, `flask run`, `uvicorn main:app --reload`
+- Docker: `docker-compose up`
+- Go: `go run .`
+- Rust: `cargo run`
 
 ---
 
 ## Phase 5: Environment Setup
 
-**Goal**: Ensure correct environment is active before running
+**Goal**: Activate correct environment before running
 
-**Actions**:
+**Python**: Check for `venv/`, `.venv/`. Activate with `source venv/bin/activate`, `poetry shell`, or `pipenv shell`.
 
-**Python**:
-- Check for `venv/`, `.venv/`, `env/` directories
-- Check for `pyproject.toml` (Poetry), `Pipfile` (Pipenv), `requirements.txt`
-- Activate the environment:
-  ```bash
-  source venv/bin/activate      # Standard
-  source .venv/bin/activate
-  poetry shell                  # Poetry
-  pipenv shell                  # Pipenv
-  ```
-- If no virtual environment exists but dependencies are listed, ask user if they want to create one
+**Node.js**: If `node_modules/` missing, run `npm install`. Check `.nvmrc` for version.
 
-**Node.js**:
-- Check for `node_modules/` - if missing, run `npm install` or `yarn install` first
-- Check for `.nvmrc` or `.node-version` for required Node version
-- Use `nvm use` if version file exists
+**Conda**: Check `environment.yml`, activate with `conda activate`.
 
-**Conda**:
-- Check for `environment.yml` or `conda.yaml`
-- Activate with: `conda activate <env-name>`
+**Ruby**: Check `Gemfile`, run `bundle install` if needed.
 
-**Ruby**:
-- Check for `Gemfile` - may need `bundle install`
-- Check for `.ruby-version`
-
-**Other**:
-- Check for any environment setup scripts
-- Look for documented setup in README.md
+If no environment exists, ask user about creating one.
 
 ---
 
