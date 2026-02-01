@@ -7,6 +7,34 @@ argument-hint: "[optional: specific focus or priority features]"
 
 Implement an MVP from a PRD systematically: understand the PRD, break it into features, design architecture, and implement feature by feature with RFD tracking.
 
+## ATLAS Development Philosophy
+
+This command implements the full **ATLAS** framework for building production-ready MVPs.
+
+**When to use this command:**
+- Building a new MVP from a PRD
+- Implementing multiple related features systematically
+- Projects requiring architecture planning and integration validation
+
+**When NOT to use this command:**
+- Single feature additions → use `/pr:feature-dev` instead
+- Bug fixes or small changes → just fix directly
+- Quick prototypes where validation isn't critical
+
+### ATLAS Phase Mapping
+
+| Phase | How This Command Applies It |
+|-------|----------------------------|
+| **A** (Architect) | PRD contains problem, users, success metrics |
+| **T** (Trace) | Phase 2-3 extracts features, designs architecture, maps integrations |
+| **L** (Link) | Phase 3 validates connections before building |
+| **A** (Assemble) | Phase 4 implements features with layered architecture |
+| **S** (Stress-test) | Phase 4.6 tests each feature before proceeding |
+
+**Key principle:** Never build before designing. Never skip connection validation. Never ship without testing.
+
+For complete ATLAS framework, see `atlas-development` skill.
+
 ## Core Principles
 
 - **Use available tools**: Check MCP servers and skills. Use frontend-design for UIs, browser automation for testing, Context7 for documentation.
@@ -20,6 +48,7 @@ Implement an MVP from a PRD systematically: understand the PRD, break it into fe
 - **Simple and elegant**: Write readable, maintainable code.
 - **Write clearly**: Use `writing-clearly-and-concisely` for RFDs. Active voice, omit needless words, avoid AI-isms.
 - **Use TodoWrite**: Track progress throughout.
+- **Validate before building**: Test all integrations and connections before writing feature code.
 
 ---
 
@@ -105,9 +134,11 @@ find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
 
 ---
 
-## Phase 3: Foundation Setup
+## Phase 3: Foundation Setup & Link Validation
 
-**Goal**: Set up project foundation before implementing features
+**Goal**: Set up project foundation AND validate all connections before implementing features
+
+This phase implements ATLAS **Link** step: validate everything works before building.
 
 **Actions**:
 
@@ -124,9 +155,19 @@ find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
    - Identify any gaps in infrastructure
    - Set up any missing components
 
-3. Update Architecture RFD with foundation implementation status
+3. **Link Validation** (CRITICAL — do not skip):
+   - [ ] Database connection tested (query returns data or empty, not error)
+   - [ ] All API keys verified (make test requests)
+   - [ ] MCP servers responding (list tools, test one operation)
+   - [ ] OAuth flows working (if applicable)
+   - [ ] Environment variables set correctly
+   - [ ] Rate limits documented
 
-4. **Commit foundation** (suggest user run /pr:commit-push)
+   Present validation results to user. If anything fails, fix before proceeding.
+
+4. Update Architecture RFD with foundation implementation status and validation results
+
+5. **Commit foundation** (suggest user run /pr:commit-push)
 
 ---
 

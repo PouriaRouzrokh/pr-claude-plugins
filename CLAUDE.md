@@ -22,12 +22,34 @@ Claude Code plugin marketplace containing the **pr** plugin - a personal develop
 | Skill                           | Description                                        |
 | ------------------------------- | -------------------------------------------------- |
 | `agent-browser`                 | Browser automation for web testing and screenshots |
+| `atlas-development`             | ATLAS framework for production-ready development   |
 | `create-prd`                    | Interactive PRD generation with web research       |
 | `create-snapshot`               | Technical codebase snapshot generation             |
 | `frontend-design`               | Production-grade frontend interfaces               |
 | `writing-clearly-and-concisely` | Clear, direct prose following Strunk's principles  |
 
 ## Development Principles
+
+### ATLAS Framework
+
+ATLAS is a development philosophy — apply it based on task complexity:
+
+| Step | Phase | Purpose |
+|------|-------|---------|
+| **A** | Architect | Define problem, users, success metrics |
+| **T** | Trace | Data schema, integrations map, stack proposal |
+| **L** | Link | Validate ALL connections before building |
+| **A** | Assemble | Build with layered architecture |
+| **S** | Stress-test | Test functionality, error handling |
+
+**When to apply:**
+- **Full ATLAS**: New MVPs, features with integrations/schema changes
+- **Partial (L+A+S)**: Features using existing patterns
+- **Skip**: Bug fixes, one-line changes, documentation, refactoring
+
+**Anti-patterns:** Building before designing, skipping connection validation, no testing.
+
+See `atlas-development` skill for complete framework details.
 
 ### Leveraging Available Tools
 
@@ -101,6 +123,7 @@ pr-claude-plugins/
 │   ├── commands/                     # Slash commands (10 total)
 │   └── skills/                       # Skills with SKILL.md + references/
 │       ├── agent-browser/            # Browser automation
+│       ├── atlas-development/        # ATLAS development framework
 │       ├── create-prd/               # PRD generation
 │       ├── create-snapshot/          # Snapshot generation
 │       ├── frontend-design/          # UI development
@@ -151,6 +174,7 @@ color: yellow|green|red
 
 ## Key Concepts
 
+- **ATLAS**: Development framework — Architect, Trace, Link, Assemble, Stress-test
 - **RFD**: Request for Development - tracks feature requests and implementation
 - **PRD**: Product Requirements Document - project vision at `checkpoint-0/prd.md`
 - **Checkpoint**: Point-in-time documentation (checkpoint-0 = pre-dev, checkpoint-1+ = development)

@@ -4,6 +4,27 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 1/31/2026 - 14:45 (main)
+
+- **Feature: Integrate ATLAS development framework**
+  - Added new `atlas-development` skill documenting the ATLAS philosophy
+    - ATLAS: Architect, Trace, Link, Assemble, Stress-test
+    - Includes guidance on when to apply full, partial, or skip ATLAS
+    - Anti-patterns section to avoid common "vibe coding" failures
+  - Updated `create-prd` skill with ATLAS Foundation section
+    - PRD now implements Architect phase with clear problem/user/success questions
+    - Added ATLAS Brief section to PRD template
+  - Updated `mvp-dev` command with ATLAS philosophy
+    - Added Link Validation step in Phase 3 (connection validation before building)
+    - Guidance on when to use vs when NOT to use this command
+  - Updated `feature-dev` command with contextual ATLAS application
+    - Full process for complex features, simplified for small changes
+    - Added "Match process depth to task complexity" principle
+  - Updated `CLAUDE.md` with ATLAS framework section and "When to apply" guidance
+  - Updated README files with ATLAS skill and framework documentation
+
+---
+
 ### 1/31/2026 - 12:20 (main)
 
 - **Feature: Add new skills and update generate-image-nb**

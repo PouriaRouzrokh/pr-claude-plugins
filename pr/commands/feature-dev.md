@@ -7,6 +7,35 @@ argument-hint: "[optional: feature description]"
 
 Implement features systematically: understand the codebase, manage RFD documentation, clarify requirements, design architecture, then implement.
 
+## ATLAS Development Philosophy
+
+This command applies **ATLAS** principles contextually based on task complexity:
+
+### When to Apply Full Process
+
+**Full process (all phases)** for:
+- New features with integrations or schema changes
+- Complex multi-component features
+- Features requiring architectural decisions
+
+**Simplified process** for:
+- Small features using existing patterns — skip to Phase 5-6
+- Bug fixes — explore, fix, test (no RFD needed)
+- Minor tweaks — just implement and verify
+
+### ATLAS Phase Mapping
+
+| Phase | How This Command Applies It |
+|-------|----------------------------|
+| **T** (Trace) | Phase 2-4 traces existing code, maps dependencies, clarifies requirements |
+| **L** (Link) | Phase 5 validates architecture fits existing patterns before building |
+| **A** (Assemble) | Phase 6 implements following chosen architecture |
+| **S** (Stress-test) | Phase 7 reviews and tests the feature |
+
+**Key principle:** Match process depth to task complexity. A one-line fix doesn't need an RFD.
+
+For complete ATLAS framework, see `atlas-development` skill.
+
 ## Core Principles
 
 - **Use available tools**: Check what MCP servers and skills are available. Use frontend-design for UIs, browser automation for testing, Context7 for package documentation.
@@ -17,6 +46,7 @@ Implement features systematically: understand the codebase, manage RFD documenta
 - **Use TodoWrite**: Track progress throughout.
 - **Manage RFDs**: Create or update RFDs to track feature requests and implementation.
 - **Write clearly**: Use `writing-clearly-and-concisely` for RFDs. Active voice, omit needless words, avoid AI-isms (pivotal, crucial, leverage).
+- **Validate before building**: Confirm architecture and approach before writing code.
 
 ---
 

@@ -8,12 +8,42 @@ argument-hint: "[optional: path/to/ideas.md or free-text description]"
 
 Generate a PRD through interactive discovery, web research, and synthesis. Interview users, research best practices, then produce a professional requirements document.
 
+## ATLAS Foundation
+
+This skill implements the **Architect** phase of ATLAS development.
+
+**When to create a PRD:**
+- Starting a new project, application, or MVP
+- Major new product initiatives
+- Projects requiring stakeholder alignment
+
+**When NOT to create a PRD:**
+- Single feature additions (use `/pr:feature-dev` with RFD)
+- Bug fixes or small changes
+- Extending existing functionality
+
+A PRD answers the core questions that prevent building failures:
+
+1. **What problem does this solve?** — One sentence. If you can't say it simply, you don't understand it.
+2. **Who is this for?** — Be specific, not "everyone."
+3. **What does success look like?** — Measurable outcomes, not vague goals.
+4. **What are the constraints?** — Budget, time, technical requirements.
+
+The PRD also begins the **Trace** phase by documenting:
+- Data schema requirements
+- Integration dependencies
+- Technology stack decisions
+- Edge cases and risks
+
+For complete ATLAS framework details, see `atlas-development` skill.
+
 ## Core Principles
 
 - **Interview first**: Focused questions, one topic at a time.
 - **Research while interviewing**: Search for context when user mentions something.
 - **Accept uncertainty**: "Use your judgment" is valid.
 - **Synthesize**: Provide recommendations, not just search results.
+- **Measurable success**: Every PRD must define what success looks like in concrete terms.
 
 ---
 
@@ -196,6 +226,17 @@ mkdir -p {project_root}/.claude/checkpoints/checkpoint-0
 **Version:** 1.0
 **Created:** [Date]
 **Status:** Draft
+
+---
+
+## ATLAS Brief
+
+> Complete this section first. If you can't answer these clearly, you don't understand the project yet.
+
+- **Problem:** [One sentence — what pain point does this solve?]
+- **User:** [Who specifically — not "everyone"]
+- **Success:** [Measurable outcome — how do we know it works?]
+- **Constraints:** [Budget, time, technical requirements]
 
 ---
 

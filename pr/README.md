@@ -48,10 +48,30 @@ This plugin relies on external tools that should be installed before use. Some a
 |-------|-------------|
 | `agent-browser` | Browser automation for web testing, form filling, screenshots, and data extraction |
 | `agentation` | Add Agentation visual feedback toolbar to Next.js projects |
+| `atlas-development` | ATLAS framework for production-ready development (Architect, Trace, Link, Assemble, Stress-test) |
 | `create-prd` | Interactive PRD generation with web research |
 | `frontend-design` | Create distinctive, production-grade frontend interfaces with high design quality |
 | `generate-image-nb` | Generate and edit images via Gemini Nano Banana API |
 | `writing-clearly-and-concisely` | Clear, direct prose following Strunk's principles |
+
+## ATLAS Development Framework
+
+This plugin follows the **ATLAS** philosophy for building production-ready applications:
+
+| Step | Phase | Purpose |
+|------|-------|---------|
+| **A** | Architect | Define problem, users, success metrics |
+| **T** | Trace | Data schema, integrations map, stack proposal |
+| **L** | Link | Validate ALL connections before building |
+| **A** | Assemble | Build with layered architecture |
+| **S** | Stress-test | Test functionality, error handling |
+
+**When to apply:**
+- **Full ATLAS**: New MVPs, features with integrations/schema changes
+- **Partial (L+A+S)**: Features using existing patterns
+- **Skip**: Bug fixes, one-line changes, documentation, refactoring
+
+ATLAS is integrated into `create-prd`, `mvp-dev`, and `feature-dev` commands. See the `atlas-development` skill for complete framework details.
 
 ## Agents
 

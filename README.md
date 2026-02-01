@@ -49,6 +49,8 @@ This plugin relies on external tools that should be installed before use. Some a
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [pr](./pr/) | Personal development toolkit with commands for feature development, MVP development, code cleanup, documentation, deployment, and git operations |
 
+The **pr** plugin implements the **ATLAS development framework** (Architect, Trace, Link, Assemble, Stress-test) for building production-ready applications. See the [pr plugin README](./pr/README.md) for details.
+
 ## Updating
 
 To get the latest plugins, run:
