@@ -4,6 +4,20 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 2/2/2026 - 18:30 (main)
+
+- **Refactor: Update /pr:update-claude-md to focus on stable content**
+  - Changed philosophy: CLAUDE.md points to documentation, doesn't duplicate it
+  - Added "Context Loading Instructions" as the most important required section
+    - Tells Claude how to find latest checkpoint, read snapshot/PRD, read RFDs
+  - Added "Key Files/Folders" section for stable structural anchors
+  - Removed focus on extracting implementation details from checkpoints
+  - Reduced target length from 200 to 150 lines
+  - Added tables showing what belongs vs. what doesn't belong in CLAUDE.md
+  - Implementation details belong in PRDs, RFDs, snapshots (not CLAUDE.md)
+
+---
+
 ### 1/31/2026 - 14:45 (main)
 
 - **Feature: Integrate ATLAS development framework**
