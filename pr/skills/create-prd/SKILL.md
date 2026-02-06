@@ -37,6 +37,18 @@ The PRD also begins the **Trace** phase by documenting:
 
 For complete ATLAS framework details, see `atlas-development` skill.
 
+## Multi-Agent Strategy
+
+PRD creation is primarily an interactive interview process, so multi-agent approaches apply mainly to the research phase (Phase 2).
+
+**When to use subagents**: During deep research, dispatch subagents to research different domains in parallel — one for tech stack analysis, one for security/compliance, one for competitive landscape. Each returns findings independently. This is the default and sufficient approach.
+
+**When agent teams could help**: For PRDs covering very complex domains with many interacting technology choices (e.g., a full-stack application with multiple external integrations, compliance requirements, and competing architectural approaches). In this case, research agents could challenge each other's technology recommendations and surface conflicts. In practice, PRD research tasks are independent enough that subagents work well.
+
+If the calling command passes `--team`, respect that flag. Otherwise, default to subagents for research phases.
+
+---
+
 ## Core Principles
 
 - **Interview first**: Focused questions, one topic at a time.

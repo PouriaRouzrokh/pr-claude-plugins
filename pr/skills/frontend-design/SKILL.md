@@ -118,6 +118,25 @@ Review the DON'T guidelines above—they are the fingerprints of AI-generated wo
 
 ---
 
+## Multi-Agent Strategy for Complex UI Projects
+
+For large frontend projects with multiple pages or complex component systems, multi-agent approaches accelerate development and improve quality.
+
+**Use subagents (default)** for:
+- Parallel design audits (accessibility, performance, responsiveness checked independently)
+- Code-explorer agents analyzing existing UI patterns before building new components
+- Code-reviewer agents checking design quality, code quality, and performance simultaneously
+- Dispatching browser automation agents to test UI at different viewports
+
+**Consider agent teams** for:
+- Multi-page applications where page-level agents need to coordinate shared design tokens, component APIs, and navigation patterns
+- Design system extraction where agents analyzing different pages need to agree on shared components
+- Full redesigns where one agent handles visual design while another handles interaction patterns, and they need to resolve conflicts (e.g., a visual animation that hurts interaction latency)
+
+Agent teams are experimental and more expensive. For most frontend tasks — even complex ones — subagents work well because you synthesize their outputs into a cohesive design. Use agent teams only when agents genuinely need to negotiate and coordinate in real-time.
+
+---
+
 ## Implementation Principles
 
 Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details.

@@ -1,6 +1,6 @@
 ---
 description: Guided feature development with codebase understanding, architecture focus, and RFD documentation management
-argument-hint: "[optional: feature description]"
+argument-hint: "[optional: feature description] [--subagents | --team]"
 ---
 
 # Feature Development with RFD Management
@@ -35,6 +35,35 @@ This command applies **ATLAS** principles contextually based on task complexity:
 **Key principle:** Match process depth to task complexity. A one-line fix doesn't need an RFD.
 
 For complete ATLAS framework, see `atlas-development` skill.
+
+## Multi-Agent Strategy
+
+This command uses agents for codebase exploration, architecture design, and code review. Decide which agent strategy to use based on task complexity and user flags.
+
+### Choosing Between Subagents and Agent Teams
+
+**Use subagents (default)** — lightweight workers that report results back:
+- Exploration agents analyzing different parts of the codebase independently
+- Architecture agents proposing approaches that you synthesize
+- Review agents checking different quality dimensions
+- Most feature development tasks
+
+**Use agent teams** — independent sessions with inter-agent messaging:
+- Architecture phase where agents need to debate and challenge each other's proposals
+- Features spanning multiple layers (frontend + backend + data) where agents must coordinate file ownership
+- Complex integrations where one agent's findings directly affect another's approach
+
+### User Override
+
+Parse `$ARGUMENTS` for these flags:
+- `--subagents` — Force subagent mode regardless of task complexity
+- `--team` — Force agent team mode for inter-agent collaboration
+
+If `--team` is passed but the task is straightforward (small bug fix, single-file change), explain the overhead and ask if the user wants to proceed. If `--subagents` is passed for a task that could benefit from teams, respect their choice — subagents work for any task.
+
+**Without flags**: Default to subagents. Only propose agent teams when inter-agent communication provides a clear advantage, and explain why before proceeding. Agent teams are experimental, more expensive, and add coordination overhead.
+
+---
 
 ## Core Principles
 
@@ -105,12 +134,14 @@ Initial request: $ARGUMENTS
 
 **Actions**:
 
-1. Launch 2-3 code-explorer agents in parallel, each targeting a different aspect:
+1. Launch 2-3 code-explorer agents in parallel (as subagents by default, or as an agent team if `--team` was specified), each targeting a different aspect:
    - Similar features and their implementation
    - Architecture and abstractions
    - UI patterns, testing, or extension points
 
    Each agent should return 5-10 key files to read.
+
+   *Subagents are sufficient here — exploration tasks are independent and don't need inter-agent messaging.*
 
 2. Read all files identified by agents
 3. Summarize findings and patterns
@@ -228,7 +259,11 @@ If the user says "use your judgment", provide your recommendation and get confir
 
 **Actions**:
 
-1. Launch 2-3 code-architect agents with different focuses: minimal changes, clean architecture, or pragmatic balance
+1. Launch 2-3 code-architect agents with different focuses: minimal changes, clean architecture, or pragmatic balance.
+
+   - **With subagents (default)**: Each agent proposes independently; you synthesize and compare approaches.
+   - **With agent teams (`--team`)**: Architects can debate trade-offs and challenge each other's proposals before presenting a consolidated recommendation. This is the phase most likely to benefit from inter-agent communication, especially for complex multi-component features.
+
 2. Form your recommendation (consider: fix vs feature, urgency, complexity)
 3. Present to user: summary of each approach, trade-offs, your recommendation, implementation differences
 4. Ask which approach they prefer
@@ -258,7 +293,10 @@ If the user says "use your judgment", provide your recommendation and get confir
 
 **Actions**:
 
-1. Launch 3 code-reviewer agents: simplicity/DRY, bugs/correctness, conventions/abstractions
+1. Launch 3 code-reviewer agents (subagents by default, or agent team if `--team`): simplicity/DRY, bugs/correctness, conventions/abstractions.
+
+   *With agent teams, reviewers can cross-reference each other's findings — e.g., a bug reviewer can flag that a DRY violation also creates a correctness risk. With subagents, you consolidate their findings yourself.*
+
 2. Consolidate findings and identify high-severity issues
 3. Present findings and ask user: fix now, fix later, or proceed?
 4. Address issues based on decision

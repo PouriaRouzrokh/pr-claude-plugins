@@ -1,11 +1,21 @@
 ---
 description: Clean and professionalize code using automated review to identify issues before cleanup
-argument-hint: "[optional: path/to/scope]"
+argument-hint: "[optional: path/to/scope] [--subagents | --team]"
 ---
 
 # Clean Codebase
 
 Clean and professionalize the codebase using code-reviewer agents to identify issues systematically.
+
+## Multi-Agent Strategy
+
+This command uses code-reviewer agents for automated review. Parse `$ARGUMENTS` for `--subagents` or `--team` flags.
+
+**Default: subagents.** Cleanup review tasks (dead code detection, comment quality) are independent — each agent checks a different dimension and reports findings. Subagents are sufficient and more cost-effective.
+
+**Agent teams** add minimal value here since review agents don't need to share findings in real-time. However, if `--team` is passed, respect the user's choice — reviewers can then cross-reference findings (e.g., dead code agent flagging that a commented-out block is related to an unused function found by the other agent). If `--team` is passed for a small scope (single file), explain the unnecessary overhead and confirm.
+
+---
 
 ## Core Principles
 
@@ -36,7 +46,7 @@ Clean and professionalize the codebase using code-reviewer agents to identify is
 
 **Actions**:
 
-1. Launch 2 code-reviewer agents in parallel with different focuses:
+1. Launch 2 code-reviewer agents in parallel (subagents by default, or agent team if `--team`) with different focuses:
 
    **Agent 1 - Dead Code Detection**:
    ```

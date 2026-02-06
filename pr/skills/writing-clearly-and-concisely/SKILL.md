@@ -31,6 +31,8 @@ When context is tight:
 
 Loading a single section (~1,000-4,500 tokens) instead of everything saves significant context.
 
+**Note on agent strategy**: Writing and copyediting are inherently single-agent tasks — a subagent is the right tool. Agent teams add no value here since there is nothing for multiple agents to coordinate on.
+
 ## Elements of Style
 
 William Strunk Jr.'s *The Elements of Style* (1918) teaches you to write clearly and cut ruthlessly.

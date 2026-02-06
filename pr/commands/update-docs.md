@@ -1,11 +1,21 @@
 ---
 description: Update project documentation using code exploration to understand changes since last update
-argument-hint: "[path] [description of what to document]"
+argument-hint: "[path] [description of what to document] [--subagents | --team]"
 ---
 
 # Update Documentation
 
 Update project documentation to reflect current codebase state, using code-explorer agents to understand changes.
+
+## Multi-Agent Strategy
+
+This command uses code-explorer agents for change analysis and gap detection. Parse `$ARGUMENTS` for `--subagents` or `--team` flags.
+
+**Default: subagents.** Documentation exploration tasks (recent changes analysis, gap analysis) are independent — each agent investigates a different dimension and reports findings. Subagents are sufficient.
+
+**Agent teams** may help for large-scale documentation overhauls where the changes agent and gap agent need to coordinate (e.g., the changes agent discovers a renamed module while the gap agent is documenting the old name). For typical documentation updates, this coordination happens naturally when you consolidate findings. If `--team` is passed, respect the user's choice.
+
+---
 
 ## Core Principles
 
@@ -105,7 +115,7 @@ If arguments are ambiguous, ask the user to clarify.
 
 **Actions**:
 
-1. Launch 2 code-explorer agents in parallel:
+1. Launch 2 code-explorer agents in parallel (subagents by default, or agent team if `--team`):
 
    **Agent 1 - Recent Changes Analysis**:
    ```

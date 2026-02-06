@@ -271,6 +271,40 @@ Test report with:
 
 ---
 
+## Multi-Agent Approaches in ATLAS
+
+Complex ATLAS workflows benefit from running multiple agents. Choose the right strategy based on task needs.
+
+### Subagents (Default)
+
+Subagents are lightweight workers that report results back. Use them for:
+- **Trace**: Multiple code-explorer agents analyzing different parts of the codebase in parallel
+- **Assemble**: Code-architect agents proposing different implementation approaches
+- **Stress-test**: Code-reviewer agents checking different quality dimensions (bugs, security, performance)
+
+Subagents are cheaper, faster, and sufficient when each agent works independently and you synthesize their outputs.
+
+### Agent Teams
+
+Agent teams are independent sessions with inter-agent messaging. Consider them for:
+- **Trace + Link**: When architects need to debate schema decisions, negotiate shared components, and validate that integration plans are consistent across layers
+- **Assemble**: Full-stack features where frontend, backend, and data agents need to coordinate file ownership and share interface contracts
+- **Stress-test**: When reviewers should challenge each other's findings — e.g., security reviewer flagging that a performance optimization bypasses validation
+
+Agent teams are experimental, more expensive, and add coordination overhead. Use them only when inter-agent communication provides a clear advantage over consolidating subagent outputs yourself.
+
+### Decision Guide
+
+| ATLAS Phase | Subagents | Agent Teams |
+|-------------|-----------|-------------|
+| Architect | N/A (interactive with user) | N/A |
+| Trace | Parallel exploration of codebase | Architects debating schema/integration choices |
+| Link | Independent validation checks | Cross-layer validation coordination |
+| Assemble | Independent implementation tasks | Multi-layer features needing coordination |
+| Stress-test | Independent review dimensions | Adversarial review with cross-referencing |
+
+---
+
 ## Anti-Patterns (What NOT to Do)
 
 These are the mistakes that cause projects to fail:

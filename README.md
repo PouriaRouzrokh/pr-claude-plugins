@@ -35,6 +35,7 @@ This plugin relies on external tools that should be installed before use. Some a
 |------|------|---------|--------------|
 | Gemini API | API | `generate-image-nb` skill | Requires `GEMINI_API_KEY` environment variable |
 | [Agentation](https://github.com/benjitaylor/agentation) | Next.js component | `agentation` skill | Installed per-project via skill |
+| Agent Teams | Claude Code feature | `--team` flag on supported commands | Enable in settings (see below) |
 
 ### Setup Notes
 
@@ -42,6 +43,15 @@ This plugin relies on external tools that should be installed before use. Some a
 - **Context7**: Provides up-to-date documentation for any library. Add to your `.claude/settings.json` MCP servers.
 - **Gemini API**: The `generate-image-nb` skill uses the Gemini Nano Banana API for image generation. Get an API key from Google AI Studio.
 - **Agentation**: Adds visual feedback toolbar to Next.js projects. Installed automatically when skill is used.
+- **Agent Teams**: Several commands support running agents as a coordinated team (via Claude Code's experimental [agent teams](https://docs.anthropic.com/en/docs/claude-code/agent-teams) feature). This is optional — commands default to subagents. To enable agent teams, add to your `settings.json`:
+  ```json
+  {
+    "env": {
+      "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+    }
+  }
+  ```
+  Then pass `--team` to supported commands (e.g., `/pr:feature-dev my feature --team`). See the [pr plugin README](./pr/README.md#multi-agent-strategy) for details.
 
 ## Available Plugins
 

@@ -29,18 +29,18 @@ This plugin relies on external tools that should be installed before use. Some a
 
 ## Commands
 
-| Command                                  | Description                                                                                            |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `/pr:feature-dev [description]`          | Develop a single feature with RFD tracking, codebase exploration, architecture design, and code review |
-| `/pr:mvp-dev [focus]`                    | Develop an entire MVP from a PRD file, creating RFDs for each feature                                  |
-| `/pr:commit-push [path] [--merge\|--pr]` | Commit changes, update commitlog.md, push to remote, optionally merge or create PR                     |
-| `/pr:clean-codebase [path]`              | Clean and professionalize code using automated review to identify issues                               |
-| `/pr:update-docs [path] [focus]`         | Update project documentation based on codebase changes                                                 |
-| `/pr:update-claude-md [path]`            | Update CLAUDE.md files with current project state and development principles                           |
-| `/pr:run-local [instructions]`           | Start and run the application locally for development                                                  |
-| `/pr:run-public [instructions]`          | Deploy and run the application publicly                                                                |
-| `/pr:create-prd [ideas]`                 | Generate a Product Requirements Document through interactive discovery and research                    |
-| `/pr:create-snapshot [path]`             | Generate a comprehensive technical snapshot of the codebase for handoff or documentation               |
+| Command                                  | Description                                                                                            | Agent Support |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------- |
+| `/pr:feature-dev [desc] [--subagents\|--team]` | Develop a single feature with RFD tracking, codebase exploration, architecture design, and code review | Yes |
+| `/pr:mvp-dev [focus] [--subagents\|--team]`    | Develop an entire MVP from a PRD file, creating RFDs for each feature                                  | Yes |
+| `/pr:commit-push [path] [--merge\|--pr]` | Commit changes, update commitlog.md, push to remote, optionally merge or create PR                     | No |
+| `/pr:clean-codebase [path] [--subagents\|--team]` | Clean and professionalize code using automated review to identify issues                            | Yes |
+| `/pr:update-docs [path] [focus] [--subagents\|--team]` | Update project documentation based on codebase changes                                          | Yes |
+| `/pr:update-claude-md [path]`            | Update CLAUDE.md files with current project state and development principles                           | No |
+| `/pr:run-local [instructions]`           | Start and run the application locally for development                                                  | No |
+| `/pr:run-public [instructions]`          | Deploy and run the application publicly                                                                | No |
+| `/pr:create-prd [ideas]`                 | Generate a Product Requirements Document through interactive discovery and research                    | No |
+| `/pr:create-snapshot [path]`             | Generate a comprehensive technical snapshot of the codebase for handoff or documentation               | Yes |
 
 ## Skills
 
@@ -82,6 +82,64 @@ The plugin includes three specialized subagents used by commands:
 | `code-explorer`  | Yellow | Analyzes existing codebase by tracing execution paths and mapping architecture |
 | `code-architect` | Green  | Designs feature architectures with implementation blueprints                   |
 | `code-reviewer`  | Red    | Reviews code for bugs, quality issues, and convention adherence                |
+
+## Multi-Agent Strategy
+
+Several commands in this plugin launch multiple agents in parallel for exploration, architecture design, and code review. These commands support two agent strategies:
+
+### Subagents (Default)
+
+Subagents are lightweight workers that run within your session and report results back. They work independently — each handles a focused task and returns findings. This is the default mode for all commands and requires no additional setup.
+
+### Agent Teams (Experimental)
+
+[Agent teams](https://docs.anthropic.com/en/docs/claude-code/agent-teams) are a Claude Code experimental feature that lets multiple Claude Code instances work together as a team with inter-agent messaging. Unlike subagents, teammates can communicate directly with each other, share findings, challenge each other's conclusions, and coordinate work through a shared task list.
+
+Agent teams are useful when agents need to collaborate — for example, architecture agents debating design trade-offs, or reviewers cross-referencing each other's findings across different quality dimensions.
+
+**Agent teams are more expensive** (each teammate is a separate Claude instance) and add coordination overhead. The plugin defaults to subagents and only recommends agent teams when inter-agent communication provides a clear advantage.
+
+#### Enabling Agent Teams
+
+Agent teams are disabled by default in Claude Code. To use the `--team` flag, you must first enable the feature:
+
+**Option 1: Add to settings.json** (recommended):
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
+
+**Option 2: Set as environment variable**:
+
+```bash
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+```
+
+Without this setting enabled, the `--team` flag will not work.
+
+### Using the Flags
+
+Commands that support multi-agent strategies accept these flags:
+
+| Flag | Behavior |
+|------|----------|
+| *(no flag)* | Claude decides the best strategy. Defaults to subagents unless the task clearly benefits from inter-agent communication. |
+| `--subagents` | Force subagent mode regardless of task complexity. |
+| `--team` | Force agent team mode. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to be enabled. |
+
+### Which Commands Support Agent Flags?
+
+| Command | Agent Phases | Best Case for Teams |
+|---------|-------------|---------------------|
+| `feature-dev` | Exploration, architecture, review | Architecture debate for complex multi-component features |
+| `mvp-dev` | Exploration, architecture, per-feature dev, integration review | Architecture planning and integration review for tightly coupled MVPs |
+| `clean-codebase` | Code review (dead code, comments) | Rarely needed — review tasks are independent |
+| `update-docs` | Codebase exploration (changes, gaps) | Rarely needed — exploration tasks are independent |
+| `create-snapshot` | Codebase exploration (4 agents) | Rarely needed — exploration tasks are independent |
 
 ## Documentation Structure
 

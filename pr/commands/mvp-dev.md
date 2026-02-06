@@ -1,6 +1,6 @@
 ---
 description: Develop an entire MVP from a PRD with systematic feature-by-feature implementation and RFD tracking
-argument-hint: "[optional: specific focus or priority features]"
+argument-hint: "[optional: specific focus or priority features] [--subagents | --team]"
 ---
 
 # MVP Development with PRD and RFD Management
@@ -34,6 +34,34 @@ This command implements the full **ATLAS** framework for building production-rea
 **Key principle:** Never build before designing. Never skip connection validation. Never ship without testing.
 
 For complete ATLAS framework, see `atlas-development` skill.
+
+## Multi-Agent Strategy
+
+MVP development involves many agent-assisted phases: exploration, architecture, implementation support, and review. Decide which agent strategy to use based on MVP complexity and user flags.
+
+### Choosing Between Subagents and Agent Teams
+
+**Use subagents (default)** — lightweight workers that report results back:
+- Per-feature exploration and architecture (most MVP features are developed sequentially)
+- Code review agents checking different quality dimensions
+- Standard feature-by-feature development where features are relatively independent
+
+**Use agent teams** — independent sessions with inter-agent messaging:
+- Architecture planning (Phase 2) for MVPs with tightly coupled features where architects need to coordinate shared components, database schema, and API contracts
+- Integration review (Phase 5) where reviewers should cross-check how features interact, challenge each other's findings, and coordinate on cross-cutting issues
+- Full-stack features where frontend, backend, and data agents need to coordinate file ownership and avoid conflicts
+
+### User Override
+
+Parse `$ARGUMENTS` for these flags:
+- `--subagents` — Force subagent mode for all agent phases
+- `--team` — Force agent team mode for inter-agent collaboration
+
+If `--team` is passed but the MVP is simple (few features, no complex integrations), explain the overhead and ask if the user wants to proceed. If `--subagents` is passed, respect their choice.
+
+**Without flags**: Default to subagents for individual feature phases. Consider proposing agent teams for architecture planning (Phase 2) and integration review (Phase 5) if the MVP has many interconnected features — explain the benefit before proceeding. Agent teams are experimental, more expensive, and add coordination overhead.
+
+---
 
 ## Core Principles
 
@@ -122,11 +150,13 @@ find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
 
 **Actions**:
 
-1. If existing codebase, launch 2 code-explorer agents to understand patterns
+1. If existing codebase, launch 2 code-explorer agents (subagents) to understand patterns
 
-2. Launch 2 code-architect agents:
+2. Launch 2 code-architect agents (subagents by default, or agent team if `--team`):
    - **Foundation Architecture**: Project structure, tech stack, shared components, database schema, API patterns
    - **Feature Architecture Map**: How features fit together, shared code, integration points, build sequence
+
+   *This phase benefits most from agent teams — architects can negotiate shared components, debate schema decisions, and ensure foundation and feature architectures are consistent. With subagents, you synthesize their proposals yourself.*
 
 3. Form recommendation and present to user. Ask for approval.
 
@@ -377,7 +407,7 @@ When user runs /pr:mvp-dev on a project with existing RFDs:
 
 **Actions**:
 
-1. Launch integration review agents:
+1. Launch integration review agents (subagents by default, or agent team if `--team`):
    ```
    Review the complete MVP implementation for:
    - Integration between features
@@ -388,6 +418,8 @@ When user runs /pr:mvp-dev on a project with existing RFDs:
 
    Focus on how features interact with each other.
    ```
+
+   *Agent teams add value here — reviewers covering security, performance, and integration can challenge each other's findings and flag cross-cutting issues (e.g., a performance reviewer noticing that a security fix introduces latency). With subagents, you consolidate findings yourself.*
 
 2. Address any integration issues found
 

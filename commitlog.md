@@ -4,6 +4,30 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 2/6/2026 - 15:00 (main)
+
+- **Feature: Add multi-agent strategy (subagents vs agent teams) across plugin**
+  - Added `--subagents` and `--team` flags to 5 commands: feature-dev, mvp-dev, clean-codebase, update-docs, create-snapshot
+  - Each command now includes a Multi-Agent Strategy section with decision criteria
+  - Annotated agent launch points with per-phase guidance (when teams add value vs when subagents suffice)
+  - Updated 5 skills with multi-agent guidance:
+    - `atlas-development`: Decision guide table mapping each ATLAS phase to agent strategy
+    - `create-snapshot`: Notes exploration agents are independent, subagents sufficient
+    - `create-prd`: Subagents for parallel research, teams rarely needed
+    - `frontend-design`: Teams for multi-page coordination, subagents for audits
+    - `writing-clearly-and-concisely`: Clarified subagent is correct for copyediting
+  - Updated `update-claude-md` template to include Multi-Agent Strategy in generated CLAUDE.md files
+  - Updated CLAUDE.md with Multi-Agent Strategy development principle
+  - Updated both READMEs with agent teams documentation:
+    - Agent Support column in commands table
+    - Full Multi-Agent Strategy section with enabling instructions (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`)
+    - Agent Teams added to optional prerequisites with setup instructions
+  - Default: subagents. Agent teams only when inter-agent communication has clear benefit.
+  - 5 commands skipped (no multi-agent value): commit-push, run-local, run-public, create-prd (wrapper), update-claude-md
+  - 3 skills skipped: agent-browser, agentation, generate-image-nb
+
+---
+
 ### 2/2/2026 - 18:30 (main)
 
 - **Refactor: Update /pr:update-claude-md to focus on stable content**

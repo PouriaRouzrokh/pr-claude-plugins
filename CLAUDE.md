@@ -51,6 +51,16 @@ ATLAS is a development philosophy — apply it based on task complexity:
 
 See `atlas-development` skill for complete framework details.
 
+### Multi-Agent Strategy
+
+When a task benefits from running multiple agents, choose the right approach:
+
+- **Subagents (default)**: Lightweight workers that report results back. Use for independent parallel tasks — exploration, architecture proposals, code review. Cheaper and sufficient for most work.
+- **Agent teams**: Independent sessions with inter-agent messaging. Use only when agents need to communicate, challenge each other, or coordinate (e.g., architecture debates, cross-layer coordination, adversarial review). Experimental, more expensive, higher coordination overhead.
+- **User override**: Commands that support agents accept `--subagents` or `--team` flags. Respect the user's choice, but warn if the flag adds unnecessary overhead for the task.
+
+**Priority**: Always default to subagents. Only propose agent teams when inter-agent communication has a clear benefit. See `atlas-development` skill for per-phase guidance.
+
 ### Leveraging Available Tools
 
 Before starting any task, check what skills and MCP servers are available in your current context:

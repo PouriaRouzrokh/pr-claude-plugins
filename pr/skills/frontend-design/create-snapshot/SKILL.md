@@ -8,6 +8,18 @@ argument-hint: "[optional: path/to/project]"
 
 Generate a comprehensive technical snapshot of a codebase that serves as a complete handoff document for developers unfamiliar with the project, using code-explorer agents for deep analysis.
 
+## Multi-Agent Strategy
+
+This skill launches 4 code-explorer agents in parallel for deep codebase analysis. Each agent focuses on a different dimension (architecture, features, dev context, UI/UX) and returns findings independently.
+
+**Default: subagents.** Snapshot exploration agents are independent — each analyzes a different aspect of the codebase and reports key files. There is no need for inter-agent communication since findings are synthesized by you after all agents complete.
+
+**When agent teams could help**: For very large codebases where exploration agents might benefit from sharing discoveries in real-time (e.g., the architecture agent finding a pattern that the feature agent should trace differently). In practice, this is rare — subagents are sufficient for nearly all snapshot generation tasks.
+
+If the calling command passes `--team`, respect that flag and launch agents as a team. Otherwise, use subagents.
+
+---
+
 ## Core Principles
 
 - **Read existing context first**: Always read PRDs, previous snapshots, and RFDs before exploring
@@ -97,7 +109,7 @@ find {project_root}/.claude/references -name "*.md" 2>/dev/null | sort
 
 **Actions**:
 
-1. Launch 4 code-explorer agents in parallel with different focuses:
+1. Launch 4 code-explorer agents in parallel (subagents by default) with different focuses:
 
    **Agent 1 - Architecture Overview**:
    ```

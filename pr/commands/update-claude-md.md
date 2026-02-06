@@ -147,6 +147,14 @@ Read the most recent RFDs to understand current work and decisions.
 ```markdown
 ## Development Principles
 
+### Multi-Agent Strategy
+
+When a task benefits from running multiple agents, choose the right approach:
+
+- **Subagents (default)**: Lightweight workers that report results back. Use for independent parallel tasks. Cheaper and sufficient for most work.
+- **Agent teams**: Independent sessions with inter-agent messaging. Use only when agents need to communicate or coordinate. Experimental, more expensive.
+- Commands that support agents accept `--subagents` or `--team` flags.
+
 ### Leveraging Available Tools
 
 Before starting any task, check what skills and MCP servers are available:
