@@ -126,7 +126,7 @@ For large frontend projects with multiple pages or complex component systems, mu
 - Parallel design audits (accessibility, performance, responsiveness checked independently)
 - Code-explorer agents analyzing existing UI patterns before building new components
 - Code-reviewer agents checking design quality, code quality, and performance simultaneously
-- Dispatching browser automation agents to test UI at different viewports
+- Dispatching Playwright agents to test UI at different viewports (if available)
 
 **Consider agent teams** for:
 - Multi-page applications where page-level agents need to coordinate shared design tokens, component APIs, and navigation patterns
@@ -282,7 +282,7 @@ Generate custom images, logos, icons, illustrations, and visual assets using the
 - "Design an app icon for my productivity tool" → Use generate-image-nb with `/icon`
 - "Make a flowchart showing the user auth flow" → Use generate-image-nb with `/diagram`
 
-### Browser Testing: `agent-browser`
+### Browser Testing: Playwright
 
 Automate browser interactions for testing, screenshots, form filling, and visual verification of your frontend work.
 
@@ -293,12 +293,12 @@ Automate browser interactions for testing, screenshots, form filling, and visual
 - Verifying responsive design at different viewports
 - Debugging layout or interaction issues
 
-**How to invoke**: Use the `agent-browser` skill. Core workflow: `open` → `snapshot -i` → interact using refs → re-snapshot.
+**How to install**: Install Playwright via Claude Code by running `/install-github-mcp playwright` or add the Playwright MCP server to your settings.
 
 **Example scenarios**:
-- "Test the login form I just built" → Use agent-browser to fill and submit the form
-- "Take screenshots at mobile and desktop sizes" → Use agent-browser with viewport changes
-- "Check if the button hover states work" → Use agent-browser to hover and capture
+- "Test the login form I just built" → Use Playwright to fill and submit the form
+- "Take screenshots at mobile and desktop sizes" → Use Playwright with viewport changes
+- "Check if the button hover states work" → Use Playwright to hover and capture
 
 ### Visual Feedback: `agentation`
 

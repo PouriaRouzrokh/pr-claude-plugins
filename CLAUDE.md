@@ -21,11 +21,11 @@ Claude Code plugin marketplace containing the **pr** plugin - a personal develop
 
 | Skill                           | Description                                        |
 | ------------------------------- | -------------------------------------------------- |
-| `agent-browser`                 | Browser automation for web testing and screenshots |
+| `agentation`                    | Add Agentation visual feedback toolbar to Next.js  |
 | `atlas-development`             | ATLAS framework for production-ready development   |
 | `create-prd`                    | Interactive PRD generation with web research       |
-| `create-snapshot`               | Technical codebase snapshot generation             |
 | `frontend-design`               | Production-grade frontend interfaces               |
+| `generate-image-nb`             | Generate and edit images via Gemini API            |
 | `writing-clearly-and-concisely` | Clear, direct prose following Strunk's principles  |
 
 ## Development Principles
@@ -97,7 +97,7 @@ When working with unfamiliar packages:
 
 For frontend development:
 
-- Check available skills for browser automation/testing capabilities
+- Use Playwright for browser automation and testing (install via Claude Code: `/install-github-mcp playwright`)
 - Take screenshots to verify visual changes
 - Test user flows and form interactions
 
@@ -132,11 +132,11 @@ pr-claude-plugins/
 │   ├── agents/                       # code-explorer, code-architect, code-reviewer
 │   ├── commands/                     # Slash commands (10 total)
 │   └── skills/                       # Skills with SKILL.md + references/
-│       ├── agent-browser/            # Browser automation
+│       ├── agentation/               # Visual feedback toolbar for Next.js
 │       ├── atlas-development/        # ATLAS development framework
 │       ├── create-prd/               # PRD generation
-│       ├── create-snapshot/          # Snapshot generation
 │       ├── frontend-design/          # UI development
+│       ├── generate-image-nb/        # Image generation via Gemini API
 │       └── writing-clearly-and-concisely/  # Writing quality
 ├── CLAUDE.md
 ├── commitlog.md

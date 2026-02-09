@@ -26,7 +26,6 @@ This plugin relies on external tools that should be installed before use. Some a
 
 | Tool | Type | Used By | Installation |
 |------|------|---------|--------------|
-| [agent-browser](https://github.com/vercel-labs/agent-browser) | NPX package | `agent-browser` skill, UI testing | `npx agent-browser` (auto-installs on first use) |
 | [Context7](https://github.com/upstash/context7) | MCP server | Package documentation lookup | Add to MCP settings, no API key needed |
 
 ### Optional
@@ -35,14 +34,15 @@ This plugin relies on external tools that should be installed before use. Some a
 |------|------|---------|--------------|
 | Gemini API | API | `generate-image-nb` skill | Requires `GEMINI_API_KEY` environment variable |
 | [Agentation](https://github.com/benjitaylor/agentation) | Next.js component | `agentation` skill | Installed per-project via skill |
+| [Playwright](https://github.com/anthropics/claude-code) | MCP server | UI testing, browser automation | Install via Claude Code (see below) |
 | Agent Teams | Claude Code feature | `--team` flag on supported commands | Enable in settings (see below) |
 
 ### Setup Notes
 
-- **agent-browser**: Runs headless Chrome for browser automation. First run downloads browser binaries.
 - **Context7**: Provides up-to-date documentation for any library. Add to your `.claude/settings.json` MCP servers.
 - **Gemini API**: The `generate-image-nb` skill uses the Gemini Nano Banana API for image generation. Get an API key from Google AI Studio.
 - **Agentation**: Adds visual feedback toolbar to Next.js projects. Installed automatically when skill is used.
+- **Playwright**: For browser automation and UI testing. Install via Claude Code by running `/install-github-mcp playwright` or add the Playwright MCP server to your settings. Playwright is used by commands and skills that need browser testing, if available.
 - **Agent Teams**: Several commands support running agents as a coordinated team (via Claude Code's experimental [agent teams](https://docs.anthropic.com/en/docs/claude-code/agent-teams) feature). This is optional — commands default to subagents. To enable agent teams, add to your `settings.json`:
   ```json
   {

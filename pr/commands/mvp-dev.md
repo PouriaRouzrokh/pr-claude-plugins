@@ -65,7 +65,7 @@ If `--team` is passed but the MVP is simple (few features, no complex integratio
 
 ## Core Principles
 
-- **Use available tools**: Check MCP servers and skills. Use frontend-design for UIs, browser automation for testing, Context7 for documentation.
+- **Use available tools**: Check MCP servers and skills. Use frontend-design for UIs, Playwright for browser testing (if available), Context7 for documentation.
 - **PRD is source of truth**: All features come from the PRD.
 - **Sequential development**: ONE feature at a time. Test, review, and approve before moving on. User can pause and resume.
 - **RFD-first**: Create the RFD before starting any feature. It tracks the entire lifecycle.
@@ -317,7 +317,7 @@ Both you AND the user must verify the feature works.
 **Actions**:
 
 1. **Your testing**:
-   - Use browser automation skills for UI, screenshots, behavior verification
+   - Use Playwright for UI testing, screenshots, behavior verification (if available)
    - Test API endpoints for backend features
    - Run existing test suites
    - Check off acceptance criteria in RFD

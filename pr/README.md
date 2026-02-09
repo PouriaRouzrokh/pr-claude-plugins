@@ -10,7 +10,6 @@ This plugin relies on external tools that should be installed before use. Some a
 
 | Tool | Type | Used By | Installation |
 |------|------|---------|--------------|
-| [agent-browser](https://github.com/vercel-labs/agent-browser) | NPX package | `agent-browser` skill, UI testing | `npx agent-browser` (auto-installs on first use) |
 | [Context7](https://github.com/upstash/context7) | MCP server | Package documentation lookup | Add to MCP settings, no API key needed |
 
 ### Optional
@@ -19,11 +18,12 @@ This plugin relies on external tools that should be installed before use. Some a
 |------|------|---------|--------------|
 | Gemini API | API | `generate-image-nb` skill | Requires `GEMINI_API_KEY` environment variable |
 | [Agentation](https://github.com/benjitaylor/agentation) | Next.js component | `agentation` skill | Installed per-project via skill |
+| [Playwright](https://github.com/anthropics/claude-code) | MCP server | UI testing, browser automation | Install via Claude Code: `/install-github-mcp playwright` |
 
 ### Setup Notes
 
-- **agent-browser**: Runs headless Chrome for browser automation. First run downloads browser binaries.
 - **Context7**: Provides up-to-date documentation for any library. Add to your `.claude/settings.json` MCP servers.
+- **Playwright**: For browser automation and UI testing. Install via Claude Code by running `/install-github-mcp playwright` or add the Playwright MCP server to your settings.
 - **Gemini API**: The `generate-image-nb` skill uses the Gemini Nano Banana API for image generation. Get an API key from Google AI Studio.
 - **Agentation**: Adds visual feedback toolbar to Next.js projects. Installed automatically when skill is used.
 
@@ -46,7 +46,6 @@ This plugin relies on external tools that should be installed before use. Some a
 
 | Skill | Description |
 |-------|-------------|
-| `agent-browser` | Browser automation for web testing, form filling, screenshots, and data extraction |
 | `agentation` | Add Agentation visual feedback toolbar to Next.js projects |
 | `atlas-development` | ATLAS framework for production-ready development (Architect, Trace, Link, Assemble, Stress-test) |
 | `create-prd` | Interactive PRD generation with web research |

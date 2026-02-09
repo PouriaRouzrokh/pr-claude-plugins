@@ -190,7 +190,7 @@ When working with unfamiliar packages:
 
 For frontend development:
 
-- Check available skills for browser automation/testing capabilities
+- Use Playwright for browser automation and testing, if available
 - Take screenshots to verify visual changes
 - Test user flows and form interactions
 

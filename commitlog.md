@@ -4,6 +4,17 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 2/8/2026 - (main)
+
+- **Refactor: Replace agent-browser with Playwright for browser testing**
+  - Deleted `agent-browser` skill entirely (SKILL.md, 5 references, 3 templates — 1,505 lines removed)
+  - Updated all commands and skills to reference Playwright instead of agent-browser
+  - Added Playwright as optional prerequisite in both READMEs with install instructions
+  - Fixed CLAUDE.md skills table: removed stale `create-snapshot`, added missing `agentation` and `generate-image-nb`
+  - Fixed CLAUDE.md repo structure to match actual skill directories
+
+---
+
 ### 2/6/2026 - 15:00 (main)
 
 - **Feature: Add multi-agent strategy (subagents vs agent teams) across plugin**
@@ -24,7 +35,7 @@ This file tracks significant commits and changes to the pr-claude-plugins market
     - Agent Teams added to optional prerequisites with setup instructions
   - Default: subagents. Agent teams only when inter-agent communication has clear benefit.
   - 5 commands skipped (no multi-agent value): commit-push, run-local, run-public, create-prd (wrapper), update-claude-md
-  - 3 skills skipped: agent-browser, agentation, generate-image-nb
+  - 3 skills skipped: agentation, generate-image-nb
 
 ---
 
@@ -91,7 +102,7 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 - **Feature: Add /pr:update-claude-md command (RFD-2)**
   - New command to update CLAUDE.md files with project state and development principles
   - Enforces required sections: Development Principles, Documentation Hierarchy
-  - Development Principles include: RFD workflow, Context7 MCP for docs, agent-browser for UI testing, testing requirements
+  - Development Principles include: RFD workflow, Context7 MCP for docs, Playwright for UI testing, testing requirements
   - Reads from existing checkpoints/snapshots (no agent exploration needed)
   - Target: keep CLAUDE.md under 200 lines to avoid context bloat
   - Removed CLAUDE.md handling from /pr:update-docs (Phase 5.5 removed)
@@ -102,18 +113,9 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ### 1/28/2026 (main)
 
-- **Add agent-browser skill from vercel-labs**
-  - Browser automation skill for web testing, form filling, screenshots, data extraction
-  - Includes references: authentication, proxy-support, session-management, snapshot-refs, video-recording
-  - Includes templates: form-automation.sh, authenticated-session.sh, capture-workflow.sh
-
----
-
-### 1/28/2026 (main)
-
 - **Add MCP tools and skills guidance to feature-dev and mvp-dev**
   - Added core principle to leverage available MCP tools and skills
-  - Examples: context7 for docs, vercel-labs/agent-skills for UI testing
+  - Examples: context7 for docs, Playwright for UI testing (if available)
   - Encourages proactive use of available integrations during development
 
 ---

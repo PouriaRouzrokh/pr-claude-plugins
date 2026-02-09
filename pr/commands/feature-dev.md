@@ -67,7 +67,7 @@ If `--team` is passed but the task is straightforward (small bug fix, single-fil
 
 ## Core Principles
 
-- **Use available tools**: Check what MCP servers and skills are available. Use frontend-design for UIs, browser automation for testing, Context7 for package documentation.
+- **Use available tools**: Check what MCP servers and skills are available. Use frontend-design for UIs, Playwright for browser testing (if available), Context7 for package documentation.
 - **Ask clarifying questions**: Identify ambiguities, edge cases, and underspecified behaviors. Ask specific questions early—after exploring the codebase, before designing.
 - **Understand before acting**: Read existing code patterns first.
 - **Read files from agents**: Ask agents to return 5-10 key files. Read those files before proceeding.
