@@ -29,7 +29,7 @@ This command implements the full **ATLAS** framework for building production-rea
 | **T** (Trace) | Phase 2-3 extracts features, designs architecture, maps integrations |
 | **L** (Link) | Phase 3 validates connections before building |
 | **A** (Assemble) | Phase 4 implements features with layered architecture |
-| **S** (Stress-test) | Phase 4.6 tests each feature before proceeding |
+| **S** (Stress-test) | Phase 4.6-4.7 proactively tests and professionalizes code before proceeding |
 
 **Key principle:** Never build before designing. Never skip connection validation. Never ship without testing.
 
@@ -77,6 +77,8 @@ If `--team` is passed but the MVP is simple (few features, no complex integratio
 - **Write clearly**: Use `writing-clearly-and-concisely` for RFDs. Active voice, omit needless words, avoid AI-isms.
 - **Use TodoWrite**: Track progress throughout.
 - **Validate before building**: Test all integrations and connections before writing feature code.
+- **Test proactively**: After implementing each feature, test your own work — run endpoints, execute functions, verify behavior. Clean up all test artifacts afterward.
+- **Professionalize code**: Before handoff, review all code for professional quality — no redundancies, proper commenting, clean structure, no debug leftovers.
 
 ---
 
@@ -209,7 +211,7 @@ Sequential process: complete, test, and approve each feature before starting the
 
 ---
 
-### For each feature, execute Steps 4.1 through 4.8:
+### For each feature, execute Steps 4.1 through 4.9:
 
 ---
 
@@ -310,42 +312,66 @@ Create the RFD first—it tracks the entire feature lifecycle.
 
 ---
 
-### 4.6: Testing & Verification
+### 4.6: Proactive Testing & Verification
 
-Both you AND the user must verify the feature works.
-
-**Actions**:
-
-1. **Your testing**:
-   - Use Playwright for UI testing, screenshots, behavior verification (if available)
-   - Test API endpoints for backend features
-   - Run existing test suites
-   - Check off acceptance criteria in RFD
-
-2. Launch 2 code-reviewer agents for bugs, quality, security (confidence >= 80)
-
-3. Fix issues found
-
-4. Update RFD with testing results
-
-5. Present to user: summary, how to test, screenshots. Ask for feedback.
-
-6. Wait for user feedback
-
----
-
-### 4.7: User Feedback & Iteration
+**CRITICAL**: Test your own work before asking the user to test. Do not hand off untested code.
 
 **Actions**:
 
-1. Address any issues or changes requested by user
-2. Re-test after making changes
-3. **Update RFD** → Document feedback received and changes made
-4. Repeat until user confirms they're satisfied with the feature
+1. **Self-testing** (do this yourself, proactively):
+   - **Backend**: Call API endpoints, invoke functions, run database queries — verify correct responses and data flow
+   - **Frontend**: Use Playwright for UI testing, screenshots, behavior verification (if available)
+   - **Logic**: Write and run quick validation scripts to confirm business logic works as expected
+   - **Integration**: Test that new code works correctly with existing features
+   - Run existing test suites and verify all pass
+
+2. **Clean up test artifacts**: After testing passes, remove all temporary test scripts, debug print statements, console.logs, temporary routes, hardcoded test data, and any code added solely for testing purposes. The codebase must contain zero testing residue.
+
+3. Launch 2 code-reviewer agents for bugs, quality, security (confidence >= 80)
+
+4. Fix issues found
+
+5. Check off acceptance criteria in RFD
+6. Update RFD with testing results (what was tested, what passed, what was fixed)
 
 ---
 
-### 4.8: Feature Completion & Checkpoint
+### 4.7: Code Professionalization
+
+**CRITICAL**: Before any user-facing handoff, review and professionalize all code written in this feature. The code must read as if written by a senior engineer.
+
+**Actions**:
+
+1. **Read every file you created or modified** in this feature — line by line
+2. **Check for and fix**:
+   - Redundant or duplicated code blocks — consolidate into shared functions where appropriate
+   - Dead code, unused imports, unused variables — remove completely
+   - Debug artifacts — remove all console.log, print statements, TODO/FIXME/HACK comments left from development
+   - Inconsistent naming — ensure variables, functions, and files follow the project's conventions
+   - Missing or excessive comments — add comments only where logic is non-obvious; remove obvious or redundant comments
+   - Overly complex logic — simplify where possible without changing behavior
+   - Inconsistent formatting — ensure consistent indentation, spacing, and style throughout
+   - Hardcoded values that should be constants or configuration
+   - Error messages that are vague or unhelpful
+3. **Verify the code reads cleanly**: A developer opening this file for the first time should find it well-organized, well-named, and easy to follow
+4. Update RFD with professionalization notes (what was cleaned up)
+
+---
+
+### 4.8: User Presentation & Feedback
+
+**Actions**:
+
+1. Present to user: summary of what was built, how to test, screenshots if available
+2. Wait for user testing and feedback
+3. Address any issues or changes requested by user
+4. Re-test and re-professionalize after making changes
+5. **Update RFD** → Document feedback received and changes made
+6. Repeat until user confirms they're satisfied with the feature
+
+---
+
+### 4.9: Feature Completion & Checkpoint
 
 **This is a formal checkpoint before moving to the next feature.**
 
@@ -423,9 +449,11 @@ When user runs /pr:mvp-dev on a project with existing RFDs:
 
 2. Address any integration issues found
 
-3. Run full test suite (if tests exist)
+3. **Final code professionalization**: Review the entire codebase for consistency across all features — naming conventions, code style, comment quality, and shared abstractions. Fix any cross-feature redundancies or inconsistencies that emerged during sequential development.
 
-4. Verify MVP meets PRD success criteria
+4. Run full test suite (if tests exist)
+
+5. Verify MVP meets PRD success criteria
 
 ---
 
@@ -529,14 +557,21 @@ Each feature RFD should follow this structure:
 
 ## Testing
 
-### Claude Testing
-- [ ] Tested with available testing skills
-- [ ] Screenshots/verification captured
-- [ ] All acceptance criteria verified
+### Proactive Self-Testing
+- [ ] Backend endpoints/functions tested directly
+- [ ] Frontend tested with Playwright/screenshots (if applicable)
+- [ ] Integration with existing features verified
+- [ ] Existing test suites pass
+- [ ] All test artifacts cleaned up (no debug code, temporary scripts, or test data remains)
 - {Test results and notes}
 
-### Code Review
+### Code Review & Professionalization
 - [ ] Code review agents run
+- [ ] All code read line-by-line for professional quality
+- [ ] No redundant code, dead code, or unused imports
+- [ ] Comments are appropriate (present where needed, absent where obvious)
+- [ ] Naming conventions consistent with project
+- [ ] Code reads cleanly — well-organized and easy to follow
 - {Issues found and fixed}
 
 ### User Testing
@@ -605,10 +640,12 @@ The RFD tracks the entire lifecycle: planning → implementation → testing →
 
 ### Testing Requirements
 Feature completion requires:
-1. Your testing with available skills
-2. Code review agents
-3. User testing and confirmation
-4. All acceptance criteria checked in RFD
+1. Proactive self-testing (run endpoints, execute functions, verify behavior)
+2. Cleanup of all test artifacts (temporary scripts, debug statements, test data)
+3. Code review agents
+4. Code professionalization (no redundancies, proper commenting, clean structure)
+5. User testing and confirmation
+6. All acceptance criteria checked in RFD
 
 ---
 

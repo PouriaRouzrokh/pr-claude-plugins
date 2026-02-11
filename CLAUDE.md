@@ -101,13 +101,16 @@ For frontend development:
 - Take screenshots to verify visual changes
 - Test user flows and form interactions
 
-### Testing Requirements
+### Testing & Code Quality Requirements
 
 Before handing off work:
 
-- Run all relevant tests
-- Verify changes work as expected
+- **Test proactively**: Run your own code — call endpoints, execute functions, verify behavior
+- Run all relevant test suites and verify they pass
 - Fix any failures or regressions
+- **Clean up test artifacts**: Remove all temporary scripts, debug statements, console.logs, and test data
+- **Professionalize code**: Review every file changed for professional quality — no redundancies, no dead code, proper commenting, consistent naming, clean structure
+- Code should read as if written by a senior engineer: well-organized, well-named, easy to follow
 
 ## Documentation Hierarchy
 

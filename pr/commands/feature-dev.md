@@ -30,7 +30,7 @@ This command applies **ATLAS** principles contextually based on task complexity:
 | **T** (Trace) | Phase 2-4 traces existing code, maps dependencies, clarifies requirements |
 | **L** (Link) | Phase 5 validates architecture fits existing patterns before building |
 | **A** (Assemble) | Phase 6 implements following chosen architecture |
-| **S** (Stress-test) | Phase 7 reviews and tests the feature |
+| **S** (Stress-test) | Phase 7-8 proactively tests and professionalizes code before handoff |
 
 **Key principle:** Match process depth to task complexity. A one-line fix doesn't need an RFD.
 
@@ -76,6 +76,8 @@ If `--team` is passed but the task is straightforward (small bug fix, single-fil
 - **Manage RFDs**: Create or update RFDs to track feature requests and implementation.
 - **Write clearly**: Use `writing-clearly-and-concisely` for RFDs. Active voice, omit needless words, avoid AI-isms (pivotal, crucial, leverage).
 - **Validate before building**: Confirm architecture and approach before writing code.
+- **Test proactively**: After implementing, test your own work — run endpoints, execute functions, verify behavior. Clean up all test artifacts afterward.
+- **Professionalize code**: Before handoff, review all code for professional quality — no redundancies, proper commenting, clean structure, no debug leftovers.
 
 ---
 
@@ -287,9 +289,33 @@ If the user says "use your judgment", provide your recommendation and get confir
 
 ---
 
-## Phase 7: Quality Review
+## Phase 7: Proactive Testing & Verification
 
-**Goal**: Verify code quality and correctness
+**Goal**: Test your own work before asking the user to review
+
+**CRITICAL**: Do not hand off untested code. Test everything yourself first.
+
+**Actions**:
+
+1. **Self-testing** (do this yourself, proactively):
+   - **Backend**: Call API endpoints, invoke functions, run database queries — verify correct responses and data flow
+   - **Frontend**: Use Playwright for UI testing, screenshots, behavior verification (if available)
+   - **Logic**: Write and run quick validation scripts to confirm business logic works as expected
+   - **Integration**: Test that new code works correctly with existing features
+   - Run existing test suites and verify all pass
+
+2. **Clean up test artifacts**: After testing passes, remove all temporary test scripts, debug print statements, console.logs, temporary routes, hardcoded test data, and any code added solely for testing purposes. The codebase must contain zero testing residue.
+
+3. Fix any issues found during testing
+4. Update RFD with testing results (what was tested, what passed, what was fixed)
+
+---
+
+## Phase 8: Code Professionalization
+
+**Goal**: Ensure all code is clean, professional, and ready for handoff
+
+**CRITICAL**: Before any user-facing handoff, review and professionalize all code. The code must read as if written by a senior engineer.
 
 **Actions**:
 
@@ -297,14 +323,28 @@ If the user says "use your judgment", provide your recommendation and get confir
 
    *With agent teams, reviewers can cross-reference each other's findings — e.g., a bug reviewer can flag that a DRY violation also creates a correctness risk. With subagents, you consolidate their findings yourself.*
 
-2. Consolidate findings and identify high-severity issues
-3. Present findings and ask user: fix now, fix later, or proceed?
-4. Address issues based on decision
-5. Update RFD with significant issues and resolutions
+2. **Read every file you created or modified** — line by line. Check for and fix:
+   - Redundant or duplicated code blocks — consolidate into shared functions where appropriate
+   - Dead code, unused imports, unused variables — remove completely
+   - Debug artifacts — remove all console.log, print statements, TODO/FIXME/HACK comments left from development
+   - Inconsistent naming — ensure variables, functions, and files follow the project's conventions
+   - Missing or excessive comments — add comments only where logic is non-obvious; remove obvious or redundant comments
+   - Overly complex logic — simplify where possible without changing behavior
+   - Inconsistent formatting — ensure consistent indentation, spacing, and style throughout
+   - Hardcoded values that should be constants or configuration
+   - Error messages that are vague or unhelpful
+
+3. Consolidate review agent findings and address high-severity issues
+
+4. **Verify the code reads cleanly**: A developer opening any changed file for the first time should find it well-organized, well-named, and easy to follow
+
+5. Present findings and ask user: fix now, fix later, or proceed?
+
+6. Update RFD with professionalization notes and significant issues resolved
 
 ---
 
-## Phase 8: Summary & RFD Finalization
+## Phase 9: Summary & RFD Finalization
 
 **Goal**: Document completion and finalize RFD
 
@@ -335,5 +375,6 @@ If the user says "use your judgment", provide your recommendation and get confir
 - After clarifying requirements (Phase 3)
 - After choosing architecture (Phase 5)
 - During implementation milestones (Phase 6)
-- After quality review (Phase 7)
-- At completion (Phase 8)
+- After proactive testing (Phase 7)
+- After code professionalization (Phase 8)
+- At completion (Phase 9)

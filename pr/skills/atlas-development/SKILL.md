@@ -218,6 +218,17 @@ Working application with:
 
 **Purpose:** Test before shipping. This is the step most "vibe coding" tutorials skip entirely.
 
+### Proactive Self-Testing
+
+Test your own work before anyone else sees it. Run the code yourself:
+
+- **Backend**: Call your API endpoints, invoke your functions, run database queries. Verify correct responses and data flow.
+- **Frontend**: Open the UI, click through flows, take screenshots. Use Playwright if available.
+- **Logic**: Write quick validation scripts to confirm business logic behaves correctly.
+- **Integration**: Verify new code works with existing features — don't assume, verify.
+
+After all tests pass, **clean up every test artifact**: remove temporary scripts, debug print statements, console.logs, hardcoded test data, temporary routes, and any code added solely for testing. The codebase must contain zero testing residue.
+
 ### Functional Testing
 
 Does it actually work?
@@ -262,12 +273,31 @@ Is this what was wanted?
 [ ] No major friction points
 ```
 
+### Code Professionalization
+
+Before handoff, review every file you changed. The code must read as if written by a senior engineer:
+
+```
+[ ] No redundant or duplicated code blocks
+[ ] No dead code, unused imports, or unused variables
+[ ] No debug artifacts (console.log, print, TODO/FIXME/HACK)
+[ ] Consistent naming following project conventions
+[ ] Comments present where logic is non-obvious, absent where obvious
+[ ] No overly complex logic that could be simplified
+[ ] Consistent formatting and style throughout
+[ ] No hardcoded values that should be constants or configuration
+[ ] Error messages are clear and helpful
+```
+
+This is not optional. Messy, careless code erodes trust. Every file should be clean, well-organized, and easy to follow.
+
 ### Output
 
 Test report with:
 - What passed
 - What failed
 - What needs fixing
+- What was cleaned up during professionalization
 
 ---
 
@@ -314,6 +344,7 @@ These are the mistakes that cause projects to fail:
 3. **No data modeling** — Schema changes cascade into UI rewrites
 4. **No testing** — Ship broken code, lose trust
 5. **Hardcoding everything** — No flexibility for changes
+6. **Shipping messy code** — Redundancies, debug leftovers, inconsistent naming, missing or excessive comments. Unprofessional code erodes trust even when it works
 
 ---
 

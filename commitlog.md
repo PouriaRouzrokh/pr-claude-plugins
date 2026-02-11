@@ -4,6 +4,19 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 2/10/2026 - (main)
+
+- **Feature: Add proactive testing and code professionalization to development commands**
+  - Updated `feature-dev` command: added Phase 7 (Proactive Testing & Verification) and Phase 8 (Code Professionalization), renumbered Phase 9 (Summary)
+  - Updated `mvp-dev` command: enhanced Step 4.6 (proactive self-testing), added Step 4.7 (Code Professionalization), added Step 4.8 (User Presentation & Feedback), renumbered Step 4.9 (Feature Completion)
+  - Updated `atlas-development` skill: added Proactive Self-Testing and Code Professionalization sections to Stress-test phase, added anti-pattern #6 (shipping messy code)
+  - Updated `CLAUDE.md`: enhanced Testing Requirements with proactive testing, artifact cleanup, and code professionalization
+  - Both commands now require: self-testing (run endpoints, execute functions), test artifact cleanup, line-by-line code review for professional quality before user handoff
+  - MVP command also adds final code professionalization step in Phase 5 (Integration) for cross-feature consistency
+  - Updated RFD template with expanded testing and professionalization checklists
+
+---
+
 ### 2/8/2026 - (main)
 
 - **Refactor: Replace agent-browser with Playwright for browser testing**
