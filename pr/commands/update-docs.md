@@ -193,22 +193,21 @@ If arguments are ambiguous, ask the user to clarify.
 
 ## Phase 6: Update Checkpoint Documents
 
-**Goal**: Maintain .claude/checkpoints/ documentation
+**Goal**: Update RFD documents to reflect current implementation state
 
 **Actions**:
-
-**snapshot.md**:
-- Update to reflect current codebase state
-- Note changes since last checkpoint
 
 **rfd/**:
 - Ensure RFD status reflects actual implementation state (Planning/In Progress/Completed)
 - Update progress logs for active features
 - Mark completed features appropriately
 
+**snapshot.md**:
+- **NEVER modify existing snapshots.** Snapshots are point-in-time records. Their purpose is to capture the codebase state at the moment they were created. Editing them defeats their purpose.
+- If the user needs a new snapshot, direct them to use `/pr:create-snapshot` instead.
+
 **prd.md**:
-- **Generally should NOT be modified** unless requirements have officially changed
-- Ask user before making any changes to PRD
+- **NEVER modify** unless requirements have officially changed and the user explicitly confirms
 
 ---
 
@@ -260,6 +259,7 @@ Summarize to user:
 - Create new documentation files unless explicitly requested
 - Delete documentation files
 - Change the documentation structure/organization without asking
+- **Edit any existing `snapshot.md` files** — snapshots are immutable point-in-time records. If a new snapshot is needed, direct the user to `/pr:create-snapshot`
 - Modify prd.md unless the user explicitly confirms requirements changed
 - Modify reference documents (.claude/references/) without user confirmation
 - Update documentation for code outside the specified scope (if scope was provided)

@@ -22,10 +22,11 @@ If the calling command passes `--team`, respect that flag and launch agents as a
 
 ## Core Principles
 
-- **Read existing context first**: Always read PRDs, previous snapshots, and RFDs before exploring
+- **NEVER edit prior snapshots**: Previous snapshots are immutable point-in-time records. Always create a NEW checkpoint with a new snapshot. Even if nothing has changed since the last checkpoint, create a fresh snapshot capturing the current state. Never go back to modify, update, or "fix" an earlier snapshot.
+- **Read existing context first**: Always read PRDs, previous snapshots, and RFDs before exploring — but only for context, never to edit them
 - **Use agents for depth**: Launch code-explorer agents to understand codebase deeply
 - **Be specific**: Use actual file paths, function names, and code references
-- **Track evolution**: Note how things have changed from previous checkpoints
+- **Track evolution**: Note how things have changed from previous checkpoints (in the NEW snapshot, not by editing old ones)
 - **Clarity over brevity**: Prioritize clear, thorough communication over keeping things concise. A snapshot should be comprehensive enough that any developer can fully understand the project without needing to ask questions. Avoid unnecessary summarization that loses important details.
 - **Capture the full picture**: Include UI/UX, design, aesthetics, and multimedia aspects—not just backend logic
 
@@ -296,3 +297,13 @@ Key sections to include:
   - Inside each folder: `rfd-{YYYY-MM-DD}-{HHMM}.md` with timestamp of creation
   - RFDs describe: user's feature request, implementation progress, current status
 - **references/**: Reference documents providing context but not directly part of development
+
+---
+
+## Safety Guidelines
+
+**DO NOT:**
+- Edit, modify, or overwrite any previous checkpoint's `snapshot.md` — they are immutable historical records
+- Edit `prd.md` or prior RFDs unless explicitly requested by the user
+- Skip creating a new checkpoint even if the codebase hasn't changed much since the last one — the point is to capture the state at this moment in time
+- Reuse an existing checkpoint number — always increment to the next available number
