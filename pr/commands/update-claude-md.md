@@ -68,7 +68,7 @@ find {project_root} -name "CLAUDE.md" -type f 2>/dev/null | sort
 
 ## Phase 3: Check Checkpoint Structure
 
-**Goal**: Verify what documentation exists to point to
+**Goal**: Verify what documentation exists to point to, and validate structural integrity
 
 **Actions**:
 
@@ -83,7 +83,12 @@ ls -d .claude/checkpoints/checkpoint-* 2>/dev/null | sort -V | tail -1
    - Snapshot at latest checkpoint
    - RFDs at latest checkpoint's `rfd/` folder
 
-3. Note the checkpoint structure for the Context Loading Instructions section
+3. **Validate sequential numbering**:
+   - Check that checkpoint folders are sequentially numbered (0, 1, 2, ...) with no gaps
+   - Check that RFD folders within each checkpoint are sequentially numbered with no gaps
+   - If gaps are found, note them in the report to the user (e.g., "Warning: checkpoint numbering has gaps — checkpoint-2 is missing between checkpoint-1 and checkpoint-3")
+
+4. Note the checkpoint structure for the Context Loading Instructions section
 
 **NOTE**: Do NOT read these documents in detail. You're only checking what exists so CLAUDE.md can point to them.
 

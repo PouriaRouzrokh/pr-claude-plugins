@@ -28,6 +28,7 @@ If the calling command passes `--team`, respect that flag and launch agents as a
 - **Be specific**: Use actual file paths, function names, and code references
 - **Track evolution**: Note how things have changed from previous checkpoints (in the NEW snapshot, not by editing old ones)
 - **Clarity over brevity**: Prioritize clear, thorough communication over keeping things concise. A snapshot should be comprehensive enough that any developer can fully understand the project without needing to ask questions. Avoid unnecessary summarization that loses important details.
+- **Do NOT over-summarize**: Every section should contain enough detail that a developer can understand the full picture without reading the source code. If a section needs 3 paragraphs, write 3 paragraphs. Brevity at the cost of completeness defeats the purpose of a snapshot. Include specific file paths, function names, configuration values, and architectural rationale.
 - **Capture the full picture**: Include UI/UX, design, aesthetics, and multimedia aspects—not just backend logic
 
 ---
@@ -45,6 +46,32 @@ If the calling command passes `--team`, respect that flag and launch agents as a
 
 ---
 
+## Phase 0.5: Existing Codebase Detection & Setup
+
+**Goal**: Detect whether this is an existing codebase being onboarded vs. a new project, and set up checkpoint structure accordingly
+
+**Actions**:
+
+1. **Detect project type** by checking for:
+   - Source files (`src/`, `lib/`, `app/`, `package.json`, `requirements.txt`, `Cargo.toml`, `go.mod`, `*.py`, `*.js`, `*.ts`, etc.)
+   - Existing checkpoint structure (`.claude/checkpoints/`)
+
+2. **If existing codebase WITHOUT checkpoint structure** (has source files but no `.claude/checkpoints/`):
+   - This is an existing codebase being onboarded to the checkpoint system
+   - Create `.claude/checkpoints/` directory
+   - Create `checkpoint-1` (NOT checkpoint-0 — checkpoint-0 is reserved for new projects that start with a PRD before any code exists)
+   - If no `CLAUDE.md` exists in the project root, suggest: "Consider running `/pr:update-claude-md` to set up a CLAUDE.md for this project"
+   - Proceed with snapshot generation in checkpoint-1
+
+3. **If existing codebase WITH checkpoint structure** (has both source files and `.claude/checkpoints/`):
+   - Proceed normally to Phase 1 (auto-increment checkpoint number)
+
+4. **If new/empty project** (no source files, no checkpoint structure):
+   - Suggest: "This appears to be a new project with no source code yet. Consider using `/pr:create-prd` first to set up checkpoint-0 with a Product Requirements Document."
+   - If user wants to proceed anyway, create checkpoint-1 and generate a minimal snapshot
+
+---
+
 ## Phase 1: Checkpoint Setup
 
 **Goal**: Determine checkpoint number and create directory
@@ -55,14 +82,17 @@ If the calling command passes `--team`, respect that flag and launch agents as a
 
 2. If it doesn't exist, create it and use `checkpoint-1`
 
-3. If it exists, count existing checkpoint folders and increment:
+3. If it exists, find the highest existing checkpoint number and increment by 1 (do NOT simply count directories — numbering may have gaps):
 
 ```bash
-CHECKPOINT_COUNT=$(find {project_root}/.claude/checkpoints -maxdepth 1 -type d -name "checkpoint-*" 2>/dev/null | wc -l)
-NEXT_CHECKPOINT=$((CHECKPOINT_COUNT + 1))
+# Find the highest checkpoint number, not just count directories
+HIGHEST=$(ls -d {project_root}/.claude/checkpoints/checkpoint-* 2>/dev/null | grep -oE 'checkpoint-[0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1)
+NEXT_CHECKPOINT=$((HIGHEST + 1))
 ```
 
-4. Create the new checkpoint directory: `.claude/checkpoints/checkpoint-{N}/`
+4. **Validate sequential numbering**: Check that existing checkpoints are sequentially numbered (0, 1, 2, ...) with no gaps. If gaps are found, warn the user before proceeding.
+
+5. Create the new checkpoint directory: `.claude/checkpoints/checkpoint-{N}/`
 
 ---
 

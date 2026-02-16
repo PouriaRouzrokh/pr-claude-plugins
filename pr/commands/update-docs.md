@@ -24,6 +24,7 @@ This command uses code-explorer agents for change analysis and gap detection. Pa
 - **Accuracy over completeness**: Only document what exists in code.
 - **Respect existing structure**: Don't reorganize without asking.
 - **Checkpoint awareness**: Maintain `.claude/checkpoints/` structure.
+- **Thoroughness over brevity**: When updating RFDs, write thorough descriptions. Include specific file paths, function names, architectural decisions, and rationale. A future session reading this RFD should understand exactly what happened without needing to re-explore the code. Do NOT over-summarize.
 
 ---
 
@@ -106,6 +107,28 @@ If arguments are ambiguous, ask the user to clarify.
    - Any `.md` files in the project
 
 6. **Note**: Track whether this is a global update (no path scope) or scoped update
+
+---
+
+## Phase 1.5: Checkpoint Structure Validation
+
+**Goal**: Verify checkpoint and RFD numbering integrity before exploring changes
+
+**Actions**:
+
+1. **Validate checkpoint sequential numbering**:
+   - List all checkpoint directories and extract their numbers
+   - Verify they are sequentially numbered (0, 1, 2, ...) with no gaps
+   - Example: checkpoint-0, checkpoint-1, checkpoint-3 → gap detected (missing checkpoint-2)
+
+2. **Validate RFD sequential numbering within each checkpoint**:
+   - For each checkpoint's `rfd/` folder, extract RFD folder numbers
+   - Verify they are sequentially numbered with no gaps
+
+3. **If gaps are found**:
+   - Warn the user: "Detected numbering gaps in checkpoint/RFD structure: [details]"
+   - Suggest renumbering before proceeding to avoid compounding the issue
+   - Wait for user acknowledgment before continuing
 
 ---
 
@@ -195,12 +218,26 @@ If arguments are ambiguous, ask the user to clarify.
 
 **Goal**: Update RFD documents to reflect current implementation state
 
+### CRITICAL: Complete Change Coverage
+
+Every recent change — from git history, new files, modified features, refactored code — **MUST** be documented in the appropriate RFD(s). If changes span multiple features, update multiple RFDs. No change should be left undocumented.
+
+**Why this matters**: RFDs are the system's long-term memory. Future sessions rely on them to understand what was built, why it was built that way, and which files were affected. Missing changes create knowledge gaps that compound over time — each undocumented change makes it harder for future sessions to reason about the codebase correctly.
+
+**When updating RFDs, be thorough**:
+- Include what changed and why it changed
+- List specific files that were affected
+- Document architectural decisions and their rationale
+- Note any trade-offs or alternatives considered
+- Do NOT over-summarize — details matter for future context. A future session reading this RFD should understand exactly what happened without needing to re-explore the code.
+
 **Actions**:
 
 **rfd/**:
 - Ensure RFD status reflects actual implementation state (Planning/In Progress/Completed)
 - Update progress logs for active features
 - Mark completed features appropriately
+- Verify ALL recent changes are covered — cross-reference git history against RFD content to find gaps
 
 **snapshot.md**:
 - **NEVER modify existing snapshots.** Snapshots are point-in-time records. Their purpose is to capture the codebase state at the moment they were created. Editing them defeats their purpose.

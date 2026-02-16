@@ -223,9 +223,16 @@ Create the RFD first—it tracks the entire feature lifecycle.
 
 1. Announce: "Starting Feature {N}: {Feature Name}"
 2. Re-read relevant PRD section
-3. Create RFD at `.claude/checkpoints/checkpoint-0/rfd/{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`
+3. Determine the next RFD number by finding the highest existing RFD number and adding 1 (do NOT simply count directories — numbering may have gaps):
+   ```bash
+   # Find highest RFD number in checkpoint-0
+   HIGHEST_RFD=$(ls -d .claude/checkpoints/checkpoint-0/rfd/*/ 2>/dev/null | grep -oE '/([0-9]+)-' | grep -oE '[0-9]+' | sort -n | tail -1)
+   NEXT_RFD=$((HIGHEST_RFD + 1))
+   ```
+   - Validate sequential numbering before creating; if gaps found, warn user
+4. Create RFD at `.claude/checkpoints/checkpoint-0/rfd/{NEXT_RFD}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`
    - Include: feature request, acceptance criteria (checkboxes), status: Planning
-4. Confirm RFD creation with user
+5. Confirm RFD creation with user
 
 ---
 
@@ -381,8 +388,10 @@ Create the RFD first—it tracks the entire feature lifecycle.
    - Update status: **Completed**
    - Verify all acceptance criteria are checked off
    - Add final progress log entry with completion summary
-   - List all files created/modified
+   - List all files created/modified with descriptions of what changed in each
+   - Verify ALL changes from this feature are documented — cross-reference git history and modified files against the RFD content. No change should be missing.
    - Document any technical debt or future improvements noted
+   - Be thorough: include architectural decisions, rationale, and specific details. Do not over-summarize.
 
 2. **Present completion summary to user**:
    ```
@@ -465,7 +474,7 @@ When user runs /pr:mvp-dev on a project with existing RFDs:
 
 1. Mark all todos complete
 
-2. Update all RFDs to Completed status
+2. Update all RFDs to Completed status. For each RFD, verify ALL changes from its feature are thoroughly documented — cross-reference git history and modified files against RFD content. No change should be missing. Include specific file paths, what changed, and why.
 
 3. Create MVP completion summary:
 

@@ -88,11 +88,12 @@ If `--team` is passed but the task is straightforward (small bug fix, single-fil
 **Actions**:
 
 1. Check if `.claude/checkpoints/` directory exists
-2. Find the latest checkpoint number:
+2. Find the latest checkpoint number by finding the highest existing number (not just counting directories — numbering may have gaps):
 
 ```bash
-CHECKPOINT_COUNT=$(find .claude/checkpoints -maxdepth 1 -type d -name "checkpoint-*" 2>/dev/null | wc -l)
-CURRENT_CHECKPOINT=$((CHECKPOINT_COUNT > 0 ? CHECKPOINT_COUNT - 1 : 0))
+# Find the highest checkpoint number, not just count directories
+HIGHEST=$(ls -d .claude/checkpoints/checkpoint-* 2>/dev/null | grep -oE 'checkpoint-[0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1)
+CURRENT_CHECKPOINT=${HIGHEST:-0}
 ```
 
 3. Read existing documentation to understand context:
@@ -173,16 +174,30 @@ If the user says "use your judgment", provide your recommendation and get confir
 
 **Actions**:
 
-1. Determine the RFD location:
+1. **Decide whether to CREATE or UPDATE an RFD**:
+   - **Create a new RFD** when: the change request is a distinct new feature, a major architectural change, or a significant scope addition that doesn't belong to any existing RFD
+   - **Update an existing RFD** when: the changes are refinements, bug fixes, or extensions of an already-tracked feature
+   - When in doubt, ask the user whether this warrants a new RFD or is an update to an existing one
+   - If a session involves multiple unrelated changes, create separate RFDs for each distinct change — do NOT lump unrelated work into one RFD
+
+2. Determine the RFD location:
    - Find the current/latest checkpoint number
    - If creating new RFD:
-     - Count existing RFDs to get next number: `find .claude/checkpoints -path "*/rfd/*" -maxdepth 3 -type d 2>/dev/null | wc -l`
+     - Find the highest existing RFD number in the current checkpoint and add 1 (do NOT simply count directories — numbering may have gaps):
+     ```bash
+     # Find highest RFD number in the current checkpoint
+     HIGHEST_RFD=$(ls -d .claude/checkpoints/checkpoint-{current}/rfd/*/ 2>/dev/null | grep -oE '/([0-9]+)-' | grep -oE '[0-9]+' | sort -n | tail -1)
+     NEXT_RFD=$((HIGHEST_RFD + 1))
+     ```
+     - Validate no gaps exist in RFD numbering; if gaps found, warn the user
      - Create folder: `.claude/checkpoints/checkpoint-{current}/rfd/{next-rfd-number}-{feature-slug}/`
      - Create file: `rfd-{YYYY-MM-DD}-{HHMM}.md`
    - If updating existing RFD:
      - Use the existing RFD path found in Phase 0
 
-2. Write/Update the RFD with this structure:
+3. **RFDs must be thorough**. Include all file changes, architectural decisions, and rationale. Future sessions depend on these documents for context. Do not condense to the point of losing detail — include specific file paths, function names, and the reasoning behind decisions.
+
+4. Write/Update the RFD with this structure:
 
 ```markdown
 # RFD-{N}: {Feature Name}
@@ -251,7 +266,7 @@ If the user says "use your judgment", provide your recommendation and get confir
 {Important decisions made and their rationale}
 ```
 
-3. Confirm RFD creation/update with user
+5. Confirm RFD creation/update with user
 
 ---
 
@@ -351,7 +366,7 @@ If the user says "use your judgment", provide your recommendation and get confir
 **Actions**:
 
 1. Mark all todos complete
-2. Finalize RFD: update status to "Completed", add completion summary, list files changed
+2. Finalize RFD: update status to "Completed", add completion summary, list all files changed with descriptions of what changed in each. Be thorough — the RFD is the permanent record of this work. Include architectural decisions, trade-offs considered, and rationale for choices made.
 3. Summarize to user: what was built, key decisions, files modified, RFD location, next steps
 
 ---
