@@ -60,7 +60,7 @@ If the calling command passes `--team`, respect that flag and launch agents as a
    - This is an existing codebase being onboarded to the checkpoint system
    - Create `.claude/checkpoints/` directory
    - Create `checkpoint-1` (NOT checkpoint-0 — checkpoint-0 is reserved for new projects that start with a PRD before any code exists)
-   - If no `CLAUDE.md` exists in the project root, suggest: "Consider running `/pr:update-claude-md` to set up a CLAUDE.md for this project"
+   - If no `CLAUDE.md` exists in the project root, suggest: "Consider running `/pr:handle-claude-md` to set up a CLAUDE.md for this project"
    - Proceed with snapshot generation in checkpoint-1
 
 3. **If existing codebase WITH checkpoint structure** (has both source files and `.claude/checkpoints/`):

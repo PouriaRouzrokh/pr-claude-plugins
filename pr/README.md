@@ -36,7 +36,7 @@ This plugin relies on external tools that should be installed before use. Some a
 | `/pr:commit-push [path] [--merge\|--pr]` | Commit changes, update commitlog.md, push to remote, optionally merge or create PR                     | No |
 | `/pr:clean-codebase [path] [--subagents\|--team]` | Clean and professionalize code using automated review to identify issues                            | Yes |
 | `/pr:update-docs [path] [focus] [--subagents\|--team]` | Update project documentation based on codebase changes                                          | Yes |
-| `/pr:update-claude-md [path]`            | Update CLAUDE.md files with current project state and development principles                           | No |
+| `/pr:handle-claude-md [path] [docs]`     | Initialize or update CLAUDE.md and project documentation structure                                     | No |
 | `/pr:run-local [instructions]`           | Start and run the application locally for development                                                  | No |
 | `/pr:run-public [instructions]`          | Deploy and run the application publicly                                                                | No |
 | `/pr:create-prd [ideas]`                 | Generate a Product Requirements Document through interactive discovery and research                    | No |
@@ -51,6 +51,7 @@ This plugin relies on external tools that should be installed before use. Some a
 | `create-prd` | Interactive PRD generation with web research |
 | `frontend-design` | Create distinctive, production-grade frontend interfaces with high design quality |
 | `generate-image-nb` | Generate and edit images via Gemini Nano Banana API |
+| `generate-svg` | Generate SVG graphics via Gemini Pro |
 | `writing-clearly-and-concisely` | Clear, direct prose following Strunk's principles |
 
 ## ATLAS Development Framework
@@ -180,7 +181,7 @@ This plugin uses a structured documentation approach in projects:
 
 - `/pr:clean-codebase` - Clean up code
 - `/pr:update-docs` - Update documentation
-- `/pr:update-claude-md` - Update CLAUDE.md files
+- `/pr:handle-claude-md` - Initialize or update CLAUDE.md and project structure
 - `/pr:create-snapshot` - Capture current state
 - `/pr:commit-push --pr` - Commit and create PR
 

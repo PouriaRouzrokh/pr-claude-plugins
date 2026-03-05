@@ -11,7 +11,7 @@ Claude Code plugin marketplace containing the **pr** plugin - a personal develop
 | `/pr:commit-push [path] [--merge\|--pr]` | Commit, push, merge/PR        |
 | `/pr:clean-codebase [path]`              | Code cleanup                  |
 | `/pr:update-docs [path]`                 | Update documentation          |
-| `/pr:update-claude-md [path]`            | Update CLAUDE.md files        |
+| `/pr:handle-claude-md [path]`            | Init or update CLAUDE.md      |
 | `/pr:create-prd [ideas]`                 | Generate PRD                  |
 | `/pr:create-snapshot [path]`             | Technical snapshot            |
 | `/pr:run-local`                          | Start local dev server        |
@@ -26,6 +26,7 @@ Claude Code plugin marketplace containing the **pr** plugin - a personal develop
 | `create-prd`                    | Interactive PRD generation with web research       |
 | `frontend-design`               | Production-grade frontend interfaces               |
 | `generate-image-nb`             | Generate and edit images via Gemini API            |
+| `generate-svg`                  | Generate SVG graphics via Gemini Pro               |
 | `writing-clearly-and-concisely` | Clear, direct prose following Strunk's principles  |
 
 ## Development Principles
@@ -140,6 +141,7 @@ pr-claude-plugins/
 │       ├── create-prd/               # PRD generation
 │       ├── frontend-design/          # UI development
 │       ├── generate-image-nb/        # Image generation via Gemini API
+│       ├── generate-svg/            # SVG generation via Gemini Pro
 │       └── writing-clearly-and-concisely/  # Writing quality
 ├── CLAUDE.md
 ├── commitlog.md

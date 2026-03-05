@@ -1,26 +1,32 @@
 #!/usr/bin/env node
 /**
- * Generate images using the Gemini Nano Banana API.
+ * Generate images using the Gemini Nano Banana 2 API.
  *
- * Usage:
- *   node generate_image.mjs "prompt" [options]
+ * Uses gemini-3.1-flash-image-preview (Nano Banana 2). All generation
+ * parameters can be controlled via a JSON prompt with a "config" key,
+ * or via CLI flags as fallbacks.
  *
- * Options:
+ * JSON prompt format (config is extracted, rest sent to model):
+ *   {
+ *     "task": "generate_image",
+ *     "subject": {"primary": "...", "details": "..."},
+ *     "style": {...}, "composition": {...}, "technical": {...},
+ *     "environment": {...}, "quality": {...},
+ *     "config": {
+ *       "output": "filename.png", "size": "4K",
+ *       "aspect_ratio": "16:9", "search": true, "edit": "input.jpg"
+ *     }
+ *   }
+ *
+ * CLI flags (fallbacks if not in JSON config):
  *   --output, -o    Output filename (default: generated_image.png)
- *   --model, -m     Model: flash (default) or pro
  *   --aspect, -a    Aspect ratio (1:1, 16:9, 9:16, etc.)
- *   --size, -s      Image size for pro model: 1K, 2K, 4K
+ *   --size, -s      Image size: 512, 1K, 2K, 4K
  *   --edit, -e      Path to input image for editing
- *   --search        Enable Google Search grounding (pro model only)
- *
- * Examples:
- *   node generate_image.mjs "A cat wearing a hat"
- *   node generate_image.mjs "A blog header" -a 16:9 -o header.png
- *   node generate_image.mjs "Add sunglasses" -e photo.jpg -o edited.png
- *   node generate_image.mjs "Current weather in NYC" -m pro --search
+ *   --search        Enable image search grounding
  *
  * Environment:
- *   GEMINI_API_KEY  Required. Your Gemini API key.
+ *   GEMINI_API_KEY  Required. Loaded from env, .env, or .claude/.env.
  *
  * Dependencies:
  *   npm install @google/genai
@@ -31,10 +37,33 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { parseArgs } from "node:util";
 
+const MODEL = "gemini-3.1-flash-image-preview";
+
+function loadEnvFile(filepath) {
+  try {
+    const content = fs.readFileSync(filepath, "utf-8");
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith("#") && trimmed.includes("=")) {
+        const idx = trimmed.indexOf("=");
+        const key = trimmed.slice(0, idx).trim();
+        const value = trimmed.slice(idx + 1).trim();
+        if (!process.env[key]) process.env[key] = value;
+      }
+    }
+  } catch {}
+}
+
+function loadApiKey() {
+  if (process.env.GEMINI_API_KEY) return;
+  loadEnvFile(path.join(process.cwd(), ".env"));
+  if (process.env.GEMINI_API_KEY) return;
+  loadEnvFile(path.join(process.cwd(), ".claude", ".env"));
+}
+
 function parseArguments() {
   const options = {
     output: { type: "string", short: "o", default: "generated_image.png" },
-    model: { type: "string", short: "m", default: "flash" },
     aspect: { type: "string", short: "a" },
     size: { type: "string", short: "s" },
     edit: { type: "string", short: "e" },
@@ -49,21 +78,15 @@ function parseArguments() {
 
   if (values.help || positionals.length === 0) {
     console.log(`
-Usage: node generate_image.mjs "prompt" [options]
+Usage: node generate_image.mjs "prompt_or_json" [options]
 
-Options:
+Options (fallbacks if not in JSON config):
   -o, --output   Output filename (default: generated_image.png)
-  -m, --model    Model: flash (default) or pro
   -a, --aspect   Aspect ratio (1:1, 16:9, 9:16, etc.)
-  -s, --size     Image size for pro model: 1K, 2K, 4K
+  -s, --size     Image size: 512, 1K, 2K, 4K
   -e, --edit     Path to input image for editing
-  --search       Enable Google Search grounding (pro model only)
+  --search       Enable image search grounding
   -h, --help     Show this help message
-
-Examples:
-  node generate_image.mjs "A cat wearing a hat"
-  node generate_image.mjs "A blog header" -a 16:9 -o header.png
-  node generate_image.mjs "Add sunglasses" -e photo.jpg -o edited.png
 `);
     process.exit(values.help ? 0 : 1);
   }
@@ -71,7 +94,6 @@ Examples:
   return {
     prompt: positionals[0],
     output: values.output,
-    model: values.model,
     aspect: values.aspect,
     size: values.size,
     edit: values.edit,
@@ -79,10 +101,18 @@ Examples:
   };
 }
 
-function getModelName(modelChoice) {
-  return modelChoice === "pro"
-    ? "gemini-3-pro-image-preview"
-    : "gemini-2.5-flash-image";
+function extractConfig(promptStr) {
+  try {
+    const data = JSON.parse(promptStr);
+    if (data && typeof data === "object" && "config" in data) {
+      const config = data.config;
+      delete data.config;
+      return { prompt: JSON.stringify(data), config };
+    }
+    return { prompt: promptStr, config: {} };
+  } catch {
+    return { prompt: promptStr, config: {} };
+  }
 }
 
 function getMimeType(filePath) {
@@ -107,55 +137,51 @@ function loadImage(filePath) {
   };
 }
 
-function buildConfig(args) {
-  const config = {
-    responseModalities: ["TEXT", "IMAGE"],
-  };
-
+function buildConfig(size, aspect, search) {
+  const config = { responseModalities: ["TEXT", "IMAGE"] };
   const imageConfig = {};
-  if (args.aspect) {
-    imageConfig.aspectRatio = args.aspect;
-  }
-  if (args.size && args.model === "pro") {
-    imageConfig.imageSize = args.size;
-  }
-
-  if (Object.keys(imageConfig).length > 0) {
-    config.imageConfig = imageConfig;
-  }
-
-  if (args.search && args.model === "pro") {
-    config.tools = [{ googleSearch: {} }];
-  }
-
+  if (aspect) imageConfig.aspectRatio = aspect;
+  if (size) imageConfig.imageSize = size;
+  if (Object.keys(imageConfig).length > 0) config.imageConfig = imageConfig;
+  if (search) config.tools = [{ imageSearch: {} }];
   return config;
 }
 
 async function generate(args) {
+  loadApiKey();
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error("Error: GEMINI_API_KEY environment variable not set.");
     process.exit(1);
   }
 
+  const { prompt: promptStr, config: jsonConfig } = extractConfig(args.prompt);
+
+  // JSON config overrides CLI flags
+  const output = jsonConfig.output || args.output;
+  const size = jsonConfig.size || args.size;
+  const aspect = jsonConfig.aspect_ratio || args.aspect;
+  const search = jsonConfig.search ?? args.search;
+  const edit = jsonConfig.edit || args.edit;
+
   const ai = new GoogleGenAI({ apiKey });
-  const modelName = getModelName(args.model);
 
   const contents = [];
-  if (args.edit) {
-    contents.push(loadImage(args.edit));
-  }
-  contents.push({ text: args.prompt });
+  if (edit) contents.push(loadImage(edit));
+  contents.push({ text: promptStr });
 
-  const config = buildConfig(args);
+  const config = buildConfig(size, aspect, search);
 
-  console.log(`Generating with ${modelName}...`);
+  console.log(`Generating with ${MODEL}...`);
+  if (size) console.log(`  Size: ${size}`);
+  if (aspect) console.log(`  Aspect ratio: ${aspect}`);
+  if (search) console.log(`  Image search: enabled`);
 
   try {
     const response = await ai.models.generateContent({
-      model: modelName,
-      contents: contents,
-      config: config,
+      model: MODEL,
+      contents,
+      config,
     });
 
     let saved = false;
@@ -164,8 +190,8 @@ async function generate(args) {
         console.log(part.text);
       } else if (part.inlineData) {
         const buffer = Buffer.from(part.inlineData.data, "base64");
-        fs.writeFileSync(args.output, buffer);
-        console.log(`Image saved: ${args.output}`);
+        fs.writeFileSync(output, buffer);
+        console.log(`Image saved: ${output}`);
         saved = true;
       }
     }

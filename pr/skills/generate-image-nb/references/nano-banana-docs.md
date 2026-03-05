@@ -3,10 +3,88 @@ Gemini can generate, edit, and process images conversationally
 with text, images, or a combination of both. This lets you create, edit, and
 iterate on visuals with unprecedented control.
 
-Nano Banana refers to two distinct models available in the Gemini API:
+Nano Banana refers to three models available in the Gemini API. **Nano Banana 2 is the recommended default.**
 
-- **Nano Banana** : The [Gemini 2.5 Flash Image](https://ai.google.dev/gemini-api/docs/models/gemini#gemini-2.5-flash-image) model (`gemini-2.5-flash-image`). This model is designed for speed and efficiency, optimized for high-volume, low-latency tasks.
-- **Nano Banana Pro** : The [Gemini 3 Pro Image Preview](https://ai.google.dev/gemini-api/docs/models/gemini#gemini-3-pro-image-preview) model (`gemini-3-pro-image-preview`). This model is designed for professional asset production, utilizing advanced reasoning ("Thinking") to follow complex instructions and render high-fidelity text.
+- **Nano Banana 2** (default): The [Gemini 3.1 Flash Image Preview](https://ai.google.dev/gemini-api/docs/models/gemini#gemini-3.1-flash-image-preview) model (`gemini-3.1-flash-image-preview`). Released Feb 2026. 2x faster and 50% cheaper than the original, supports 512px–4K resolution, up to 10 object references and 4 character references per prompt, and achieves ~95% of Pro quality. Uses `image_search` tool for real-time visual grounding.
+- **Nano Banana** (legacy): The [Gemini 2.5 Flash Image](https://ai.google.dev/gemini-api/docs/models/gemini#gemini-2.5-flash-image) model (`gemini-2.5-flash-image`). The original model, superseded by NB2.
+- **Nano Banana Pro**: The [Gemini 3 Pro Image Preview](https://ai.google.dev/gemini-api/docs/models/gemini#gemini-3-pro-image-preview) model (`gemini-3-pro-image-preview`). Designed for professional asset production, utilizing advanced reasoning ("Thinking") to follow complex instructions and render high-fidelity text.
+
+### Nano Banana 2 vs Original vs Pro
+
+| Feature | NB2 (`gemini-3.1-flash-image-preview`) | Flash (`gemini-2.5-flash-image`) | Pro (`gemini-3-pro-image-preview`) |
+|---------|-----|-------|-----|
+| Speed | 2x faster | Baseline | Slower |
+| Cost | ~$0.02/image | ~$0.04/image | Higher |
+| Resolution | 512px–4K | 1024px | Up to 4K |
+| Object refs | Up to 10 | Up to 3 | Up to 14 |
+| Character refs | Up to 4 | N/A | N/A |
+| Search tool | `image_search` | N/A | `google_search` |
+| Quality | ~95% of Pro | Good | Best |
+| Text rendering | Good | Basic | Best |
+
+## JSON-Structured Prompting
+
+For complex scenes with multiple elements, serializing the prompt as a JSON string improves generation quality by 60-80%. The JSON is passed as the text prompt via `json.dumps()` / `JSON.stringify()` — it is **not** used as `responseSchema`.
+
+### JSON Prompt Schema
+
+```json
+{
+  "task": "generate_image",
+  "subject": {
+    "primary": "main subject description",
+    "details": "specific details, attributes, or context"
+  },
+  "style": {
+    "primary": "photorealistic | illustration | watercolor | oil painting | etc.",
+    "rendering_quality": "4K | 2K | 1K"
+  },
+  "composition": {
+    "framing": "rule of thirds | centered | golden ratio | etc.",
+    "perspective": "wide-angle | close-up | bird's eye | isometric | etc."
+  },
+  "technical": {
+    "camera": {
+      "focal_length": "24mm | 50mm | 85mm | 135mm"
+    },
+    "lighting": "golden hour | studio | dramatic | natural | rim light"
+  },
+  "environment": {
+    "atmosphere": "misty | clear | moody | vibrant | ethereal"
+  },
+  "quality": {
+    "include": ["desired visual elements or qualities"],
+    "avoid": ["unwanted elements like text, people, watermarks"]
+  }
+}
+```
+
+### When to Use
+
+- **JSON**: Complex scenes (3+ elements), specific technical/camera requirements, multi-constraint compositions
+- **Plain text**: Simple single-subject requests, quick iterations, conversational editing
+
+### Example (Python)
+
+```python
+import json
+
+prompt = json.dumps({
+    "task": "generate_image",
+    "subject": {"primary": "mountain landscape", "details": "snow-capped peaks reflected in alpine lake"},
+    "style": {"primary": "photorealistic", "rendering_quality": "4K"},
+    "composition": {"framing": "rule of thirds", "perspective": "wide-angle panoramic"},
+    "technical": {"camera": {"focal_length": "24mm"}, "lighting": "golden hour"},
+    "environment": {"atmosphere": "crisp morning mist"},
+    "quality": {"include": ["sharp details", "natural colors", "mirror reflection"], "avoid": ["text", "people"]}
+})
+
+response = client.models.generate_content(
+    model="gemini-3.1-flash-image-preview",
+    contents=[prompt],
+    config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
+)
+```
 
 All generated images include a [SynthID watermark](https://ai.google.dev/responsible/docs/safeguards/synthid).
 

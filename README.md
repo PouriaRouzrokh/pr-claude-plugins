@@ -32,7 +32,7 @@ This plugin relies on external tools that should be installed before use. Some a
 
 | Tool | Type | Used By | Installation |
 |------|------|---------|--------------|
-| Gemini API | API | `generate-image-nb` skill | Requires `GEMINI_API_KEY` environment variable |
+| Gemini API | API | `generate-image-nb`, `generate-svg` skills | Requires `GEMINI_API_KEY` environment variable |
 | [Agentation](https://github.com/benjitaylor/agentation) | Next.js component | `agentation` skill | Installed per-project via skill |
 | [Playwright](https://github.com/anthropics/claude-code) | MCP server | UI testing, browser automation | Install via Claude Code (see below) |
 | Agent Teams | Claude Code feature | `--team` flag on supported commands | Enable in settings (see below) |

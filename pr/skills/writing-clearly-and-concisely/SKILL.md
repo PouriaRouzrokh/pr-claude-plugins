@@ -17,6 +17,7 @@ Use this skill whenever you write prose for humans:
 - Commit messages, pull request descriptions
 - Error messages, UI copy, help text, comments
 - Reports, summaries, or any explanation
+- RFDs, PRDs, CLAUDE.md files
 - Editing to improve clarity
 
 **If you're writing sentences for a human to read, use this skill.**
@@ -89,6 +90,16 @@ LLMs regress to statistical means, producing generic, puffy prose. Avoid:
 Be specific, not grandiose. Say what it actually does.
 
 For comprehensive research on why these patterns occur, see `signs-of-ai-writing.md`. Wikipedia editors developed this guide to detect AI-generated submissions — their patterns are well-documented and field-tested.
+
+## 5-Second Writing Checklist
+
+Before finalizing any prose, run through these five checks:
+
+1. **Active voice?** — Subject doing the action ("The server handles requests" not "Requests are handled by the server")
+2. **Can I cut words?** — Omit needless words ("because" not "due to the fact that")
+3. **Positive form?** — Say what IS, not what ISN'T ("ignore" not "do not consider")
+4. **Emphatic position?** — Important word at end of sentence ("The key factor is speed" not "Speed is the key factor to consider here")
+5. **AI-free?** — Would Wikipedia editors flag this? No puffery, no "delve", no "leverage"
 
 ## Bottom Line
 

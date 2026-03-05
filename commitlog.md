@@ -4,6 +4,28 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 3/5/2026 - (main)
+
+- **Feature: Add generate-svg skill and register in ecosystem**
+  - New `generate-svg` skill for SVG graphics generation via Gemini Pro (hero sections, icons, illustrations, logos, components)
+  - Registered in CLAUDE.md skills table, repo structure, pr/README.md skills table, and README.md prerequisites
+- **Feature: Rename update-claude-md to handle-claude-md with init capabilities**
+  - Renamed command from `update-claude-md` to `handle-claude-md`
+  - Now handles three project states: empty folders (creates CLAUDE.md, checkpoint structure, PRD placement), existing codebases without checkpoints (initializes structure + triggers snapshot), and fully initialized projects (updates CLAUDE.md)
+  - Accepts initial documentation as file path or inline text for new project setup
+  - Updated all cross-references in CLAUDE.md, pr/README.md, update-docs, create-snapshot
+- **Improve: Add cross-references between all skills**
+  - frontend-design: added raster vs vector decision table + generate-svg subsection in Related Skills + reference loading strategy
+  - generate-image-nb: added generate-svg cross-reference + 4 new troubleshooting rows (429, 400/SAFETY, 403, timeout)
+  - generate-svg: added Related Skills section (frontend-design, generate-image-nb)
+  - atlas-development: added skills-by-phase mapping table
+  - create-prd: extracted 234-line PRD template to `references/prd-template.md`, added writing-clearly-and-concisely cross-reference
+  - writing-clearly-and-concisely: added 5-Second Writing Checklist, added RFD/PRD/CLAUDE.md to triggers
+- **Improve: Update generate-image-nb for Nano Banana 2**
+  - Updated SKILL.md, scripts (Python + JS), and reference docs for NB2 model (gemini-3.1-flash-image-preview)
+
+---
+
 ### 2/10/2026 - (main)
 
 - **Feature: Add proactive testing and code professionalization to development commands**

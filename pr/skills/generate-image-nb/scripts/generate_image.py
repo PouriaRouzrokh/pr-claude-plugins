@@ -1,30 +1,47 @@
 #!/usr/bin/env python3
 """
-Generate images using the Gemini Nano Banana API.
+Generate images using the Gemini Nano Banana 2 API.
+
+Uses gemini-3.1-flash-image-preview (Nano Banana 2). All generation
+parameters can be controlled via a JSON prompt with a "config" key,
+or via CLI flags as fallbacks.
 
 Usage:
-    python generate_image.py "prompt" [options]
+    python generate_image.py "prompt_or_json" [options]
 
-Options:
+JSON prompt format (config is extracted, rest sent to model):
+    {
+      "task": "generate_image",
+      "subject": {"primary": "...", "details": "..."},
+      "style": {"primary": "...", "rendering_quality": "..."},
+      "composition": {...},
+      "technical": {...},
+      "environment": {...},
+      "quality": {"include": [...], "avoid": [...]},
+      "config": {
+        "output": "filename.png",
+        "size": "4K",
+        "aspect_ratio": "16:9",
+        "search": true,
+        "edit": "input.jpg"
+      }
+    }
+
+CLI flags (used as fallbacks if not in JSON config):
     --output, -o    Output filename (default: generated_image.png)
-    --model, -m     Model: flash (default) or pro
     --aspect, -a    Aspect ratio (1:1, 16:9, 9:16, etc.)
-    --size, -s      Image size for pro model: 1K, 2K, 4K
+    --size, -s      Image size: 512, 1K, 2K, 4K
     --edit, -e      Path to input image for editing
-    --search        Enable Google Search grounding (pro model only)
-
-Examples:
-    python generate_image.py "A cat wearing a hat"
-    python generate_image.py "A blog header" -a 16:9 -o header.png
-    python generate_image.py "Add sunglasses" -e photo.jpg -o edited.png
-    python generate_image.py "Current weather in NYC" -m pro --search
+    --search        Enable image search grounding
 
 Environment:
-    GEMINI_API_KEY  Required. Your Gemini API key.
+    GEMINI_API_KEY  Required. Loaded from env, .env, or .claude/.env.
 """
 
 import argparse
+import json
 import os
+import pathlib
 import sys
 
 try:
@@ -40,44 +57,65 @@ try:
 except ImportError:
     Image = None
 
+MODEL = "gemini-3.1-flash-image-preview"
+
+
+def load_env_file(filepath):
+    """Load KEY=VALUE pairs from an env file into os.environ."""
+    try:
+        for line in pathlib.Path(filepath).read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, _, value = line.partition("=")
+                os.environ.setdefault(key.strip(), value.strip())
+    except FileNotFoundError:
+        pass
+
+
+def load_api_key():
+    """Load GEMINI_API_KEY from env, then .env, then .claude/.env."""
+    if os.environ.get("GEMINI_API_KEY"):
+        return
+    load_env_file(os.path.join(os.getcwd(), ".env"))
+    if os.environ.get("GEMINI_API_KEY"):
+        return
+    load_env_file(os.path.join(os.getcwd(), ".claude", ".env"))
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Generate images with Gemini Nano Banana API"
+        description="Generate images with Gemini Nano Banana 2"
     )
-    parser.add_argument("prompt", help="Text prompt for image generation")
+    parser.add_argument("prompt", help="Text prompt or JSON prompt for image generation")
     parser.add_argument(
         "-o", "--output", default="generated_image.png", help="Output filename"
     )
     parser.add_argument(
-        "-m",
-        "--model",
-        choices=["flash", "pro"],
-        default="flash",
-        help="Model to use (flash=fast, pro=high-quality)",
-    )
-    parser.add_argument(
-        "-a",
-        "--aspect",
+        "-a", "--aspect",
         help="Aspect ratio (1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9)",
     )
     parser.add_argument(
-        "-s",
-        "--size",
-        choices=["1K", "2K", "4K"],
-        help="Image size (pro model only)",
+        "-s", "--size", choices=["512", "1K", "2K", "4K"],
+        help="Image size (512=preview, 1K=default, 2K, 4K)",
     )
     parser.add_argument("-e", "--edit", help="Input image path for editing")
     parser.add_argument(
-        "--search", action="store_true", help="Enable Google Search grounding"
+        "--search", action="store_true", help="Enable image search grounding"
     )
     return parser.parse_args()
 
 
-def get_model_name(model_choice):
-    if model_choice == "pro":
-        return "gemini-3-pro-image-preview"
-    return "gemini-2.5-flash-image"
+def extract_config(prompt_str):
+    """If prompt is JSON with a 'config' key, extract config and return (prompt_str, config).
+    Config values override CLI defaults. The config key is removed from the prompt sent to the model."""
+    try:
+        data = json.loads(prompt_str)
+        if isinstance(data, dict) and "config" in data:
+            config = data.pop("config")
+            return json.dumps(data), config
+        return prompt_str, {}
+    except (json.JSONDecodeError, TypeError):
+        return prompt_str, {}
 
 
 def load_image(path):
@@ -88,43 +126,60 @@ def load_image(path):
     return Image.open(path)
 
 
-def build_config(args):
+def build_config(size, aspect, search):
     config_kwargs = {"response_modalities": ["TEXT", "IMAGE"]}
 
     image_config_kwargs = {}
-    if args.aspect:
-        image_config_kwargs["aspect_ratio"] = args.aspect
-    if args.size and args.model == "pro":
-        image_config_kwargs["image_size"] = args.size
+    if aspect:
+        image_config_kwargs["aspect_ratio"] = aspect
+    if size:
+        image_config_kwargs["image_size"] = size
 
     if image_config_kwargs:
         config_kwargs["image_config"] = types.ImageConfig(**image_config_kwargs)
 
-    if args.search and args.model == "pro":
-        config_kwargs["tools"] = [{"google_search": {}}]
+    if search:
+        config_kwargs["tools"] = [{"image_search": {}}]
 
     return types.GenerateContentConfig(**config_kwargs)
 
 
 def generate(args):
+    load_api_key()
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         print("Error: GEMINI_API_KEY environment variable not set.")
         sys.exit(1)
 
+    # Extract config from JSON prompt if present
+    prompt_str, json_config = extract_config(args.prompt)
+
+    # JSON config overrides CLI flags
+    output = json_config.get("output", args.output)
+    size = json_config.get("size", args.size)
+    aspect = json_config.get("aspect_ratio", args.aspect)
+    search = json_config.get("search", args.search)
+    edit = json_config.get("edit", args.edit)
+
     client = genai.Client(api_key=api_key)
-    model_name = get_model_name(args.model)
 
     contents = []
-    if args.edit:
-        contents.append(load_image(args.edit))
-    contents.append(args.prompt)
+    if edit:
+        contents.append(load_image(edit))
+    contents.append(prompt_str)
 
-    config = build_config(args)
+    config = build_config(size, aspect, search)
 
-    print(f"Generating with {model_name}...")
+    print(f"Generating with {MODEL}...")
+    if size:
+        print(f"  Size: {size}")
+    if aspect:
+        print(f"  Aspect ratio: {aspect}")
+    if search:
+        print(f"  Image search: enabled")
+
     response = client.models.generate_content(
-        model=model_name, contents=contents, config=config
+        model=MODEL, contents=contents, config=config
     )
 
     saved = False
@@ -133,8 +188,8 @@ def generate(args):
             print(part.text)
         elif part.inline_data is not None:
             image = part.as_image()
-            image.save(args.output)
-            print(f"Image saved: {args.output}")
+            image.save(output)
+            print(f"Image saved: {output}")
             saved = True
 
     if not saved:

@@ -57,7 +57,7 @@ If arguments are ambiguous, ask the user to clarify.
 **Actions**:
 
 1. **Note about CLAUDE.md**:
-   - CLAUDE.md updates are handled by the `/pr:update-claude-md` skill
+   - CLAUDE.md updates are handled by the `/pr:handle-claude-md` command
    - This command focuses on project documentation (README, API docs, checkpoints, references)
 
 2. **Check standard locations**:
@@ -302,4 +302,4 @@ Summarize to user:
 - Update documentation for code outside the specified scope (if scope was provided)
 - Fabricate features - only document what actually exists in the code
 
-**NOTE**: This command focuses on standalone documentation files (markdown, etc.). For CLAUDE.md updates, use `/pr:update-claude-md`. Inline documentation within code files (JSDoc, TSDoc, docstrings) is handled by the `/pr:clean-codebase` command as part of code maintenance.
+**NOTE**: This command focuses on standalone documentation files (markdown, etc.). For CLAUDE.md updates, use `/pr:handle-claude-md`. Inline documentation within code files (JSDoc, TSDoc, docstrings) is handled by the `/pr:clean-codebase` command as part of code maintenance.

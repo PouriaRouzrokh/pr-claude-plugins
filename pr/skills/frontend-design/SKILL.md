@@ -149,7 +149,11 @@ Remember: Claude is capable of extraordinary creative work. Don't hold back—sh
 
 ## Reference Library
 
-This skill includes extensive reference documentation for specialized tasks. Use these references as needed throughout your design process.
+This skill includes extensive reference documentation for specialized tasks. Load references based on what you're doing:
+
+- **Page build**: Start with typography + color-and-contrast + spatial-design
+- **Polish pass**: Start with audit + polish
+- **Specialized work**: Load animate, harden, or extract only when needed
 
 ### Design Foundations
 These references provide core design knowledge. Consult them when building any frontend:
@@ -264,6 +268,15 @@ When building React or Next.js applications, apply these performance optimizatio
 
 These complementary skills extend frontend-design capabilities. Use them when you need specialized functionality beyond core design and implementation.
 
+### Raster vs Vector Decision
+
+| Need | Format | Skill |
+|------|--------|-------|
+| Photos, textures, backgrounds | Raster (PNG) | generate-image-nb |
+| Icons, logos, illustrations, hero graphics | Vector (SVG) | generate-svg |
+| Animated web elements | Vector (SVG) | generate-svg |
+| Diagrams, flowcharts | Either | generate-image-nb (complex) / generate-svg (simple) |
+
 ### Image Generation: `generate-image-nb`
 
 Generate custom images, logos, icons, illustrations, and visual assets using the Nano Banana model (via Gemini CLI).
@@ -281,6 +294,23 @@ Generate custom images, logos, icons, illustrations, and visual assets using the
 - "Create a hero image for my landing page" → Use generate-image-nb
 - "Design an app icon for my productivity tool" → Use generate-image-nb with `/icon`
 - "Make a flowchart showing the user auth flow" → Use generate-image-nb with `/diagram`
+
+### SVG Generation: `generate-svg`
+
+Generate production-quality SVG graphics — hero sections, icons, illustrations, logos, and UI components — using Gemini Pro as a text model.
+
+**When to use**:
+- Creating hero section illustrations with gradients and geometry
+- Generating icons, logos, or UI component graphics
+- Building animated web elements (loading spinners, transitions)
+- When you need scalable vector graphics that stay crisp at any size
+
+**How to invoke**: Use the `generate-svg` skill. It supports types: `hero`, `icon`, `illustration`, `logo`, `component`.
+
+**Example scenarios**:
+- "Create a hero illustration for my landing page" → Use generate-svg with `-t hero`
+- "Design a settings gear icon" → Use generate-svg with `-t icon`
+- "Make an animated loading spinner" → Use generate-svg with `-t component`
 
 ### Browser Testing: Playwright
 

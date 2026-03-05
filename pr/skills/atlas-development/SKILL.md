@@ -39,6 +39,14 @@ ATLAS is a thinking philosophy, not a checklist to follow blindly. Apply the ste
 | **A** | Assemble | Build with layered architecture |
 | **S** | Stress-test | Test functionality, error handling |
 
+### Skills by Phase
+
+| ATLAS Phase | Related Skills |
+|-------------|---------------|
+| Architect | `create-prd` |
+| Assemble | `frontend-design`, `generate-image-nb`, `generate-svg` |
+| Stress-test | `writing-clearly-and-concisely` (docs quality) |
+
 ---
 
 ## A — Architect
