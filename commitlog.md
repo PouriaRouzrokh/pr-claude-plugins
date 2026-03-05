@@ -6,6 +6,15 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ### 3/5/2026 - (main)
 
+- **Feature: Add /pr:generate-image and /pr:generate-svg commands**
+  - New slash commands that directly invoke the generate-image-nb and generate-svg skills
+  - Accept image/SVG descriptions as arguments
+  - Bumped version to 1.2.0
+
+---
+
+### 3/5/2026 - (main)
+
 - **Improve: Add ~/.claude/.env as API key fallback for Gemini skills**
   - Scripts now check: env var → `.env` → `.claude/.env` → `~/.claude/.env`
   - Updated all 4 scripts (Python + JS for generate-image-nb and generate-svg)

@@ -14,6 +14,8 @@ Claude Code plugin marketplace containing the **pr** plugin - a personal develop
 | `/pr:handle-claude-md [path]`            | Init or update CLAUDE.md      |
 | `/pr:create-prd [ideas]`                 | Generate PRD                  |
 | `/pr:create-snapshot [path]`             | Technical snapshot            |
+| `/pr:generate-image [desc]`              | Generate or edit images        |
+| `/pr:generate-svg [desc]`                | Generate SVG graphics          |
 | `/pr:run-local`                          | Start local dev server        |
 | `/pr:run-public`                         | Deploy publicly               |
 
@@ -134,7 +136,7 @@ pr-claude-plugins/
 ├── pr/                               # The pr plugin
 │   ├── .claude-plugin/plugin.json    # Plugin manifest
 │   ├── agents/                       # code-explorer, code-architect, code-reviewer
-│   ├── commands/                     # Slash commands (10 total)
+│   ├── commands/                     # Slash commands (12 total)
 │   └── skills/                       # Skills with SKILL.md + references/
 │       ├── agentation/               # Visual feedback toolbar for Next.js
 │       ├── atlas-development/        # ATLAS development framework

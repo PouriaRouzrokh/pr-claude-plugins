@@ -37,6 +37,8 @@ This plugin relies on external tools that should be installed before use. Some a
 | `/pr:clean-codebase [path] [--subagents\|--team]` | Clean and professionalize code using automated review to identify issues                            | Yes |
 | `/pr:update-docs [path] [focus] [--subagents\|--team]` | Update project documentation based on codebase changes                                          | Yes |
 | `/pr:handle-claude-md [path] [docs]`     | Initialize or update CLAUDE.md and project documentation structure                                     | No |
+| `/pr:generate-image [description]`       | Generate or edit images using Gemini Nano Banana 2 API                                                 | No |
+| `/pr:generate-svg [description]`         | Generate SVG graphics using Gemini Pro                                                                 | No |
 | `/pr:run-local [instructions]`           | Start and run the application locally for development                                                  | No |
 | `/pr:run-public [instructions]`          | Deploy and run the application publicly                                                                | No |
 | `/pr:create-prd [ideas]`                 | Generate a Product Requirements Document through interactive discovery and research                    | No |
@@ -187,7 +189,7 @@ This plugin uses a structured documentation approach in projects:
 
 ## Version
 
-1.1.0
+1.2.0
 
 ## Author
 
