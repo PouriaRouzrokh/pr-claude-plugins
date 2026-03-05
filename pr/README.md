@@ -187,7 +187,7 @@ This plugin uses a structured documentation approach in projects:
 
 ## Version
 
-1.0.0
+1.1.0
 
 ## Author
 
