@@ -6,6 +6,15 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ### 3/5/2026 - (main)
 
+- **Improve: Add ~/.claude/.env as API key fallback for Gemini skills**
+  - Scripts now check: env var → `.env` → `.claude/.env` → `~/.claude/.env`
+  - Updated all 4 scripts (Python + JS for generate-image-nb and generate-svg)
+  - Updated SKILL.md docs and README prerequisites with new lookup order
+
+---
+
+### 3/5/2026 - (main)
+
 - **Feature: Add generate-svg skill and register in ecosystem**
   - New `generate-svg` skill for SVG graphics generation via Gemini Pro (hero sections, icons, illustrations, logos, components)
   - Registered in CLAUDE.md skills table, repo structure, pr/README.md skills table, and README.md prerequisites

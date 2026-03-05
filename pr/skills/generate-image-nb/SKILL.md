@@ -72,7 +72,7 @@ Before generating images, verify the API key exists:
 [ -n "$GEMINI_API_KEY" ] && echo "API key configured" || echo "Missing GEMINI_API_KEY"
 ```
 
-The scripts automatically load `GEMINI_API_KEY` from: environment variable, then `.env` in the project root, then `.claude/.env`.
+The scripts automatically load `GEMINI_API_KEY` from: environment variable → `.env` in the project root → `.claude/.env` in the project root → `~/.claude/.env`. If none found, ask the user for their API key.
 
 Install dependencies based on the user's environment:
 
@@ -254,7 +254,7 @@ Write descriptive scenes, not keyword lists:
 
 | Problem | Solution |
 |---------|----------|
-| Missing API key | Set `GEMINI_API_KEY` in env, `.env`, or `.claude/.env` |
+| Missing API key | Set `GEMINI_API_KEY` in env, `.env`, `.claude/.env`, or `~/.claude/.env` |
 | Package not found | Run pip/npm install commands |
 | No image generated | Simplify prompt, check for policy violations |
 | Poor text rendering | Use detailed prompts with font/style specifications |

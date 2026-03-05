@@ -40,7 +40,7 @@ This plugin relies on external tools that should be installed before use. Some a
 ### Setup Notes
 
 - **Context7**: Provides up-to-date documentation for any library. Add to your `.claude/settings.json` MCP servers.
-- **Gemini API**: The `generate-image-nb` skill uses the Gemini Nano Banana API for image generation. Get an API key from Google AI Studio.
+- **Gemini API**: Used by `generate-image-nb` and `generate-svg` skills. Get an API key from Google AI Studio and set `GEMINI_API_KEY` in your environment, project `.env`, `.claude/.env`, or `~/.claude/.env`.
 - **Agentation**: Adds visual feedback toolbar to Next.js projects. Installed automatically when skill is used.
 - **Playwright**: For browser automation and UI testing. Install via Claude Code by running `/install-github-mcp playwright` or add the Playwright MCP server to your settings. Playwright is used by commands and skills that need browser testing, if available.
 - **Agent Teams**: Several commands support running agents as a coordinated team (via Claude Code's experimental [agent teams](https://docs.anthropic.com/en/docs/claude-code/agent-teams) feature). This is optional — commands default to subagents. To enable agent teams, add to your `settings.json`:

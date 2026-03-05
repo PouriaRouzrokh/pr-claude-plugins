@@ -32,7 +32,7 @@ CLI flags (fallbacks if not in JSON config):
     --optimize      Run svgo optimization on output
 
 Environment:
-    GEMINI_API_KEY  Required. Loaded from env, .env, or .claude/.env.
+    GEMINI_API_KEY  Required. Loaded from env, .env, .claude/.env, or ~/.claude/.env.
 """
 
 import argparse
@@ -65,13 +65,16 @@ def load_env_file(filepath):
 
 
 def load_api_key():
-    """Load GEMINI_API_KEY from env, then .env, then .claude/.env."""
+    """Load GEMINI_API_KEY from env, then .env, then .claude/.env, then ~/.claude/.env."""
     if os.environ.get("GEMINI_API_KEY"):
         return
     load_env_file(os.path.join(os.getcwd(), ".env"))
     if os.environ.get("GEMINI_API_KEY"):
         return
     load_env_file(os.path.join(os.getcwd(), ".claude", ".env"))
+    if os.environ.get("GEMINI_API_KEY"):
+        return
+    load_env_file(os.path.join(os.path.expanduser("~"), ".claude", ".env"))
 
 
 TYPE_DEFAULTS = {

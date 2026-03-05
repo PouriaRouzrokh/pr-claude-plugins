@@ -26,7 +26,7 @@
  *   --search        Enable image search grounding
  *
  * Environment:
- *   GEMINI_API_KEY  Required. Loaded from env, .env, or .claude/.env.
+ *   GEMINI_API_KEY  Required. Loaded from env, .env, .claude/.env, or ~/.claude/.env.
  *
  * Dependencies:
  *   npm install @google/genai
@@ -34,6 +34,7 @@
 
 import { GoogleGenAI } from "@google/genai";
 import * as fs from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 import { parseArgs } from "node:util";
 
@@ -59,6 +60,8 @@ function loadApiKey() {
   loadEnvFile(path.join(process.cwd(), ".env"));
   if (process.env.GEMINI_API_KEY) return;
   loadEnvFile(path.join(process.cwd(), ".claude", ".env"));
+  if (process.env.GEMINI_API_KEY) return;
+  loadEnvFile(path.join(os.homedir(), ".claude", ".env"));
 }
 
 function parseArguments() {

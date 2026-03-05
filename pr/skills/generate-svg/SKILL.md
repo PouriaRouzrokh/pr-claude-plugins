@@ -69,6 +69,8 @@ For simple requests (e.g., "gear icon"), a plain text prompt is acceptable — t
 
 ## Setup
 
+The scripts automatically load `GEMINI_API_KEY` from: environment variable → `.env` in the project root → `.claude/.env` in the project root → `~/.claude/.env`. If none found, ask the user for their API key.
+
 Verify the API key:
 
 ```bash
@@ -225,7 +227,7 @@ This reduces file size by 20-60% while preserving visual fidelity.
 
 | Problem | Solution |
 |---------|----------|
-| Missing API key | Set `GEMINI_API_KEY` environment variable |
+| Missing API key | Set `GEMINI_API_KEY` in env, `.env`, `.claude/.env`, or `~/.claude/.env` |
 | No SVG extracted | Model may have returned prose — retry with simpler prompt |
 | svgo not found | Install with `npm install -g svgo` |
 | Broken rendering | Check viewBox matches width/height dimensions |
