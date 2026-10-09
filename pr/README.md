@@ -49,7 +49,7 @@ Every skill can be run as `/pr:<name>`. Claude also loads most of them automatic
 | Skill | What it does |
 |-------|--------------|
 | `/pr:frontend-design` | Distinctive, production-grade UI: design process, craft floor, critique/audit/polish playbooks, Vercel's React rules, Tailwind v4 |
-| `/pr:generate-image [desc]` | Nano Banana 2.1 / Pro image generation and editing, with search grounding and conversational refinement |
+| `/pr:generate-image [desc]` | Image generation and editing with Nano Banana 2.1 / Pro (Google) or GPT Image 2.5 (OpenAI), routed by use case: transparency, masks, and variations via GPT; search grounding, references, and dense text via Nano Banana |
 | `/pr:generate-svg [desc]` | Gemini-written SVGs (hero, icon, illustration, logo, component), validated, sanitized, and previewed as PNG |
 | `/pr:generate-video [desc]` | Gemini Omni Flash clips: text-to-video, image-to-video, editing, and extension |
 | `/pr:agentation [mcp\|manual]` | Adds the Agentation annotation toolbar to a React app, optionally synced to Claude through MCP |
@@ -128,7 +128,7 @@ Several skills adapt open-source work; each skill folder's `NOTICE.md` has the d
 
 ## Version
 
-2.0.0
+2.1.0
 
 ## Author
 

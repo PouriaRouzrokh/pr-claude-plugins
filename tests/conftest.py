@@ -1,7 +1,7 @@
 """Shared test configuration for the plugin's Gemini scripts.
 
 Run from the repository root:
-    uv run --with pytest --with "google-genai>=2.3,<3" --with resvg-py pytest tests -q
+    uv run --with pytest --with "google-genai>=2.3,<3" --with "openai>=2,<4" --with resvg-py pytest tests -q
 The tests replace the Gemini client with fakes; no API key or network access is needed.
 """
 

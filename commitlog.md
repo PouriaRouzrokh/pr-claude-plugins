@@ -4,6 +4,16 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 10/9/2026 - 14:36 (main)
+
+- **Feature: GPT Image (ChatGPT image models) in generate-image** (RFD-4)
+  - `-m gpt` (GPT Image 2.5 Sunburst) and `-m gpt-fast` (Flare) alongside Nano Banana 2.1 and Pro, behind the same script and flags
+  - GPT-only capabilities: transparent backgrounds, masked edits, up to 10 variations, WebP, exact pixel sizes, quality up to `max`, token/cost reporting
+  - SKILL.md routing table picks the model by use case and recommends a bake-off for important assets
+  - Bumped to 2.1.0; 29 new offline tests (75 total)
+
+---
+
 ### 10/9/2026 - 13:54 (enhance/v2.0.0)
 
 - **Release: v2.0.0 modernization and audit** (RFD-3)

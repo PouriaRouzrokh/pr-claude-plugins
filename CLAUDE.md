@@ -14,7 +14,7 @@ All skills live in `pr/skills/<name>/SKILL.md` and run as `/pr:<name>`. There is
 | `clean-codebase`, `web-quality-audit` | Code cleanup; Lighthouse/axe audits |
 | `run-local`, `run-public`, `commit-push` | Run, deploy, commit (`run-public` and `commit-push` are user-invoked only) |
 | `frontend-design`, `agentation` | UI design playbooks and React rules; annotation toolbar |
-| `generate-image`, `generate-svg`, `generate-video` | Gemini API scripts (Nano Banana 2.1/Pro, Gemini 3.8 Flash, Omni Flash) |
+| `generate-image`, `generate-svg`, `generate-video` | Gemini/OpenAI API scripts (Nano Banana 2.1/Pro + GPT Image 2.5, Gemini 3.8 Flash, Omni Flash) |
 | `atlas-development`, `writing-clearly-and-concisely` | ATLAS reference; prose quality |
 
 ## Quick Commands
@@ -22,7 +22,7 @@ All skills live in `pr/skills/<name>/SKILL.md` and run as `/pr:<name>`. There is
 | Task | Command |
 |------|---------|
 | Validate plugin and marketplace | `claude plugin validate ./pr && claude plugin validate .` |
-| Test the Gemini scripts (offline, no API key) | `uv run --with pytest --with "google-genai>=2.3,<3" --with resvg-py pytest tests -q` |
+| Test the Gemini scripts (offline, no API key) | `uv run --with pytest --with "google-genai>=2.3,<3" --with "openai>=2,<4" --with resvg-py pytest tests -q` |
 | Try the working tree in Claude Code | `claude --plugin-dir ./pr` |
 
 ## Development Principles
@@ -160,7 +160,7 @@ license: "..."                    # vendored skills: upstream license + See NOTI
 
 **Agents** (`pr/agents/*.md`): read-only via `disallowedTools: Write, Edit, NotebookEdit`; they keep Bash for git and search, and inherit MCP tools such as Context7.
 
-**Gemini model IDs** live in each script's `MODELS` dict. Verify them against https://ai.google.dev/gemini-api/docs/models before changing; preview IDs get shut down.
+**Model IDs** live in each script's `MODELS` dict. Verify them against https://ai.google.dev/gemini-api/docs/models and https://developers.openai.com/api/docs/models (append `.md` for plain text) before changing; preview IDs get shut down.
 
 ## Agent Colors
 
