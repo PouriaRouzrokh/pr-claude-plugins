@@ -4,6 +4,25 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 10/9/2026 - 13:54 (enhance/v2.0.0)
+
+- **Release: v2.0.0 modernization and audit** (RFD-3)
+  - Migrated all 12 commands to skills and removed `pr/commands/`; deleted wrapper commands whose names shadowed their skills (`create-prd`, `create-snapshot`, `generate-svg`), which had kept the real skill instructions from loading
+  - Restored `create-snapshot`, accidentally nested inside `frontend-design/` since e704d9a
+  - Fixed agents: removed retired tool names, gave them Bash for git/search, made them read-only with `disallowedTools`
+- **Fix: Gemini skills moved to current models and APIs**
+  - `generate-image-nb` → `generate-image`: Nano Banana 2.1 by default (the preview models were shut down in June 2026), Interactions API, multi-turn `--continue` edits, per-model validation, no-overwrite output
+  - `generate-svg`: Gemini 3.8 Flash, XML validation with auto-repair, sanitization, edit mode, PNG previews
+  - Removed JS scripts (could not resolve `@google/genai` from the plugin cache); Python scripts declare PEP 723 deps for `uv run` and read prompts from stdin
+- **Feature: new skills**
+  - `generate-video` (Gemini Omni Flash), `systematic-debugging` and `test-driven-development` (adapted from obra/superpowers), `web-quality-audit` (Lighthouse + axe, adapted from addyosmani/web-quality-skills)
+- **Improve: refreshed vendored skills with license attribution**
+  - `frontend-design` rebuilt on Anthropic's current skill, impeccable v4.5.2, 70 Vercel React rules, and Tailwind v4; `agentation` updated to 3.1 with MCP setup; NOTICE.md files added for all vendored content
+  - `run-local`/`run-public`/`commit-push` fixed for non-persistent shells, safer production deploys, and session attribution
+- **Test: added `tests/` (46 offline pytest cases) and validated with `claude plugin validate` and a headless Claude Code smoke test**
+
+---
+
 ### 3/5/2026 - (main)
 
 - **Feature: Add /pr:generate-image and /pr:generate-svg commands**

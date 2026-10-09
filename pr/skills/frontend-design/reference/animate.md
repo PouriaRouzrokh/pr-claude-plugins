@@ -1,163 +1,152 @@
-# Animate Reference
+# Animate
 
-Analyze a feature and strategically add animations and micro-interactions that enhance understanding, provide feedback, and create delight.
+> **Additional context needed**: performance constraints.
 
-## Assess Animation Opportunities
+Use motion to explain state, relationship, and hierarchy, or to create one authored moment the surface has earned. Decoration without purpose is animation debt.
 
-Analyze where motion would improve the experience:
+---
 
-1. **Identify static areas**:
-   - **Missing feedback**: Actions without visual acknowledgment (button clicks, form submission, etc.)
-   - **Jarring transitions**: Instant state changes that feel abrupt (show/hide, page loads, route changes)
-   - **Unclear relationships**: Spatial or hierarchical relationships that aren't obvious
-   - **Lack of delight**: Functional but joyless interactions
-   - **Missed guidance**: Opportunities to direct attention or explain behavior
+## Contents
 
-2. **Understand the context**:
-   - What's the personality? (Playful vs serious, energetic vs calm)
-   - What's the performance budget? (Mobile-first? Complex page?)
-   - Who's the audience? (Motion-sensitive users? Power users who want speed?)
-   - What matters most? (One hero animation vs many micro-interactions?)
+- [Visitor mode](#visitor-mode)
+- [Find the job](#find-the-job)
+- [Set the motion thesis](#set-the-motion-thesis)
+- [Choose material by meaning](#choose-material-by-meaning)
+- [Timing and easing](#timing-and-easing)
+- [Implement to the runtime](#implement-to-the-runtime)
+- [Accessibility and control](#accessibility-and-control)
+- [Verify](#verify)
+- [Technical reference](#technical-reference)
 
-If any of these are unclear from the codebase, STOP and call the AskUserQuestionTool to clarify.
+## Visitor mode
 
-**CRITICAL**: Respect `prefers-reduced-motion`. Always provide non-animated alternatives for users who need them.
+- **Persuade + Experience:** motion may carry the voice. Prefer one rehearsed focal sequence to repeated section reveals.
+- **Operate + Read:** motion serves feedback, state, and continuity. Keep routine transitions fast and do not make users wait through page-load choreography.
 
-## Plan Animation Strategy
+## Find the job
 
-Create a purposeful animation plan:
+Inspect the existing motion language, interaction states, target devices, and performance budget. Find only the places where motion would:
 
-- **Hero moment**: What's the ONE signature animation? (Page load? Hero section? Key interaction?)
-- **Feedback layer**: Which interactions need acknowledgment?
-- **Transition layer**: Which state changes need smoothing?
-- **Delight layer**: Where can we surprise and delight?
+- acknowledge an action;
+- make a state change or spatial relationship legible;
+- preserve continuity through navigation or layout change;
+- direct attention at a meaningful moment;
+- embody the selected visual world.
 
-**IMPORTANT**: One well-orchestrated experience beats scattered animations everywhere. Focus on high-impact moments.
+Ask only when a material constraint cannot be inferred. Do not animate a static area merely because it exists.
 
-## Implement Animations
+## Set the motion thesis
 
-Add motion systematically across these categories:
+Write a short plan before implementation:
 
-### Entrance Animations
-- **Page load choreography**: Stagger element reveals (100-150ms delays), fade + slide combinations
-- **Hero section**: Dramatic entrance for primary content (scale, parallax, or creative effects)
-- **Content reveals**: Scroll-triggered animations using intersection observer
-- **Modal/drawer entry**: Smooth slide + fade, backdrop fade, focus management
+- **Focal moment:** the one sequence or interaction that deserves authorship, if any.
+- **Continuity:** the state, layout, or navigation changes that need explanation.
+- **Feedback:** the controls and outcomes that need acknowledgment.
+- **Budget:** which effects may be expensive and how often they run.
 
-### Micro-interactions
-- **Button feedback**:
-  - Hover: Subtle scale (1.02-1.05), color shift, shadow increase
-  - Click: Quick scale down then up (0.95 → 1), ripple effect
-  - Loading: Spinner or pulse state
-- **Form interactions**:
-  - Input focus: Border color transition, slight scale or glow
-  - Validation: Shake on error, check mark on success, smooth color transitions
-- **Toggle switches**: Smooth slide + color transition (200-300ms)
-- **Checkboxes/radio**: Check mark animation, ripple effect
-- **Like/favorite**: Scale + rotation, particle effects, color transition
+The focal moment must come from this product and surface concept. A generic fade-and-rise, hover lift, parallax layer, or scroll reveal is not a thesis.
 
-### State Transitions
-- **Show/hide**: Fade + slide (not instant), appropriate timing (200-300ms)
-- **Expand/collapse**: Height transition with overflow handling, icon rotation
-- **Loading states**: Skeleton screen fades, spinner animations, progress bars
-- **Success/error**: Color transitions, icon animations, gentle scale pulse
-- **Enable/disable**: Opacity transitions, cursor changes
+## Choose material by meaning
 
-### Navigation & Flow
-- **Page transitions**: Crossfade between routes, shared element transitions
-- **Tab switching**: Slide indicator, content fade/slide
-- **Carousel/slider**: Smooth transforms, snap points, momentum
-- **Scroll effects**: Parallax layers, sticky headers with state changes, scroll progress indicators
+Transform and opacity are reliable foundations, not the entire palette. Choose properties for what the transition communicates:
 
-### Feedback & Guidance
-- **Hover hints**: Tooltip fade-ins, cursor changes, element highlights
-- **Drag & drop**: Lift effect (shadow + scale), drop zone highlights, smooth repositioning
-- **Copy/paste**: Brief highlight flash on paste, "copied" confirmation
-- **Focus flow**: Highlight path through form or workflow
+- **Continuity and relationship:** shared-element motion, FLIP-style transforms, view transitions, or deliberate spatial movement.
+- **Focus and depth:** bounded blur, filter, backdrop, light, or shadow changes.
+- **Reveal and composition:** masks, clip paths, cropping, or controlled occlusion.
+- **Material and energy:** color, gradient position, texture, distortion, or shader effects when the world and runtime support them.
+- **State and feedback:** the smallest change that makes cause and result unmistakable.
 
-### Delight Moments
-- **Empty states**: Subtle floating animations on illustrations
-- **Completed actions**: Confetti, check mark flourish, success celebrations
-- **Easter eggs**: Hidden interactions for discovery
-- **Contextual animation**: Weather effects, time-of-day themes, seasonal touches
+Do not stack techniques for spectacle. One strong material idea, carried through the focal sequence and quiet supporting states, is usually enough.
 
-## Technical Implementation
+Sibling stagger is appropriate when a list appears as a list. Cap the total delay, and never reinterpret every scrolled section as a staggered list.
 
-Use appropriate techniques for each animation:
+## Timing and easing
 
-### Timing & Easing
+Timing should express distance and consequence:
 
-**Durations by purpose:**
-- **100-150ms**: Instant feedback (button press, toggle)
-- **200-300ms**: State changes (hover, menu open)
-- **300-500ms**: Layout changes (accordion, modal)
-- **500-800ms**: Entrance animations (page load)
+| Duration | Typical use |
+|---|---|
+| 100–150 ms | immediate feedback |
+| 150–300 ms | routine state change |
+| 300–500 ms | layout, overlay, or view transition |
+| 500–800 ms | a deliberately authored focal entrance |
 
-**Easing curves (use these, not CSS defaults):**
+Exit faster than entrance. Use natural deceleration such as `cubic-bezier(0.16, 1, 0.3, 1)` for confident arrivals; do not use bounce or elastic curves by reflex. Long feedback feels like latency.
+
+## Implement to the runtime
+
+- Use CSS transitions and keyframes for declarative state and bounded sequences.
+- Use Web Animations API or the project's existing motion library for interruption, sequencing, and dynamic values.
+- Use View Transitions or shared-element techniques when continuity across states is the point.
+- Use scroll-driven motion only when the scroll relationship itself carries meaning, with a robust fallback.
+- Do not add a dependency for an effect the existing stack can express cleanly.
+
+Keep content visible in the default state so failed scripts do not hide the page. Avoid casually animating layout-driving properties such as `width`, `height`, `top`, `left`, and margins; use FLIP, transforms, or grid techniques when appropriate. Bound blur, filter, shadow, canvas, and shader work to isolated regions. Apply `will-change` only during known animation. Measure on target viewports and devices rather than assuming transform means fast.
+
+## Accessibility and control
+
+Respect autoplay and sound preferences. Any nonessential loop must stop when offscreen or hidden.
+
+Every web animation needs a `prefers-reduced-motion` path with an intentional alternative. Remove or reduce spatial movement while preserving opacity, color, and state transitions that carry meaning. Reduced motion means fewer and gentler animations, not disabling all motion; feedback that confirms an action should remain legible.
+
+## Verify
+
+- The focal motion is specific to the selected world and surface.
+- Every supporting animation explains feedback, state, or relationship.
+- Interruption and repeated use behave correctly.
+- Desktop, mobile, and keyboard paths remain usable.
+- The `prefers-reduced-motion` path reduces movement without erasing meaningful feedback or state changes.
+- Expensive effects stay smooth on the target device.
+- Removing an animation would lose meaning or authored character, not merely decoration.
+
+When motion earns its place, finish with a polish pass ([polish.md](polish.md)).
+
+## Technical reference
+
+Concrete values and patterns for applying the guidance above.
+
+### Easing curves
+
+Avoid the default `ease`; pick a curve for the job:
+
+| Curve | Use | CSS |
+|-------|-----|-----|
+| ease-out | Elements entering | `cubic-bezier(0.16, 1, 0.3, 1)` |
+| ease-in | Elements leaving | `cubic-bezier(0.7, 0, 0.84, 0)` |
+| ease-in-out | State toggles that return | `cubic-bezier(0.65, 0, 0.35, 1)` |
+
 ```css
-/* Recommended - natural deceleration */
---ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);    /* Smooth, refined */
---ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);   /* Slightly snappier */
---ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);     /* Confident, decisive */
-
-/* AVOID - feel dated and tacky */
-/* bounce: cubic-bezier(0.34, 1.56, 0.64, 1); */
-/* elastic: cubic-bezier(0.68, -0.6, 0.32, 1.6); */
+--ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);  /* smooth, refined default */
+--ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1); /* slightly more dramatic */
+--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);   /* snappy, confident */
 ```
 
-**Exit animations are faster than entrances.** Use ~75% of enter duration.
+Exit durations run about 75% of the matching entrance. Define durations and easings as motion tokens.
 
-### CSS Animations
+### Common patterns
+
+- **Height reveals:** transition `grid-template-rows` from `0fr` to `1fr` instead of animating `height`.
+- **List stagger:** `animation-delay: calc(var(--i, 0) * 50ms)` with `style="--i: 0"` on each item. Cap the total: ten items at 50ms is already 500ms.
+- **Scroll-triggered reveals:** use `IntersectionObserver` rather than scroll listeners, and unobserve after the first run.
+- **`will-change`:** set it only while an animation is imminent (`:hover`, an `.animating` class), never at rest.
+
+### Reduced motion
+
+Replace spatial movement with a gentler alternative rather than killing all motion:
+
 ```css
-/* Prefer for simple, declarative animations */
-- transitions for state changes
-- @keyframes for complex sequences
-- transform + opacity only (GPU-accelerated)
-```
+.card { animation: slide-up 500ms var(--ease-out-quart); }
 
-### JavaScript Animation
-```javascript
-/* Use for complex, interactive animations */
-- Web Animations API for programmatic control
-- Framer Motion for React
-- GSAP for complex sequences
-```
-
-### Performance
-- **GPU acceleration**: Use `transform` and `opacity`, avoid layout properties
-- **will-change**: Add sparingly for known expensive animations
-- **Reduce paint**: Minimize repaints, use `contain` where appropriate
-- **Monitor FPS**: Ensure 60fps on target devices
-
-### Accessibility
-```css
 @media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  .card { animation: fade-in 200ms ease-out; }
 }
 ```
 
-**NEVER**:
-- Use bounce or elastic easing curves—they feel dated and draw attention to the animation itself
-- Animate layout properties (width, height, top, left)—use transform instead
-- Use durations over 500ms for feedback—it feels laggy
-- Animate without purpose—every animation needs a reason
-- Ignore `prefers-reduced-motion`—this is an accessibility violation
-- Animate everything—animation fatigue makes interfaces feel exhausting
-- Block interaction during animations unless intentional
+Progress bars, loading indicators (slowed), and focus indicators keep working without spatial movement.
 
-## Verify Quality
+### Perceived performance
 
-Test animations thoroughly:
-
-- **Smooth at 60fps**: No jank on target devices
-- **Feels natural**: Easing curves feel organic, not robotic
-- **Appropriate timing**: Not too fast (jarring) or too slow (laggy)
-- **Reduced motion works**: Animations disabled or simplified appropriately
-- **Doesn't block**: Users can interact during/after animations
-- **Adds value**: Makes interface clearer or more delightful
-
-Remember: Motion should enhance understanding and provide feedback, not just add decoration. Animate with purpose, respect performance constraints, and always consider accessibility. Great animation is invisible - it just makes everything feel right.
+- Responses under about 80ms feel instant; that is the target for micro-interactions.
+- Start transitions immediately while work continues (skeletons, progressive images, streamed content); passive waiting feels longer than visible progress.
+- Use optimistic updates for low-stakes actions (likes, follows), never for payments or destructive operations.
+- Very fast results can feel untrustworthy for complex operations (search, analysis); a brief, honest progress state can signal real work.

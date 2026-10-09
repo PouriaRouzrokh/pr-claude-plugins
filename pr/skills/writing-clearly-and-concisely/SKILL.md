@@ -1,6 +1,7 @@
 ---
 name: writing-clearly-and-concisely
-description: Use when writing prose humans will read—documentation, commit messages, error messages, explanations, reports, or UI text. Applies Strunk's timeless rules for clearer, stronger, more professional writing.
+description: Applies Strunk's rules (active voice, positive form, concrete language, omit needless words) and a catalog of AI-writing tells to make prose clear and direct. Use when writing or editing prose humans will read - documentation, READMEs, RFDs, PRDs, CLAUDE.md, commit messages, PR descriptions, error messages, UI copy, reports, and explanations.
+license: MIT (softaworks/agent-toolkit); Strunk text public domain; signs-of-ai-writing.md CC BY-SA 4.0. See NOTICE.md.
 ---
 
 # Writing Clearly and Concisely
@@ -70,12 +71,12 @@ The rules above are summarized from Strunk's original text. For complete explana
 
 | Section | File | ~Tokens |
 |---------|------|---------|
-| Grammar, punctuation, comma rules | `02-elementary-rules-of-usage.md` | 2,500 |
-| Paragraph structure, active voice, concision | `03-elementary-principles-of-composition.md` | 4,500 |
-| Headings, quotations, formatting | `04-a-few-matters-of-form.md` | 1,000 |
-| Word choice, common errors | `05-words-and-expressions-commonly-misused.md` | 4,000 |
+| Grammar, punctuation, comma rules | `elements-of-style/02-elementary-rules-of-usage.md` | 2,500 |
+| Paragraph structure, active voice, concision | `elements-of-style/03-elementary-principles-of-composition.md` | 4,500 |
+| Headings, quotations, formatting | `elements-of-style/04-a-few-matters-of-form.md` | 1,000 |
+| Word choice, common errors | `elements-of-style/05-words-and-expressions-commonly-misused.md` | 4,000 |
 
-**Most tasks need only `03-elementary-principles-of-composition.md`** — it covers active voice, positive form, concrete language, and omitting needless words.
+**Most tasks need only `elements-of-style/03-elementary-principles-of-composition.md`** — it covers active voice, positive form, concrete language, and omitting needless words.
 
 ## AI Writing Patterns to Avoid
 
@@ -103,4 +104,4 @@ Before finalizing any prose, run through these five checks:
 
 ## Bottom Line
 
-Writing for humans? Load the relevant section from `elements-of-style/` and apply the rules. For most tasks, `03-elementary-principles-of-composition.md` covers what matters most.
+Writing for humans? Load the relevant section from `elements-of-style/` and apply the rules. For most tasks, `elements-of-style/03-elementary-principles-of-composition.md` covers what matters most. To rewrite an existing draft that reads as machine-written, the `humanizer` skill (if installed) applies the same Wikipedia catalog as an editing pass.

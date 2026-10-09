@@ -3,3 +3,5 @@
 .claude/.env
 claude-code-docs/
 skill-zips/
+__pycache__/
+.pytest_cache/

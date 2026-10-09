@@ -1,346 +1,270 @@
 ---
 name: frontend-design
-description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications. Generates creative, polished code that avoids generic AI aesthetics.
-license: Apache 2.0. Based on Anthropic's frontend-design skill. See NOTICE.md for attribution.
+description: Creates distinctive, production-grade frontend interfaces with intentional visual design, choosing aesthetic direction, typography, color, layout, motion, and interface copy that avoid templated AI defaults. Use when building or redesigning web components, pages, landing pages, dashboards, artifacts, posters, or applications; when critiquing, auditing, or polishing an existing UI for hierarchy, accessibility, responsiveness, or performance; or when writing React, Next.js, or Tailwind CSS v4 frontend code. Includes reference playbooks for critique, audit, polish, layout, type, color, animation, UX writing, hardening, onboarding, and design-system extraction, plus Vercel's React and Next.js performance rules.
+license: Apache-2.0 (Anthropic frontend-design, impeccable); MIT (Vercel react-best-practices, wshobson tailwind-design-system). See NOTICE.md.
 ---
 
-This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
+# Frontend Design
 
-## Design Direction
+Approach this as the design lead at a studio known for giving every client a distinct visual identity that is never mistaken for anyone else's. This client has already rejected proposals that felt cliché or templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to this brief, and take aesthetic risk where it is justified. Then implement real, working, production-grade code.
 
-Commit to a BOLD aesthetic direction:
-- **Purpose**: What problem does this interface solve? Who uses it?
-- **Tone**: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
-- **Constraints**: Technical requirements (framework, performance, accessibility).
-- **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
+## Ground designs in the subject matter
 
-**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work—the key is intentionality, not intensity.
+If the brief does not identify the product or subject, identify it yourself before designing and confirm it with the user: propose one concrete subject, the design's audience, and its primary job. Use anything you know about the user's preferences or project as a hint, and read the project's design context if one exists (a `## Design Context` section in CLAUDE.md, or DESIGN.md; [init.md](reference/init.md) creates one). The subject's industry, materials, and vernacular are where distinctive choices come from: a toy for girls aged 8–11 looks nothing like a dashboard for financial analysts. Build with the brief's real content and subject matter throughout.
 
-Then implement working code that is:
-- Production-grade and functional
-- Visually striking and memorable
-- Cohesive with a clear aesthetic point-of-view
-- Meticulously refined in every detail
+Name the visitor mode of the surface, because it decides how far the design may go ([details](reference/new-work.md#4-visitor-modes)):
 
-## Frontend Aesthetics Guidelines
+- **Persuade** (landing pages, marketing, pricing): the design is the product; earn attention and action.
+- **Operate** (app UI, dashboards, settings, tools): scanability, consistency, and familiar affordances outrank expression ([operate.md](reference/operate.md)).
+- **Read** (docs, articles, changelogs): structure for comprehension; the world frames a calm reading column.
+- **Experience** (portfolios, galleries, showcases): the work leads from the first viewport.
 
-### Typography
-→ *Consult [typography reference](reference/typography.md) for scales, pairing, and loading strategies.*
+## Design principles
 
-Choose fonts that are beautiful, unique, and interesting. Pair a distinctive display font with a refined body font.
+**Hero.** The first viewport opens with the most characteristic thing in the subject's world, in its most fitting form: a headline, an image, an animation, a live demo, an interactive moment. A big number with a small label, supporting stats, and a gradient accent is the default treatment; use it only if it is truly the best option.
 
-**DO**: Use a modular type scale with fluid sizing (clamp)
-**DO**: Vary font weights and sizes to create clear visual hierarchy
-**DON'T**: Use overused fonts—Inter, Roboto, Arial, Open Sans, system defaults
-**DON'T**: Use monospace typography as lazy shorthand for "technical/developer" vibes
-**DON'T**: Put large icons with rounded corners above every heading—they rarely add value and make sites look templated
+**Typography** carries the personality of the page.
+- Use one family or two; if two, make them clearly distinct. Choose typefaces deliberately, not the families you would reach for on any other project ([reflex fonts to question](reference/new-work.md#5-commit-the-world)).
+- Set a clear type scale following *The Elements of Typographic Style*, with intentional weights, widths, and spacing. When type is a headline or visual element, make the treatment itself an active part of the design.
+- Keep line length under 80 characters (65–75ch for body). Serif text can run slightly longer and wants slightly more line-height than sans.
+- Avoid the commonest typographic tells: accenting a single word or phrase in a headline (one italic, bold, or colored word), all-caps labels, and unnecessary labels above content.
+- Do not use monospace as a costume for "technical"; reserve it for code, data, and measurement.
 
-### Color & Theme
-→ *Consult [color reference](reference/color-and-contrast.md) for OKLCH, palettes, and dark mode.*
+**Visual structure is information.** Outlines, borders, numbering, eyebrows, dividers, and labels should encode something about the content, not decorate it. Use numbered markers (01 / 02 / 03) only when the content really is a sequence.
 
-Commit to a cohesive palette. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
+**Color.**
+- Commit to a color strategy before choosing colors: Restrained, Committed, Full palette, or Drenched ([details](reference/new-work.md#5-commit-the-world)). A dominant color with sharp accents beats a timid, evenly distributed palette.
+- Pick light or dark from the use scene (who, where, under what light), never by category habit or because dark-with-glowing-accents looks "cool".
+- Use modern CSS color (`oklch()`, `color-mix()`, `light-dark()`) for predictable ramps and themes ([colorize.md](reference/colorize.md)).
+- On colored surfaces, derive secondary text from the surface hue; gray text on color looks washed out.
+- No gradient text; emphasis comes from weight and size.
 
-**DO**: Use modern CSS color functions (oklch, color-mix, light-dark) for perceptually uniform, maintainable palettes
-**DO**: Tint your neutrals toward your brand hue—even a subtle hint creates subconscious cohesion
-**DON'T**: Use gray text on colored backgrounds—it looks washed out; use a shade of the background color instead
-**DON'T**: Use pure black (#000) or pure white (#fff)—always tint; pure black/white never appears in nature
-**DON'T**: Use the AI color palette: cyan-on-dark, purple-to-blue gradients, neon accents on dark backgrounds
-**DON'T**: Use gradient text for "impact"—especially on metrics or headings; it's decorative rather than meaningful
-**DON'T**: Default to dark mode with glowing accents—it looks "cool" without requiring actual design decisions
+**Layout and space.**
+- Create rhythm through varied spacing: tight groups, generous separations, more space above a heading than below it. One value repeated everywhere is monotony.
+- Not everything needs a container. Never nest cards inside cards, and never build the page from identical icon-heading-text card grids.
+- Decide alignment deliberately; centering everything is a default, not a choice. Asymmetry and intentional grid breaks create emphasis when the content earns them.
+- Use fluid spacing with `clamp()` on expressive surfaces and container queries for component-level responsiveness ([layout.md](reference/layout.md)).
 
-### Layout & Space
-→ *Consult [spatial reference](reference/spatial-design.md) for grids, rhythm, and container queries.*
+**Motion.** Use non-user-triggered motion sparingly, only to draw attention. One orchestrated moment (a page-load sequence or a reveal) lands better than scattered effects; fade-and-slide-up on every section and hover transitions on every card read as AI-generated. Motion that answers a person's action (opening, expanding, confirming) is welcome when it shows what changed. Use exponential ease-out, never bounce or elastic; avoid animating layout properties; animate height through `grid-template-rows` ([animate.md](reference/animate.md)).
 
-Create visual rhythm through varied spacing—not the same padding everywhere. Embrace asymmetry and unexpected compositions. Break the grid intentionally for emphasis.
+**Interaction.**
+- Make interactions feel fast: optimistic updates for low-stakes actions, skeletons rather than spinners in content.
+- Use progressive disclosure: basic options first, advanced behind clear entry points.
+- Design empty states that teach the interface and offer the next action.
+- Keep hierarchy in actions: one primary, then secondary, ghost, and text styles. Not every button is primary.
+- Reach for a modal only when a task needs interruption or protected focus; inline and progressive alternatives come first.
+- Adapt layouts across devices rather than amputating features on mobile ([adapt.md](reference/adapt.md)).
 
-**DO**: Create visual rhythm through varied spacing—tight groupings, generous separations
-**DO**: Use fluid spacing with clamp() that breathes on larger screens
-**DO**: Use asymmetry and unexpected compositions; break the grid intentionally for emphasis
-**DON'T**: Wrap everything in cards—not everything needs a container
-**DON'T**: Nest cards inside cards—visual noise, flatten the hierarchy
-**DON'T**: Use identical card grids—same-sized cards with icon + heading + text, repeated endlessly
-**DON'T**: Use the hero metric layout template—big number, small label, supporting stats, gradient accent
-**DON'T**: Center everything—left-aligned text with asymmetric layouts feels more designed
-**DON'T**: Use the same spacing everywhere—without rhythm, layouts feel monotonous
+**Written content.** Copy can make a design feel as templated as the visuals. When the brief has no real content, write it with the same care (see [Writing in design](#writing-in-design)).
 
-### Visual Details
-**DO**: Use intentional, purposeful decorative elements that reinforce brand
-**DON'T**: Use glassmorphism everywhere—blur effects, glass cards, glow borders used decoratively rather than purposefully
-**DON'T**: Use rounded elements with thick colored border on one side—a lazy accent that almost never looks intentional
-**DON'T**: Use sparklines as decoration—tiny charts that look sophisticated but convey nothing meaningful
-**DON'T**: Use rounded rectangles with generic drop shadows—safe, forgettable, could be any AI output
-**DON'T**: Use modals unless there's truly no better alternative—modals are lazy
+**CSS hygiene.** Watch selector specificity: it is easy to generate classes that cancel each other out (a type selector like `.section` against an element selector like `.cta`), especially for padding and margin between sections.
 
-### Motion
-→ *Consult [motion reference](reference/motion-design.md) for timing, easing, and reduced motion.*
+## Process: plan, review against the brief, build, critique
 
-Focus on high-impact moments: one well-orchestrated page load with staggered reveals creates more delight than scattered micro-interactions.
+### AI design clusters
 
-**DO**: Use motion to convey state changes—entrances, exits, feedback
-**DO**: Use exponential easing (ease-out-quart/quint/expo) for natural deceleration
-**DO**: For height animations, use grid-template-rows transitions instead of animating height directly
-**DON'T**: Animate layout properties (width, height, padding, margin)—use transform and opacity only
-**DON'T**: Use bounce or elastic easing—they feel dated and tacky; real objects decelerate smoothly
+For calibration, AI-generated design currently clusters around these traits:
 
-### Interaction
-→ *Consult [interaction reference](reference/interaction-design.md) for forms, focus, and loading patterns.*
+1. a warm cream background (near `#F4F1EA`) with a high-contrast serif display and a terracotta or warm-clay accent (often near `#D97757`, Anthropic's own Claude accent, so on a user's brief it reads as a tell);
+2. a near-black background with a single bright acid-green or vermilion accent;
+3. a broadsheet layout with hairline rules, zero border-radius, and dense newspaper-like columns;
+4. the SaaS-card kit: content chopped into identical rounded cards, one border-radius on everything, the same soft grey shadow (`rgba(0,0,0,.1)`) under each, and gradient washes (often purple-to-blue) as decoration;
+5. template chrome that appears whatever the subject: a tracked-out ALL-CAPS eyebrow above every heading; meta strings joined with middle dots (`A · B · C`); labels built as `WORD — fragment`; tinted near-black (`#0B0B0B`, `#111`) standing in for black; a monospace face for small data labels; a `→` appended to link and button text.
 
-Make interactions feel fast. Use optimistic UI—update immediately, sync later.
+Each is legitimate for some brief, but they are defaults rather than choices, and they appear regardless of subject. Where the brief pins a visual direction, follow it exactly; the brief's own words always win, including when it asks for one of these looks. Where it leaves an axis free, do not spend that freedom on a default.
 
-**DO**: Use progressive disclosure—start simple, reveal sophistication through interaction (basic options first, advanced behind expandable sections; hover states that reveal secondary actions)
-**DO**: Design empty states that teach the interface, not just say "nothing here"
-**DO**: Make every interactive surface feel intentional and responsive
-**DON'T**: Repeat the same information—redundant headers, intros that restate the heading
-**DON'T**: Make every button primary—use ghost buttons, text links, secondary styles; hierarchy matters
+### Two passes
 
-### Responsive
-→ *Consult [responsive reference](reference/responsive-design.md) for mobile-first, fluid design, and container queries.*
+1. **Plan.** Brainstorm a compact token system from the brief:
+   - **Color:** the core palette as 4–6 named hex values.
+   - **Type:** the typefaces and their roles.
+   - **Layout:** a layout concept in one-sentence descriptions plus ASCII wireframes to compare options, including alignment (left, center, justified).
+   - **Principles:** what makes this page unique.
+2. **Review the plan against the brief.** If any part reads like the default you would produce for any similar page (work through a similar prompt and see whether you land in the same place), revise it and say what changed and why.
+3. **Build** from the revised plan. Read [craft-floor.md](reference/craft-floor.md) immediately before writing UI code.
+4. **Critique** the result (see [Restraint and self-critique](#restraint-and-self-critique)).
 
-**DO**: Use container queries (@container) for component-level responsiveness
-**DO**: Adapt the interface for different contexts—don't just shrink it
-**DON'T**: Hide critical functionality on mobile—adapt the interface, don't amputate it
+For a new surface or a replacement identity, [new-work.md](reference/new-work.md) expands this into a full flow: deriving candidate worlds from the audience's culture, offering directions, and recording the chosen one. For planning without code, use [shape.md](reference/shape.md).
 
-### UX Writing
-→ *Consult [ux-writing reference](reference/ux-writing.md) for labels, errors, and empty states.*
+## Craft floor
 
-**DO**: Make every word earn its place
-**DON'T**: Repeat information users can already see
+Build to this floor without announcing it. The brief's own words can earn any item in the Refuse list; your habit cannot. Full list with rationale: [craft-floor.md](reference/craft-floor.md). Where references disagree, the user's explicit request wins, then this file.
 
----
+**Verify on the built result:**
+- **Contrast:** body and placeholder text ≥ 4.5:1, large text ≥ 3:1, controls and focus indicators ≥ 3:1.
+- **Type:** body measure 65–75ch, display at most 6rem, tracking no tighter than -0.04em, balanced headings, obvious scale and weight steps. Run the real copy at every breakpoint and fix overflow.
+- **States:** default, hover, focus, active, disabled, loading, error, empty, success, with real content and visible keyboard focus.
+- **Responsive:** composed down to mobile, not merely shrunk. Reduced motion respected.
+- **Browser surfaces:** theme text selection, caret, scrollbars, focus rings, underline offset, and tabular numerals from the palette; browser defaults belong to no design system.
+- **Copy:** controls name their action; errors name the problem and the recovery.
+- **Coverage:** every brief requirement is present and findable within seconds.
 
-## The AI Slop Test
+**Refuse by default:**
+- Identical icon-heading-text card grids as page structure; nested cards; the hero-metric template.
+- An eyebrow or kicker above a heading; `01 / 02 / 03` markers on content that is not a sequence.
+- Gradient text; glassmorphism as decoration; colored `border-left`/`border-right` stripes over 1px on cards, alerts, or list items.
+- Hard offset shadows (`4px 4px 0`) outside a genuinely neobrutalist world; zero-offset colored glows; a 1px border under a wide soft shadow (the ghost card). Declare elevation once.
+- Sparklines, progress rings, and soft-shadowed rounded rectangles standing in for content.
+- A system display face (Impact, Arial Black, the platform sans) as the voice of a brand page; source and self-host a real face.
+- Unicode glyphs or emoji as an icon system; use one drawn icon library in one stroke and weight.
+- Sketch-style SVG illustration, stripe and grid-overlay backgrounds with no subject reason, geometric masks faking organic cutouts.
+- Invented claims: prices, customers, benchmarks, testimonials. Label illustrative data as sample data.
 
-**Critical quality check**: If you showed this interface to someone and said "AI made this," would they believe you immediately? If yes, that's the problem.
+## Restraint and self-critique
 
-A distinctive interface should make someone ask "how was this made?" not "which AI made this?"
+Spend your boldness in one place. Let one element be the memorable thing, keep everything around it quiet and disciplined, and cut any decoration that does not serve the brief. Consider Chanel's advice: before leaving the house, look in the mirror and remove one accessory.
 
-Review the DON'T guidelines above—they are the fingerprints of AI-generated work from 2024-2025.
+Critique your work as you build, taking screenshots when the environment supports it; a picture is worth a thousand tokens. Inspect in bounded passes: capture desktop and mobile together, fix everything the round shows in one batch, confirm with at most one more round, then stop. Open-ended self-QA costs more and finds less than a fresh review ([critique.md](reference/critique.md), [audit.md](reference/audit.md), [polish.md](reference/polish.md)).
 
----
+**The AI slop test.** If you showed this interface to someone and said "AI made this," would they believe you immediately? If so, that is the problem. A distinctive interface makes people ask "how was this made?", not "which AI made this?"
+
+Human designers remember what they tried and push for something new. If you have somewhere to jot notes about the directions you have used for this user, keep them and vary your choices across projects: light and dark, different families, different structures.
+
+## Writing in design
+
+Words appear in a design for one reason: to make it easier to understand and use. They are design content, not decoration, and deserve the same intentionality and minimalism as spacing and color. Before writing anything, ask what the design needs to say and how it can best help the person navigate.
+
+- **Write from the user's side.** Name things by what users understand, not by how the system is built: users manage notifications, not webhook config. Describe what something is or does in plain terms rather than selling it. Specific and legible beats clever.
+- **Use active voice and exact actions.** A CTA says exactly what happens: "Save changes," not "Submit." An action keeps its name through the whole flow, so the "Publish" button produces a "Published" toast. Consistent vocabulary is how people learn their way around.
+- **Treat failure and emptiness as direction, not mood.** Explain what went wrong and how to fix it, in the interface's voice. Errors never apologize and are never vague. An empty screen is an invitation to act.
+- **Keep the tone conversational:** plain verbs, sentence case, no filler, matched to the brand and audience. Say each thing once; an intro that restates its heading should go. Each written element does exactly one job.
+
+Detailed patterns, tables, and localization rules: [clarify.md](reference/clarify.md).
 
 ## Multi-Agent Strategy for Complex UI Projects
 
-For large frontend projects with multiple pages or complex component systems, multi-agent approaches accelerate development and improve quality.
+**Use subagents (default)** for independent, parallel work: separate audits (accessibility, performance, responsiveness), code-explorer agents mapping existing UI patterns before new components, the two isolated assessments in [critique.md](reference/critique.md), a fresh-context final review of a finished build, and browser checks at several viewports.
 
-**Use subagents (default)** for:
-- Parallel design audits (accessibility, performance, responsiveness checked independently)
-- Code-explorer agents analyzing existing UI patterns before building new components
-- Code-reviewer agents checking design quality, code quality, and performance simultaneously
-- Dispatching Playwright agents to test UI at different viewports (if available)
-
-**Consider agent teams** for:
-- Multi-page applications where page-level agents need to coordinate shared design tokens, component APIs, and navigation patterns
-- Design system extraction where agents analyzing different pages need to agree on shared components
-- Full redesigns where one agent handles visual design while another handles interaction patterns, and they need to resolve conflicts (e.g., a visual animation that hurts interaction latency)
-
-Agent teams are experimental and more expensive. For most frontend tasks — even complex ones — subagents work well because you synthesize their outputs into a cohesive design. Use agent teams only when agents genuinely need to negotiate and coordinate in real-time.
-
----
-
-## Implementation Principles
-
-Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details.
-
-Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices across generations.
-
-Remember: Claude is capable of extraordinary creative work. Don't hold back—show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
-
----
+**Consider agent teams** only when agents must negotiate in real time: multi-page builds where page agents share tokens, component APIs, and navigation; design-system extraction across many pages; or full redesigns where visual and interaction owners must resolve conflicts. Teams are experimental and more expensive; for most frontend work, subagents plus your own synthesis are enough.
 
 ## Reference Library
 
-This skill includes extensive reference documentation for specialized tasks. Load references based on what you're doing:
+Load references only when the task needs them. Starting points:
 
-- **Page build**: Start with typography + color-and-contrast + spatial-design
-- **Polish pass**: Start with audit + polish
-- **Specialized work**: Load animate, harden, or extract only when needed
+- **New page or product:** [new-work](reference/new-work.md) + [craft-floor](reference/craft-floor.md), then [typeset](reference/typeset.md), [colorize](reference/colorize.md), [layout](reference/layout.md) as needed
+- **Product UI:** add [operate](reference/operate.md)
+- **Review an existing UI:** [critique](reference/critique.md) (UX) or [audit](reference/audit.md) (technical), then the suggested references, then [polish](reference/polish.md)
 
-### Design Foundations
-These references provide core design knowledge. Consult them when building any frontend:
+### Plan and set up
 
-| Reference | Purpose |
-|-----------|---------|
-| [typography](reference/typography.md) | Type scales, font pairing, web font loading |
-| [color-and-contrast](reference/color-and-contrast.md) | OKLCH, palettes, dark mode, accessibility |
-| [spatial-design](reference/spatial-design.md) | Grids, rhythm, container queries |
-| [motion-design](reference/motion-design.md) | Timing, easing, reduced motion |
-| [interaction-design](reference/interaction-design.md) | Forms, focus, loading patterns |
-| [responsive-design](reference/responsive-design.md) | Mobile-first, fluid design |
-| [ux-writing](reference/ux-writing.md) | Labels, errors, empty states |
-| [tailwind-design-system](reference/tailwind-design-system.md) | Tailwind CSS design tokens, CVA components, theming, dark mode |
+| Reference | Use when |
+|-----------|----------|
+| [init](reference/init.md) | Capturing durable product context (users, purpose, brand commitments) in the project's CLAUDE.md, once per project. |
+| [shape](reference/shape.md) | Planning UX and UI through a discovery interview and a confirmed brief, before any code. |
+| [new-work](reference/new-work.md) | Building a new surface or replacing a visual identity: visitor modes, candidate worlds, color strategy, typeface choice, direction contract, finish. |
+| [craft-floor](reference/craft-floor.md) | Immediately before writing UI code: the quality floor and the ban list. |
+| [operate](reference/operate.md) | App UI, dashboards, settings, and tools: product typography, color, component states, and interaction patterns (focus, forms, dialogs, popovers, keyboard). |
 
-### Quality Assessment
-Use these references to evaluate and critique your work:
+### Design foundations
 
-| Reference | When to Use |
-|-----------|-------------|
-| [audit](reference/audit.md) | Run systematic checks across accessibility, performance, theming, and responsive design. Generates a comprehensive report with severity ratings. |
-| [critique](reference/critique.md) | Conduct a holistic design critique evaluating visual hierarchy, information architecture, and emotional resonance. |
+| Reference | Use when |
+|-----------|----------|
+| [typeset](reference/typeset.md) | Type hierarchy, scale, pairing, font loading, fluid type, OpenType features. |
+| [colorize](reference/colorize.md) | Color strategy and roles, OKLCH ramps, contrast, dark themes, tokens. |
+| [layout](reference/layout.md) | Reading order, grouping, spacing rhythm, grids, container queries, touch targets. |
+| [animate](reference/animate.md) | Motion thesis, timing, easing, reduced motion, perceived performance. |
+| [clarify](reference/clarify.md) | Labels, errors, empty and loading states, voice and tone, localization. |
+| [adapt](reference/adapt.md) | Responsive and cross-device adaptation, input methods, safe areas, responsive images. |
+| [tailwind-design-system](reference/tailwind-design-system.md) | Tailwind CSS v4 (CSS-first `@theme`) tokens, CVA variants, theming, dark mode. Deeper: [tailwind/details](reference/tailwind/details.md), [tailwind/advanced-patterns](reference/tailwind/advanced-patterns.md). |
 
-**When to apply**: After completing a design checkpoint or before final delivery. Use **audit** for comprehensive technical checks; use **critique** for UX-focused design review.
+### Evaluate
 
-### Visual Adjustments
-Use these references to tune the visual intensity of your designs:
+| Reference | Use when |
+|-----------|----------|
+| [critique](reference/critique.md) | Holistic UX review: Nielsen heuristic scores, cognitive load, personas, prioritized issues. |
+| [audit](reference/audit.md) | Technical checks scored across accessibility, performance, theming, responsiveness, and implementation integrity. |
 
-| Reference | When to Use |
-|-----------|-------------|
-| [bolder](reference/bolder.md) | Amplify designs that are too safe, generic, or underwhelming. |
-| [quieter](reference/quieter.md) | Tone down overly bold or aggressive designs for refinement. |
-| [colorize](reference/colorize.md) | Add strategic color to monochromatic or bland interfaces. |
-| [simplify](reference/simplify.md) | Strip designs to their essence by removing unnecessary complexity. |
+### Adjust intensity
 
-**When to apply**: When the design feels off in terms of visual intensity—too bland, too loud, too gray, or too cluttered.
+| Reference | Use when |
+|-----------|----------|
+| [bolder](reference/bolder.md) | A section reads safe or flat; raise it within the existing system. |
+| [quieter](reference/quieter.md) | A design is loud or overstimulating; refine without going generic. |
+| [distill](reference/distill.md) | A design is cluttered; strip it to its essence. |
+| [delight](reference/delight.md) | Adding earned moments of personality and joy. |
+| [overdrive](reference/overdrive.md) | Pushing past conventional limits: view transitions, WebGL, scroll-driven motion, virtualized data. |
 
-### Specialized Transformations
-Use these references for specific enhancement tasks:
+### Harden and ship
 
-| Reference | When to Use |
-|-----------|-------------|
-| [animate](reference/animate.md) | Add purposeful animations and micro-interactions. |
-| [delight](reference/delight.md) | Add moments of joy and personality that make interfaces memorable. |
-| [clarify](reference/clarify.md) | Improve unclear UX copy, error messages, and labels. |
-| [adapt](reference/adapt.md) | Adapt designs for different screen sizes, devices, or platforms. |
-| [onboard](reference/onboard.md) | Design onboarding flows, empty states, and first-time experiences. |
-| [harden](reference/harden.md) | Improve resilience: error handling, i18n, text overflow, edge cases. |
-| [normalize](reference/normalize.md) | Align designs to match a design system's standards and patterns. |
-| [extract](reference/extract.md) | Extract reusable components and design tokens into a design system. |
-
-**When to apply**: When a specific aspect of the design needs focused improvement.
-
-### Final Polish
-Use these references before shipping:
-
-| Reference | When to Use |
-|-----------|-------------|
-| [polish](reference/polish.md) | Final quality pass fixing alignment, spacing, consistency, and details. |
-| [optimize](reference/optimize.md) | Improve performance across loading, rendering, animations, and bundle size. |
-
-**When to apply**: After the design is functionally complete, before delivery.
-
-### Setup
-| Reference | When to Use |
-|-----------|-------------|
-| [teach-impeccable](reference/teach-impeccable.md) | One-time setup to gather design context for a project and save to CLAUDE.md. |
-
----
+| Reference | Use when |
+|-----------|----------|
+| [harden](reference/harden.md) | Edge cases: errors, long and empty content, i18n, RTL, network failure. |
+| [onboard](reference/onboard.md) | First-run flows, empty states, activation. |
+| [optimize](reference/optimize.md) | Loading, rendering, animation, and bundle performance. |
+| [extract](reference/extract.md) | Consolidating repeated patterns into components and design tokens. |
+| [polish](reference/polish.md) | The final pass: system drift, states, alignment, consistency, cleanup. |
 
 ## React & Next.js Best Practices
 
-When building React or Next.js applications, apply these performance optimization patterns. Detailed rules with code examples are in `reference/react-rules/`.
+When building React or Next.js applications, apply Vercel's performance rules. The compiled guide is [react-rules/REACT-BEST-PRACTICES.md](reference/react-rules/REACT-BEST-PRACTICES.md) (70 rules with a table of contents); each rule also has its own file in `reference/react-rules/`, named by category prefix (`async-`, `bundle-`, `server-`, `client-`, `rerender-`, `rendering-`, `js-`, `advanced-`).
 
-→ *For the complete guide, consult [react-rules/REACT-BEST-PRACTICES.md](reference/react-rules/REACT-BEST-PRACTICES.md)*
+| Priority | Category | Impact | Prefix |
+|----------|----------|--------|--------|
+| 1 | Eliminating Waterfalls | CRITICAL | `async-` |
+| 2 | Bundle Size Optimization | CRITICAL | `bundle-` |
+| 3 | Server-Side Performance | HIGH | `server-` |
+| 4 | Client-Side Data Fetching | MEDIUM-HIGH | `client-` |
+| 5 | Re-render Optimization | MEDIUM | `rerender-` |
+| 6 | Rendering Performance | MEDIUM | `rendering-` |
+| 7 | JavaScript Performance | LOW-MEDIUM | `js-` |
+| 8 | Advanced Patterns | LOW | `advanced-` |
 
-### Priority Categories
+### Key rules
 
-| Priority | Category | Impact | When to Apply |
-|----------|----------|--------|---------------|
-| 1 | Eliminating Waterfalls | CRITICAL | Data fetching, API routes, async operations |
-| 2 | Bundle Size Optimization | CRITICAL | Imports, dynamic loading, third-party libraries |
-| 3 | Server-Side Performance | HIGH | Server components, caching, serialization |
-| 4 | Client-Side Data Fetching | MEDIUM-HIGH | SWR, event listeners, localStorage |
-| 5 | Re-render Optimization | MEDIUM | State management, memoization, effects |
-| 6 | Rendering Performance | MEDIUM | Hydration, SVGs, content-visibility |
-| 7 | JavaScript Performance | LOW-MEDIUM | DOM batching, lookups, iterations |
-| 8 | Advanced Patterns | LOW | Refs, initialization, stable callbacks |
+**Eliminating waterfalls (CRITICAL)**
+- Run independent operations with `Promise.all()`, and start nested fetches as soon as their parent resolves ([async-parallel](reference/react-rules/async-parallel.md), [server-parallel-nested-fetching](reference/react-rules/server-parallel-nested-fetching.md)).
+- Move `await` into the branch that needs it, and check cheap synchronous conditions before awaiting async flags ([async-defer-await](reference/react-rules/async-defer-await.md), [async-cheap-condition-before-await](reference/react-rules/async-cheap-condition-before-await.md)).
+- Stream content with Suspense boundaries ([async-suspense-boundaries](reference/react-rules/async-suspense-boundaries.md)).
 
-### Key Rules to Remember
+**Bundle size (CRITICAL)**
+- Import from modules directly, not barrel files ([bundle-barrel-imports](reference/react-rules/bundle-barrel-imports.md)), and keep import paths statically analyzable ([bundle-analyzable-paths](reference/react-rules/bundle-analyzable-paths.md)).
+- Load heavy components with `next/dynamic` and defer non-critical third-party scripts ([bundle-dynamic-imports](reference/react-rules/bundle-dynamic-imports.md), [bundle-defer-third-party](reference/react-rules/bundle-defer-third-party.md)).
 
-**Eliminating Waterfalls (CRITICAL)**:
-- Use `Promise.all()` for independent operations
-- Move `await` into branches where actually needed
-- Use Suspense boundaries to stream content
+**Server (HIGH)**
+- Authenticate Server Actions like API routes ([server-auth-actions](reference/react-rules/server-auth-actions.md)).
+- Never keep request data in shared module state; hoist static I/O to module level instead ([server-no-shared-module-state](reference/react-rules/server-no-shared-module-state.md), [server-hoist-static-io](reference/react-rules/server-hoist-static-io.md)).
 
-**Bundle Size (CRITICAL)**:
-- Import directly from modules, not barrel files
-- Use `next/dynamic` for heavy components
-- Defer non-critical third-party scripts
+**Re-renders (MEDIUM)**
+- Never define components inside other components ([rerender-no-inline-components](reference/react-rules/rerender-no-inline-components.md)).
+- Derive state during render, not in effects; use primitive effect dependencies ([rerender-derived-state-no-effect](reference/react-rules/rerender-derived-state-no-effect.md), [rerender-dependencies](reference/react-rules/rerender-dependencies.md)).
+- Keep expensive updates responsive with `useDeferredValue` and transitions ([rerender-use-deferred-value](reference/react-rules/rerender-use-deferred-value.md), [rerender-transitions](reference/react-rules/rerender-transitions.md)).
 
-**Re-renders (MEDIUM)**:
-- Extract expensive work into memoized components
-- Use primitive dependencies in effects
-- Derive state during render, not in effects
+**Rendering (MEDIUM)**
+- Add resource hints for critical assets and load scripts with `defer` or `async` ([rendering-resource-hints](reference/react-rules/rendering-resource-hints.md), [rendering-script-defer-async](reference/react-rules/rendering-script-defer-async.md)).
 
-**When to consult detailed rules**: When writing new components, implementing data fetching, reviewing code for performance, refactoring existing React/Next.js code, or optimizing bundle size and load times.
-
----
+Consult the rules when writing components, implementing data fetching, reviewing or refactoring React/Next.js code, or optimizing bundle size and load times.
 
 ## Related Skills
-
-These complementary skills extend frontend-design capabilities. Use them when you need specialized functionality beyond core design and implementation.
 
 ### Raster vs Vector Decision
 
 | Need | Format | Skill |
 |------|--------|-------|
-| Photos, textures, backgrounds | Raster (PNG) | generate-image-nb |
-| Icons, logos, illustrations, hero graphics | Vector (SVG) | generate-svg |
-| Animated web elements | Vector (SVG) | generate-svg |
-| Diagrams, flowcharts | Either | generate-image-nb (complex) / generate-svg (simple) |
+| Photos, textures, backgrounds, product shots | Raster (PNG/JPEG/WebP) | `generate-image` |
+| Icons, logos, illustrations, hero graphics | Vector (SVG) | `generate-svg` |
+| Animated web elements (spinners, ambient hero motion) | Vector (SVG) | `generate-svg` |
+| Diagrams, infographics | Either | `generate-image` with `pro` for text-heavy pieces; `generate-svg` for simple, editable diagrams |
 
-### Image Generation: `generate-image-nb`
+### `generate-image`
 
-Generate custom images, logos, icons, illustrations, and visual assets using the Nano Banana model (via Gemini CLI).
+Generates and edits raster images with Google's Nano Banana models. Use it for hero photography, blog headers, product mockups, textures, and edits to existing images. Pick the `pro` model when the image contains words that must render accurately.
 
-**When to use**:
-- Creating blog featured images, thumbnails, or banners
-- Generating app icons, favicons, or UI illustrations
-- Designing diagrams, flowcharts, or architecture visuals
-- Creating patterns, textures, or decorative graphics
-- When the user needs a custom image that can't be found online
+### `generate-svg`
 
-**How to invoke**: Use the `generate-image-nb` skill. It provides commands like `/generate`, `/icon`, `/diagram`, `/pattern` for different image types.
+Generates SVG markup with a Gemini text model. Types: `hero`, `icon`, `illustration`, `logo`, `component`. Use it when the asset must stay crisp at any size, be themable with `currentColor`, or animate with CSS.
 
-**Example scenarios**:
-- "Create a hero image for my landing page" → Use generate-image-nb
-- "Design an app icon for my productivity tool" → Use generate-image-nb with `/icon`
-- "Make a flowchart showing the user auth flow" → Use generate-image-nb with `/diagram`
+### Browser verification: Playwright
 
-### SVG Generation: `generate-svg`
+Use the Playwright MCP server (or the browser tools available in the session) to screenshot the UI at mobile, tablet, and desktop widths, exercise forms and hover/focus states, and confirm the design renders as intended. Verify before calling a design finished.
 
-Generate production-quality SVG graphics — hero sections, icons, illustrations, logos, and UI components — using Gemini Pro as a text model.
+### `agentation`
 
-**When to use**:
-- Creating hero section illustrations with gradients and geometry
-- Generating icons, logos, or UI component graphics
-- Building animated web elements (loading spinners, transitions)
-- When you need scalable vector graphics that stay crisp at any size
+Adds the Agentation annotation toolbar to a React/Next.js app so the user can click elements and send precise, selector-level feedback to the agent. Use it for iterative design review.
 
-**How to invoke**: Use the `generate-svg` skill. It supports types: `hero`, `icon`, `illustration`, `logo`, `component`.
+### `generate-video`
 
-**Example scenarios**:
-- "Create a hero illustration for my landing page" → Use generate-svg with `-t hero`
-- "Design a settings gear icon" → Use generate-svg with `-t icon`
-- "Make an animated loading spinner" → Use generate-svg with `-t component`
+Generates short clips with Gemini Omni Flash: hero background loops, product demos, animated keyframes made with `generate-image`. Embed with `autoplay muted loop playsinline`, a poster frame, and a reduced-motion fallback.
 
-### Browser Testing: Playwright
+### `web-quality-audit`
 
-Automate browser interactions for testing, screenshots, form filling, and visual verification of your frontend work.
-
-**When to use**:
-- Testing the UI after implementation
-- Taking screenshots to verify visual changes
-- Testing user flows and form interactions
-- Verifying responsive design at different viewports
-- Debugging layout or interaction issues
-
-**How to install**: Install Playwright via Claude Code by running `/install-github-mcp playwright` or add the Playwright MCP server to your settings.
-
-**Example scenarios**:
-- "Test the login form I just built" → Use Playwright to fill and submit the form
-- "Take screenshots at mobile and desktop sizes" → Use Playwright with viewport changes
-- "Check if the button hover states work" → Use Playwright to hover and capture
-
-### Visual Feedback: `agentation`
-
-Add a visual feedback/annotation toolbar to Next.js projects for development-time design iteration.
-
-**When to use**:
-- Setting up a new Next.js project that needs design feedback tools
-- When the user wants to annotate and mark up the UI during development
-- For collaborative design review workflows
-
-**How to invoke**: Use the `agentation` skill. It adds a floating toolbar component that only loads in development mode.
-
-**Example scenarios**:
-- "Set up design feedback tools for this Next.js app" → Use agentation
-- "I want to annotate the UI while developing" → Use agentation
+Measures the built page with Lighthouse and axe (Core Web Vitals, WCAG 2.2 AA, SEO). Use it after [audit](reference/audit.md)'s code-level checks, before shipping.

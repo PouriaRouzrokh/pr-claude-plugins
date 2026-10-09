@@ -21,7 +21,7 @@ Build production-ready applications, not demos. ATLAS prevents the failures that
 - Moderate complexity changes
 
 **Skip ATLAS for:**
-- Bug fixes (just fix and test)
+- Bug fixes (use `systematic-debugging`: root cause, regression test, fix)
 - One-line changes
 - Documentation updates
 - Refactoring without behavior changes
@@ -44,8 +44,8 @@ ATLAS is a thinking philosophy, not a checklist to follow blindly. Apply the ste
 | ATLAS Phase | Related Skills |
 |-------------|---------------|
 | Architect | `create-prd` |
-| Assemble | `frontend-design`, `generate-image-nb`, `generate-svg` |
-| Stress-test | `writing-clearly-and-concisely` (docs quality) |
+| Assemble | `frontend-design`, `generate-image`, `generate-svg`, `generate-video`, `test-driven-development` |
+| Stress-test | `test-driven-development` (verification gate), `systematic-debugging`, `web-quality-audit`, `writing-clearly-and-concisely` (docs quality) |
 
 ---
 

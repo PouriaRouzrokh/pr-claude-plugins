@@ -1,35 +1,29 @@
 # CLAUDE.md
 
-Claude Code plugin marketplace containing the **pr** plugin - a personal development toolkit for feature development, MVP development, code cleanup, documentation, deployment, and git operations.
-
-## Quick Commands
-
-| Command                                  | Description                   |
-| ---------------------------------------- | ----------------------------- |
-| `/pr:feature-dev [desc]`                 | Feature dev with RFD tracking |
-| `/pr:mvp-dev [focus]`                    | MVP from PRD                  |
-| `/pr:commit-push [path] [--merge\|--pr]` | Commit, push, merge/PR        |
-| `/pr:clean-codebase [path]`              | Code cleanup                  |
-| `/pr:update-docs [path]`                 | Update documentation          |
-| `/pr:handle-claude-md [path]`            | Init or update CLAUDE.md      |
-| `/pr:create-prd [ideas]`                 | Generate PRD                  |
-| `/pr:create-snapshot [path]`             | Technical snapshot            |
-| `/pr:generate-image [desc]`              | Generate or edit images        |
-| `/pr:generate-svg [desc]`                | Generate SVG graphics          |
-| `/pr:run-local`                          | Start local dev server        |
-| `/pr:run-public`                         | Deploy publicly               |
+Claude Code plugin marketplace containing the **pr** plugin: a personal development toolkit of skills for feature and MVP development, debugging, testing, cleanup, documentation, deployment, git, frontend design, and Gemini image/SVG/video generation.
 
 ## Skills
 
-| Skill                           | Description                                        |
-| ------------------------------- | -------------------------------------------------- |
-| `agentation`                    | Add Agentation visual feedback toolbar to Next.js  |
-| `atlas-development`             | ATLAS framework for production-ready development   |
-| `create-prd`                    | Interactive PRD generation with web research       |
-| `frontend-design`               | Production-grade frontend interfaces               |
-| `generate-image-nb`             | Generate and edit images via Gemini API            |
-| `generate-svg`                  | Generate SVG graphics via Gemini Pro               |
-| `writing-clearly-and-concisely` | Clear, direct prose following Strunk's principles  |
+All skills live in `pr/skills/<name>/SKILL.md` and run as `/pr:<name>`. There is no `commands/` directory: slash commands are skills.
+
+| Skill | Purpose |
+|-------|---------|
+| `feature-dev`, `mvp-dev` | Feature and MVP development with RFD tracking (multi-agent) |
+| `create-prd`, `create-snapshot`, `handle-claude-md`, `update-docs` | PRD, snapshots, CLAUDE.md, documentation |
+| `systematic-debugging`, `test-driven-development` | Root-cause debugging; TDD with a verification gate (vendored from obra/superpowers) |
+| `clean-codebase`, `web-quality-audit` | Code cleanup; Lighthouse/axe audits |
+| `run-local`, `run-public`, `commit-push` | Run, deploy, commit (`run-public` and `commit-push` are user-invoked only) |
+| `frontend-design`, `agentation` | UI design playbooks and React rules; annotation toolbar |
+| `generate-image`, `generate-svg`, `generate-video` | Gemini API scripts (Nano Banana 2.1/Pro, Gemini 3.8 Flash, Omni Flash) |
+| `atlas-development`, `writing-clearly-and-concisely` | ATLAS reference; prose quality |
+
+## Quick Commands
+
+| Task | Command |
+|------|---------|
+| Validate plugin and marketplace | `claude plugin validate ./pr && claude plugin validate .` |
+| Test the Gemini scripts (offline, no API key) | `uv run --with pytest --with "google-genai>=2.3,<3" --with resvg-py pytest tests -q` |
+| Try the working tree in Claude Code | `claude --plugin-dir ./pr` |
 
 ## Development Principles
 
@@ -100,7 +94,7 @@ When working with unfamiliar packages:
 
 For frontend development:
 
-- Use Playwright for browser automation and testing (install via Claude Code: `/install-github-mcp playwright`)
+- Use Playwright for browser automation and testing (`/plugin install playwright@claude-plugins-official`)
 - Take screenshots to verify visual changes
 - Test user flows and form interactions
 
@@ -132,54 +126,41 @@ Before handing off work:
 
 ```
 pr-claude-plugins/
-├── .claude-plugin/marketplace.json   # Marketplace manifest
+├── .claude-plugin/marketplace.json   # Marketplace manifest (version must match plugin.json)
 ├── pr/                               # The pr plugin
 │   ├── .claude-plugin/plugin.json    # Plugin manifest
 │   ├── agents/                       # code-explorer, code-architect, code-reviewer
-│   ├── commands/                     # Slash commands (12 total)
-│   └── skills/                       # Skills with SKILL.md + references/
-│       ├── agentation/               # Visual feedback toolbar for Next.js
-│       ├── atlas-development/        # ATLAS development framework
-│       ├── create-prd/               # PRD generation
-│       ├── frontend-design/          # UI development
-│       ├── generate-image-nb/        # Image generation via Gemini API
-│       ├── generate-svg/            # SVG generation via Gemini Pro
-│       └── writing-clearly-and-concisely/  # Writing quality
+│   └── skills/<name>/                # SKILL.md + references/, scripts/, NOTICE.md
+├── tests/                            # Offline pytest suite for the Gemini scripts (not shipped)
 ├── CLAUDE.md
 ├── commitlog.md
 └── README.md
 ```
 
-## Plugin Component Formats
+## Plugin Conventions
 
-**Commands** (`commands/*.md`):
-
-```yaml
----
-description: Brief description
-argument-hint: "[optional: hint text]"
----
-```
-
-**Skills** (`skills/*/SKILL.md`):
+**Skills** (`pr/skills/<name>/SKILL.md`):
 
 ```yaml
 ---
-name: skill-name
-description: Description
+name: skill-name                  # must match the directory name
+description: "What it does. Use when ..."   # third person, <= 1024 chars; quote it if it contains ': '
+argument-hint: "[optional: hint]"
+disable-model-invocation: true    # only for skills with outward side effects (deploy, push)
+allowed-tools: Bash(uv run ${CLAUDE_SKILL_DIR}/scripts/x.py *)
+license: "..."                    # vendored skills: upstream license + See NOTICE.md
 ---
 ```
 
-**Agents** (`agents/*.md`):
+- Keep SKILL.md under 500 lines; move templates and long material to `references/` (one level deep, table of contents when over 100 lines).
+- Reference bundled files as `${CLAUDE_SKILL_DIR}/scripts/...` inside SKILL.md; Claude Code substitutes the absolute path. Reference files are not substituted.
+- Scripts are Python with PEP 723 inline dependencies so `uv run` works from any project. Do not add Node scripts that import npm packages: they cannot resolve modules from the plugin cache.
+- Vendored content keeps its upstream license in the skill's `NOTICE.md`.
+- Bump `version` in both manifests on every release, or installed copies will not update.
 
-```yaml
----
-name: agent-name
-tools: Glob, Grep, Read, ...
-model: sonnet
-color: yellow|green|red
----
-```
+**Agents** (`pr/agents/*.md`): read-only via `disallowedTools: Write, Edit, NotebookEdit`; they keep Bash for git and search, and inherit MCP tools such as Context7.
+
+**Gemini model IDs** live in each script's `MODELS` dict. Verify them against https://ai.google.dev/gemini-api/docs/models before changing; preview IDs get shut down.
 
 ## Agent Colors
 

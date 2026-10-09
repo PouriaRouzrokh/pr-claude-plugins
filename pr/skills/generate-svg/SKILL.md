@@ -1,243 +1,113 @@
 ---
 name: generate-svg
-description: Generate SVG graphics (hero sections, icons, illustrations, logos, UI components) using Gemini 3.1 Pro. Triggers on "generate an SVG", "create a vector", "make an icon as SVG", "design a hero illustration", or any scalable vector content request.
-allowed-tools: Bash(python*), Bash(node*), Bash(pip*), Bash(npm*), Bash(npx*)
+description: Generates and edits SVG graphics (hero illustrations, UI icons, logo marks, illustrations, UI component graphics, CSS-animated loaders) by having a Gemini model write the markup, then validates, sanitizes, optionally optimizes with svgo, and renders a PNG preview for review. Use when the user asks for an SVG, a vector graphic, an icon, a logo mark, a scalable illustration, or an animated web graphic. For photographic or painterly images use generate-image instead.
+argument-hint: "[description of the SVG to generate or edit]"
+allowed-tools: Bash(uv run ${CLAUDE_SKILL_DIR}/scripts/generate_svg.py *) Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/generate_svg.py *)
 ---
 
-# SVG Generation with Gemini 3.1 Pro
+# Generate SVG
 
-Generate production-quality SVG graphics using `gemini-3.1-pro-preview` as a text model. The model generates SVG code directly — no image generation API needed.
+Generate SVG markup with Gemini by running the bundled script. **Do not hand-write the SVG yourself** — the user chose this skill to get Gemini's output. You may make small follow-up fixes to the saved file (an id, a color, a stray attribute) after reviewing it.
 
-## IMPORTANT: Default Prompting Behavior
+## Models
 
-**When invoking this skill, ALWAYS construct a JSON prompt that includes BOTH the creative description AND a `config` key** to control all generation parameters. The script extracts `config` before sending the rest to the model. This gives Claude full control over type, dimensions, output path, and optimization — nothing is hardcoded.
+| Alias | Model ID | Use for |
+|-------|----------|---------|
+| `flash` (default) | `gemini-3.8-flash` | Icons, logos, components, most illustrations. Fast and strong at code. |
+| `pro` | `gemini-3.1-pro-preview` | Intricate illustrations and layered hero scenes. Slower; paid tier only. |
 
-Build a single JSON object from the user's request:
+`--thinking low|medium|high` trades latency for care; use `high` for complex scenes.
 
-```python
-import json
-prompt = json.dumps({
-    "description": "main visual description",
-    "elements": ["geometric shapes", "gradients", "floating particles"],
-    "colors": {
-        "primary": "#1e40af",
-        "secondary": "#7c3aed",
-        "accent": "#06b6d4",
-        "background": "deep navy to purple gradient"
-    },
-    "layout": {
-        "negative_space": "center-left for text overlay",
-        "depth": "3 layers: background grid, mid shapes, foreground bokeh"
-    },
-    "style": "glassmorphic with geometric patterns",
-    "config": {
-        "output": "hero.svg",
-        "type": "hero",
-        "width": 1200,
-        "height": 600,
-        "optimize": False
-    }
-})
-```
-
-Then pass the serialized JSON string as the single prompt argument:
+## Run the Script
 
 ```bash
-python scripts/generate_svg.py '<json_string>'
+uv run ${CLAUDE_SKILL_DIR}/scripts/generate_svg.py - -t hero -o public/hero.svg --preview <<'PROMPT'
+Abstract hero for a developer-tools startup: layered translucent ribbons flowing from the
+lower right, a fine dot grid fading toward the top left, warm off-white background,
+ink-blue and coral accents. Leave the left 45% calm for the headline.
+PROMPT
 ```
 
-**Config keys** (all optional — omit any that aren't needed):
-| Key | Values | Description |
-|-----|--------|-------------|
-| `output` | any filename | Output path (default: generated.svg) |
-| `type` | `hero`, `icon`, `illustration`, `logo`, `component` | SVG type (affects style guidance) |
-| `width` | integer | SVG width in pixels |
-| `height` | integer | SVG height in pixels |
-| `optimize` | `true`/`false` | Run svgo optimization |
+`uv run` installs the dependencies (google-genai, resvg-py) automatically. Without uv, use `python3` (3.10+) after `python3 -m pip install -U "google-genai>=2.3,<3" resvg-py`.
 
-**Creative prompt keys** (include all that are relevant):
-| Key | Purpose |
-|-----|---------|
-| `description` | Main visual description of what to generate |
-| `elements` | List of specific shapes, patterns, objects to include |
-| `colors` | Color palette with named roles (primary, accent, background) |
-| `layout` | Spatial arrangement, negative space, depth layers |
-| `style` | Design language (glassmorphic, minimal, organic, detailed) |
-| `animation` | Animation instructions (see Animation section below) |
+| Flag | Values | Notes |
+|------|--------|-------|
+| `-t` | `hero`, `icon`, `illustration`, `logo`, `component` | Sets default size and type-specific design rules. Default `illustration`. |
+| `-o` | path ending `.svg` | Default `generated.svg`. Never overwrites: appends `-1`, `-2`. |
+| `--width`, `--height` | px | Defaults: hero 1200×600, icon 24×24, illustration 800×600, logo 200×200, component 400×300. |
+| `-m` | `flash`, `pro`, or a model ID | |
+| `-e` | existing `.svg` | Edit mode: applies the description as changes and keeps the rest. |
+| `--preview` | | Renders `<name>.preview.png` (min 512px wide) for visual review. |
+| `--optimize` | | Runs `npx svgo` (needs Node.js); typically 20–60% smaller. |
 
-For simple requests (e.g., "gear icon"), a plain text prompt is acceptable — the script handles both JSON and plain text. Always infer appropriate type and dimensions from context.
+The script rejects output that is not well-formed SVG (after one automatic repair request) and strips `<script>`, event-handler attributes, and `javascript:` links.
 
-## Setup
+## Workflow
 
-The scripts automatically load `GEMINI_API_KEY` from: environment variable → `.env` in the project root → `.claude/.env` in the project root → `~/.claude/.env`. If none found, ask the user for their API key.
+1. **Pick the type and size** from where the graphic will live. Match an existing icon set's grid and stroke width when the project has one.
+2. **Write the description** (see below). For brand work, pass exact hex colors.
+3. **Generate with `--preview`**, then open the PNG with the Read tool. Check composition, balance, legibility at the target size, and that negative space sits where text will go.
+4. **Iterate with `-e <file.svg>`** for targeted changes ("thinner strokes", "move the orb left", "use the brand coral #F0644B"), or regenerate when the direction is wrong.
+5. **Integrate**: inline small icons as React components or `<svg>` markup so `currentColor` works; reference large illustrations as files (`<img src>` or CSS background). Run `--optimize` on final assets.
+6. **Clean up** the `.preview.png` files unless the user wants them.
 
-Verify the API key:
+## Writing the Description
+
+Plain prose works for simple requests ("settings gear icon"). For richer pieces, a JSON prompt keeps the details organized; every key except `config` is sent to the model:
 
 ```bash
-[ -n "$GEMINI_API_KEY" ] && echo "API key configured" || echo "Missing GEMINI_API_KEY"
+uv run ${CLAUDE_SKILL_DIR}/scripts/generate_svg.py - <<'PROMPT'
+{
+  "description": "AI dashboard hero with a quiet neural-network motif",
+  "elements": ["5-7 nodes connected by thin curved lines", "two floating glass cards", "soft radial glow behind the cluster"],
+  "colors": {"background": "#F7F5F2", "primary": "#1F3A5F", "accent": "#E86A33"},
+  "layout": {"negative_space": "left half for the headline", "depth": "background grid, mid nodes, foreground cards"},
+  "style": "editorial, restrained, precise geometry",
+  "animation": {"nodes": "gentle pulse, staggered", "lines": "dash flow along paths, 4s"},
+  "config": {"type": "hero", "output": "public/hero.svg", "preview": true}
+}
+PROMPT
 ```
 
-Install dependencies:
+`config` keys mirror the flags: `type`, `output`, `width`, `height`, `model`, `thinking`, `edit`, `optimize`, `preview`.
 
-```bash
-# Python
-pip install google-genai
+Guidance that produces better SVGs:
 
-# JavaScript
-npm install @google/genai
+- **Name the role**: decorative backgrounds get `aria-hidden`; logos and standalone illustrations get `role="img"` and a `<title>` (the script's system prompt enforces this; say which it is when ambiguous).
+- **Constrain the palette**: 3–5 colors with roles. Avoid the overused purple-to-blue "AI gradient" unless the brand calls for it.
+- **Say where text goes** for heroes and banners.
+- **Prefer geometry over detail**: SVG excels at clean shapes, gradients, and patterns. Photorealism belongs in `generate-image`.
+- **Ask for animation explicitly** when you want it, and say which elements move. The script requires CSS keyframes and a `prefers-reduced-motion` fallback.
 
-# Optional: SVG optimization
-npm install -g svgo
-```
+## Animation Patterns
 
-## Script Usage
-
-### Python
-
-```bash
-python scripts/generate_svg.py "description" [options]
-```
-
-### JavaScript
-
-```bash
-node scripts/generate_svg.mjs "description" [options]
-```
-
-### Options
-
-| Option | Description |
-|--------|-------------|
-| `-o, --output` | Output filename (default: generated.svg) |
-| `-t, --type` | SVG type: hero, icon, illustration, logo, component |
-| `--width` | SVG width in pixels (default varies by type) |
-| `--height` | SVG height in pixels (default varies by type) |
-| `--optimize` | Run svgo optimization on output |
-
-## Type Defaults
-
-| Type | Width | Height | Description |
-|------|-------|--------|-------------|
-| hero | 1200 | 600 | Hero section illustrations with gradients and geometry |
-| icon | 24 | 24 | Minimal icons, consistent stroke width |
-| illustration | 800 | 600 | General illustrations |
-| logo | 200 | 200 | Logo marks and wordmarks |
-| component | 400 | 300 | UI components and widgets |
-
-## Examples
-
-### Hero Section
-
-```bash
-python scripts/generate_svg.py \
-  "Modern tech startup hero: abstract geometric shapes, gradient circles, floating code brackets, central glowing orb. Deep navy to electric blue gradient with cyan and white accents." \
-  -t hero -o hero.svg --width 1200 --height 600
-```
-
-### Icon
-
-```bash
-python scripts/generate_svg.py \
-  "Settings gear icon, clean lines, rounded corners" \
-  -t icon -o settings.svg
-```
-
-### Logo
-
-```bash
-python scripts/generate_svg.py \
-  "Minimalist mountain peak logo for an outdoor brand, single continuous line" \
-  -t logo -o mountain_logo.svg --width 300 --height 300
-```
-
-### UI Component
-
-```bash
-python scripts/generate_svg.py \
-  "Loading spinner with three rotating dots, CSS animation ready" \
-  -t component -o spinner.svg
-```
-
-## Animation
-
-SVGs can include CSS animations via a `<style>` block. Animation is **not mandatory** — include it when it adds value (hero sections, loading spinners, interactive elements). Skip it for static assets (logos, icons for print).
-
-### Requesting Animation via JSON
-
-Add an `animation` key to the creative prompt:
-
-```python
-import json
-prompt = json.dumps({
-    "description": "AI dashboard hero with neural network",
-    "elements": ["pulsing nodes", "flowing data lines", "floating cards"],
-    "animation": {
-        "nodes": "pulse — gentle scale oscillation, staggered delays",
-        "data_lines": "dash — stroke-dashoffset flow along paths",
-        "cards": "float — subtle vertical hover, 3-5s duration",
-        "particles": "fade-in — opacity 0 to 1 with staggered 0.2s delays",
-        "glow": "glow-cycle — opacity oscillation on light effects"
-    },
-    "config": {"type": "hero", "width": 1200, "height": 600, "output": "hero.svg"}
-})
-```
-
-### Available Animation Patterns
-
-| Pattern | Effect | Best For |
+| Pattern | Effect | Good for |
 |---------|--------|----------|
-| `pulse` | Scale or opacity oscillation | Nodes, buttons, highlights |
-| `float` | Vertical translateY oscillation | Cards, floating elements |
-| `glow-cycle` | Opacity cycling on glow effects | Light orbs, neon accents |
-| `rotate` | Continuous rotation | Spinners, orbital elements |
-| `dash` | stroke-dashoffset animation | Data flow lines, drawing effects |
-| `fade-in` | Opacity 0 → 1 with delay | Sequential reveals, particles |
+| pulse | scale or opacity oscillation | nodes, highlights |
+| float | slow translateY | cards, floating shapes |
+| glow-cycle | opacity cycling on blurred shapes | orbs, accents |
+| rotate | continuous rotation (`transform-box: fill-box`) | spinners, orbits |
+| dash | `stroke-dashoffset` flow or draw-on | data lines, signatures |
+| fade-in | staggered opacity reveal | particles, sequential reveals |
 
-### Animation Best Practices
+Keep loops at 2–6 s with ease-in-out, stagger repeated elements, and reserve infinite loops for ambient motion.
 
-- Use CSS `@keyframes` inside `<style>`, not SMIL `<animate>`
-- Prefix animation names with `svg-` (e.g., `svg-pulse`, `svg-float`)
-- Keep durations smooth: 2-6 seconds with `ease-in-out`
-- Stagger similar elements with `animation-delay`
-- Always include accessibility: `@media (prefers-reduced-motion: reduce) { ... }`
-- Use `infinite` for ambient animations, finite counts for one-time effects
+## References
 
-## SVG Best Practices
-
-The scripts enforce these practices via system instructions:
-
-- Always include `viewBox`, `xmlns`, and explicit dimensions
-- Use meaningful IDs for animation support
-- Keep paths simple and optimized
-- Include `aria-hidden="true"` for decorative SVGs
-- Use `currentColor` where appropriate for theme support
-- Test icons at 16px, 24px, 48px, and 100px+
-
-## Optimization
-
-Use `--optimize` to run svgo on the output:
-
-```bash
-python scripts/generate_svg.py "chart icon" -t icon -o chart.svg --optimize
-```
-
-This reduces file size by 20-60% while preserving visual fidelity.
+- [references/svg-best-practices.md](references/svg-best-practices.md): viewBox, path optimization, accessibility, gradients, animation, and responsive techniques.
+- [references/example_hero_output.svg](references/example_hero_output.svg): a sample hero output showing layered defs, gradients, and animation structure.
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| Missing API key | Set `GEMINI_API_KEY` in env, `.env`, `.claude/.env`, or `~/.claude/.env` |
-| No SVG extracted | Model may have returned prose — retry with simpler prompt |
-| svgo not found | Install with `npm install -g svgo` |
-| Broken rendering | Check viewBox matches width/height dimensions |
-| Missing gradients | Ensure `<defs>` block is present in output |
+| Symptom | Fix |
+|---------|-----|
+| `GEMINI_API_KEY not found` | Add it to the environment, `.env`, `.claude/.env`, or `~/.claude/.env`. |
+| `did not return a valid SVG` | Simplify the description or switch to `-m pro`; very long JSON prompts can truncate output. |
+| Looks wrong at small sizes | Regenerate as `-t icon` (24×24 grid, 2px strokes) and preview at the real size. |
+| Text renders in the wrong font | SVG text uses the viewer's fonts. Avoid text in logos, or convert it to outlined paths in a design tool. |
+| Preview skipped | Run with `uv run` so resvg-py is available. |
 
 ## Related Skills
 
-- **`frontend-design`**: Use for design direction, layout decisions, and integrating SVGs into a larger frontend. Includes a raster vs vector decision table.
-- **`generate-image-nb`**: Use for raster images (photos, textures, complex diagrams) via Gemini's image generation API.
-
-## Reference
-
-See `references/svg-best-practices.md` for detailed SVG design patterns and optimization techniques.
+- **`generate-image`**: raster images (photos, painterly scenes, textures, text-heavy posters).
+- **`frontend-design`**: art direction and integrating graphics into a page.

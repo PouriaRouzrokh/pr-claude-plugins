@@ -6,19 +6,30 @@
   },
   "metadata": {
     "description": "Personal development toolkit plugins for Claude Code",
-    "version": "1.2.0"
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "pr",
       "source": "./pr",
-      "description": "Personal development toolkit with commands for feature development, MVP development, code cleanup, documentation, deployment, and git operations",
-      "version": "1.2.0",
+      "description": "Personal development toolkit: ATLAS-guided feature and MVP development with RFD tracking, debugging, TDD, cleanup, docs, deployment, git workflows, frontend design, and Gemini image/SVG/video generation",
+      "version": "2.0.0",
       "author": {
         "name": "Pouria Rouzrokh"
       },
       "category": "development",
-      "keywords": ["feature-development", "mvp", "code-review", "documentation", "git"]
+      "keywords": [
+        "feature-development",
+        "mvp",
+        "rfd",
+        "debugging",
+        "tdd",
+        "frontend-design",
+        "image-generation",
+        "gemini",
+        "documentation",
+        "git"
+      ]
     }
   ]
 }

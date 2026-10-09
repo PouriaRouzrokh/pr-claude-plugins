@@ -1,8 +1,11 @@
 {
   "name": "pr",
-  "description": "Personal development toolkit with commands for feature development, MVP development, code cleanup, documentation, deployment, and git operations. Includes specialized agents for codebase exploration, architecture design, and quality review with comprehensive RFD/PRD/checkpoint documentation management.",
-  "version": "1.2.0",
+  "version": "2.0.0",
+  "description": "Personal development toolkit: ATLAS-guided feature and MVP development with RFD/PRD/checkpoint documentation, systematic debugging, TDD, code cleanup, docs, local and public deployment, git workflows, frontend design, web quality audits, and Gemini-powered image, SVG, and video generation.",
   "author": {
     "name": "Pouria Rouzrokh"
-  }
+  },
+  "homepage": "https://github.com/PouriaRouzrokh/pr-claude-plugins",
+  "repository": "https://github.com/PouriaRouzrokh/pr-claude-plugins",
+  "keywords": ["feature-development", "mvp", "rfd", "atlas", "debugging", "tdd", "frontend-design", "image-generation", "svg", "video-generation", "gemini", "documentation", "git"]
 }

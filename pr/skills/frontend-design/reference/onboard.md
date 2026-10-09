@@ -1,6 +1,17 @@
-# Onboard Reference
+# Onboard
 
-Create or improve onboarding experiences that help users understand, adopt, and succeed with the product quickly.
+> **Additional context needed**: the "aha moment" you want users to reach, and users' experience level.
+
+Get users to first value as fast as possible. Onboarding's job is not to teach the product. Its job is to get people to the moment that proves the product is worth their time.
+
+## Contents
+
+- [Assess Onboarding Needs](#assess-onboarding-needs)
+- [Onboarding Principles](#onboarding-principles)
+- [Design Onboarding Experiences](#design-onboarding-experiences)
+- [Empty State Design](#empty-state-design)
+- [Implementation Patterns](#implementation-patterns)
+- [Verify Onboarding Quality](#verify-onboarding-quality)
 
 ## Assess Onboarding Needs
 
@@ -32,7 +43,7 @@ Follow these core principles:
 ### Show, Don't Tell
 - Demonstrate with working examples, not just descriptions
 - Provide real functionality in onboarding, not separate tutorial mode
-- Use progressive disclosure - teach one thing at a time
+- Use progressive disclosure, teach one thing at a time
 
 ### Make It Optional (When Possible)
 - Let experienced users skip onboarding
@@ -134,7 +145,7 @@ Projects help you organize your work and collaborate with your team.
 - Make replayable (help menu)
 
 **Best practices**:
-- Interactive > passive (let users click real buttons)
+- Interactive over passive (let users click real buttons)
 - Focus on workflow, not features ("Create a project" not "This is the project button")
 - Provide sample data so actions work
 
@@ -172,7 +183,7 @@ Every empty state needs:
 ### What Will Be Here
 "Your recent projects will appear here"
 
-### Why It Matters  
+### Why It Matters
 "Projects help you organize your work and collaborate with your team"
 
 ### How to Get Started
@@ -227,8 +238,8 @@ Test with real users:
 - **Time to completion**: Can users complete onboarding quickly?
 - **Comprehension**: Do users understand after completing?
 - **Action**: Do users take desired next step?
-- **Skip rate**: Are too many users skipping? (Maybe it's too long/not valuable)
+- **Skip rate**: Are too many users skipping? (Maybe it's too long or not valuable)
 - **Completion rate**: Are users completing? (If low, simplify)
 - **Time to value**: How long until users get first value?
 
-Remember: You're a product educator with excellent teaching instincts. Get users to their "aha moment" as quickly as possible. Teach the essential, make it contextual, respect user time and intelligence.
+When users hit the aha moment fast and don't drop off, finish with a polish pass ([polish.md](polish.md)).

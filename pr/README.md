@@ -1,195 +1,134 @@
 # PR Plugin
 
-A personal development toolkit that extends Claude Code with commands for feature development, MVP development, code cleanup, documentation, deployment, and git operations.
+A personal development toolkit for Claude Code: ATLAS-guided feature and MVP development with RFD tracking, systematic debugging and TDD, code cleanup, documentation, local and public deployment, git workflows, frontend design, web quality audits, and Gemini-powered image, SVG, and video generation.
 
-## Prerequisites
+## Installation
 
-This plugin relies on external tools that should be installed before use. Some are required, others enhance specific skills.
+```
+/plugin install pr --marketplace PouriaRouzrokh/pr-claude-plugins
+```
 
-### Required
-
-| Tool | Type | Used By | Installation |
-|------|------|---------|--------------|
-| [Context7](https://github.com/upstash/context7) | MCP server | Package documentation lookup | Add to MCP settings, no API key needed |
-
-### Optional
-
-| Tool | Type | Used By | Installation |
-|------|------|---------|--------------|
-| Gemini API | API | `generate-image-nb` skill | Requires `GEMINI_API_KEY` environment variable |
-| [Agentation](https://github.com/benjitaylor/agentation) | Next.js component | `agentation` skill | Installed per-project via skill |
-| [Playwright](https://github.com/anthropics/claude-code) | MCP server | UI testing, browser automation | Install via Claude Code: `/install-github-mcp playwright` |
-
-### Setup Notes
-
-- **Context7**: Provides up-to-date documentation for any library. Add to your `.claude/settings.json` MCP servers.
-- **Playwright**: For browser automation and UI testing. Install via Claude Code by running `/install-github-mcp playwright` or add the Playwright MCP server to your settings.
-- **Gemini API**: The `generate-image-nb` skill uses the Gemini Nano Banana API for image generation. Get an API key from Google AI Studio.
-- **Agentation**: Adds visual feedback toolbar to Next.js projects. Installed automatically when skill is used.
-
-## Commands
-
-| Command                                  | Description                                                                                            | Agent Support |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------- |
-| `/pr:feature-dev [desc] [--subagents\|--team]` | Develop a single feature with RFD tracking, codebase exploration, architecture design, and code review | Yes |
-| `/pr:mvp-dev [focus] [--subagents\|--team]`    | Develop an entire MVP from a PRD file, creating RFDs for each feature                                  | Yes |
-| `/pr:commit-push [path] [--merge\|--pr]` | Commit changes, update commitlog.md, push to remote, optionally merge or create PR                     | No |
-| `/pr:clean-codebase [path] [--subagents\|--team]` | Clean and professionalize code using automated review to identify issues                            | Yes |
-| `/pr:update-docs [path] [focus] [--subagents\|--team]` | Update project documentation based on codebase changes                                          | Yes |
-| `/pr:handle-claude-md [path] [docs]`     | Initialize or update CLAUDE.md and project documentation structure                                     | No |
-| `/pr:generate-image [description]`       | Generate or edit images using Gemini Nano Banana 2 API                                                 | No |
-| `/pr:generate-svg [description]`         | Generate SVG graphics using Gemini Pro                                                                 | No |
-| `/pr:run-local [instructions]`           | Start and run the application locally for development                                                  | No |
-| `/pr:run-public [instructions]`          | Deploy and run the application publicly                                                                | No |
-| `/pr:create-prd [ideas]`                 | Generate a Product Requirements Document through interactive discovery and research                    | No |
-| `/pr:create-snapshot [path]`             | Generate a comprehensive technical snapshot of the codebase for handoff or documentation               | Yes |
+or, after `/plugin marketplace add PouriaRouzrokh/pr-claude-plugins`, run `/plugin install pr@pr-cloud-plugins`. Prerequisites (uv, a Gemini API key, Context7, Playwright) are listed in the [marketplace README](../README.md#prerequisites).
 
 ## Skills
 
-| Skill | Description |
-|-------|-------------|
-| `agentation` | Add Agentation visual feedback toolbar to Next.js projects |
-| `atlas-development` | ATLAS framework for production-ready development (Architect, Trace, Link, Assemble, Stress-test) |
-| `create-prd` | Interactive PRD generation with web research |
-| `frontend-design` | Create distinctive, production-grade frontend interfaces with high design quality |
-| `generate-image-nb` | Generate and edit images via Gemini Nano Banana API |
-| `generate-svg` | Generate SVG graphics via Gemini Pro |
-| `writing-clearly-and-concisely` | Clear, direct prose following Strunk's principles |
+Every skill can be run as `/pr:<name>`. Claude also loads most of them automatically when a task matches; `commit-push` and `run-public` run only when you invoke them, because they push code and deploy.
 
-## ATLAS Development Framework
+### Development workflow
 
-This plugin follows the **ATLAS** philosophy for building production-ready applications:
+| Skill | What it does | Agents |
+|-------|--------------|--------|
+| `/pr:create-prd [ideas]` | Interviews you, researches the stack, and writes a PRD to `checkpoint-0/prd.md` | Research |
+| `/pr:mvp-dev [focus]` | Builds an MVP from the PRD one feature at a time, each with an RFD, tests, and your sign-off | Yes |
+| `/pr:feature-dev [desc]` | Explores, clarifies, designs, implements, tests, and documents one feature in an RFD | Yes |
+| `/pr:systematic-debugging` | Root cause first: reproduce, gather evidence, test one hypothesis, fix with a regression test | |
+| `/pr:test-driven-development` | Red-green-refactor plus a verification gate before any "done" claim | |
+| `/pr:atlas-development` | The ATLAS framework reference (Architect, Trace, Link, Assemble, Stress-test) | |
 
-| Step | Phase | Purpose |
-|------|-------|---------|
-| **A** | Architect | Define problem, users, success metrics |
-| **T** | Trace | Data schema, integrations map, stack proposal |
-| **L** | Link | Validate ALL connections before building |
-| **A** | Assemble | Build with layered architecture |
-| **S** | Stress-test | Test functionality, error handling |
+### Quality and documentation
 
-**When to apply:**
-- **Full ATLAS**: New MVPs, features with integrations/schema changes
-- **Partial (L+A+S)**: Features using existing patterns
-- **Skip**: Bug fixes, one-line changes, documentation, refactoring
+| Skill | What it does | Agents |
+|-------|--------------|--------|
+| `/pr:clean-codebase [path]` | Removes dead code, stale comments, and outdated docstrings without changing behavior | Yes |
+| `/pr:update-docs [path] [focus]` | Brings README, API docs, and RFDs in line with the code | Yes |
+| `/pr:create-snapshot [path]` | Writes a technical snapshot to a new checkpoint | Yes |
+| `/pr:handle-claude-md [path] [docs]` | Creates or updates CLAUDE.md and the checkpoint structure | |
+| `/pr:writing-clearly-and-concisely` | Strunk's rules and a catalog of AI-writing tells for any prose | |
+| `/pr:web-quality-audit [url]` | Lighthouse and axe measurements: Core Web Vitals, WCAG 2.2 AA, SEO | |
 
-ATLAS is integrated into `create-prd`, `mvp-dev`, and `feature-dev` commands. See the `atlas-development` skill for complete framework details.
+### Ship
+
+| Skill | What it does |
+|-------|--------------|
+| `/pr:run-local [instructions]` | Detects the stack, prepares the environment, and starts services as background tasks |
+| `/pr:run-public [instructions]` | Builds and deploys to preview, staging, or production; confirms before production |
+| `/pr:commit-push [path] [--merge\|--pr]` | Commits, prepends a `commitlog.md` entry, pushes, and optionally merges or opens a PR |
+
+### Design and media
+
+| Skill | What it does |
+|-------|--------------|
+| `/pr:frontend-design` | Distinctive, production-grade UI: design process, craft floor, critique/audit/polish playbooks, Vercel's React rules, Tailwind v4 |
+| `/pr:generate-image [desc]` | Nano Banana 2.1 / Pro image generation and editing, with search grounding and conversational refinement |
+| `/pr:generate-svg [desc]` | Gemini-written SVGs (hero, icon, illustration, logo, component), validated, sanitized, and previewed as PNG |
+| `/pr:generate-video [desc]` | Gemini Omni Flash clips: text-to-video, image-to-video, editing, and extension |
+| `/pr:agentation [mcp\|manual]` | Adds the Agentation annotation toolbar to a React app, optionally synced to Claude through MCP |
 
 ## Agents
 
-The plugin includes three specialized subagents used by commands:
+Three read-only subagents support the multi-agent skills. They can read, search, run read-only shell commands (git, ls, rg), and look up documentation, but cannot edit files.
 
-| Agent            | Color  | Purpose                                                                        |
-| ---------------- | ------ | ------------------------------------------------------------------------------ |
-| `code-explorer`  | Yellow | Analyzes existing codebase by tracing execution paths and mapping architecture |
-| `code-architect` | Green  | Designs feature architectures with implementation blueprints                   |
-| `code-reviewer`  | Red    | Reviews code for bugs, quality issues, and convention adherence                |
+| Agent | Model | Purpose |
+|-------|-------|---------|
+| `code-explorer` | Sonnet | Traces execution paths and returns the 5–10 files essential to a topic |
+| `code-architect` | Session model | Designs implementation blueprints that follow existing patterns |
+| `code-reviewer` | Session model | Reviews changes and reports only issues at ≥80% confidence |
+
+## ATLAS Development Framework
+
+| Step | Phase | Purpose |
+|------|-------|---------|
+| **A** | Architect | Define the problem, users, and success metrics |
+| **T** | Trace | Data schema, integrations map, stack proposal |
+| **L** | Link | Validate every connection before building |
+| **A** | Assemble | Build with layered architecture |
+| **S** | Stress-test | Test functionality and error handling, then verify with evidence |
+
+Use full ATLAS for new MVPs and features with integrations or schema changes, the last three steps for features that reuse existing patterns, and skip it for bug fixes (use `systematic-debugging`), one-line changes, and docs.
 
 ## Multi-Agent Strategy
 
-Several commands in this plugin launch multiple agents in parallel for exploration, architecture design, and code review. These commands support two agent strategies:
-
-### Subagents (Default)
-
-Subagents are lightweight workers that run within your session and report results back. They work independently — each handles a focused task and returns findings. This is the default mode for all commands and requires no additional setup.
-
-### Agent Teams (Experimental)
-
-[Agent teams](https://docs.anthropic.com/en/docs/claude-code/agent-teams) are a Claude Code experimental feature that lets multiple Claude Code instances work together as a team with inter-agent messaging. Unlike subagents, teammates can communicate directly with each other, share findings, challenge each other's conclusions, and coordinate work through a shared task list.
-
-Agent teams are useful when agents need to collaborate — for example, architecture agents debating design trade-offs, or reviewers cross-referencing each other's findings across different quality dimensions.
-
-**Agent teams are more expensive** (each teammate is a separate Claude instance) and add coordination overhead. The plugin defaults to subagents and only recommends agent teams when inter-agent communication provides a clear advantage.
-
-#### Enabling Agent Teams
-
-Agent teams are disabled by default in Claude Code. To use the `--team` flag, you must first enable the feature:
-
-**Option 1: Add to settings.json** (recommended):
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
-}
-```
-
-**Option 2: Set as environment variable**:
-
-```bash
-export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
-```
-
-Without this setting enabled, the `--team` flag will not work.
-
-### Using the Flags
-
-Commands that support multi-agent strategies accept these flags:
+Skills marked "Yes" above launch agents in parallel and accept a flag:
 
 | Flag | Behavior |
 |------|----------|
-| *(no flag)* | Claude decides the best strategy. Defaults to subagents unless the task clearly benefits from inter-agent communication. |
-| `--subagents` | Force subagent mode regardless of task complexity. |
-| `--team` | Force agent team mode. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to be enabled. |
+| *(none)* | Claude decides; defaults to subagents |
+| `--subagents` | Always use subagents: lightweight workers that report back |
+| `--team` | Use an [agent team](https://code.claude.com/docs/en/agent-teams): separate sessions that message each other. Experimental; requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
 
-### Which Commands Support Agent Flags?
-
-| Command | Agent Phases | Best Case for Teams |
-|---------|-------------|---------------------|
-| `feature-dev` | Exploration, architecture, review | Architecture debate for complex multi-component features |
-| `mvp-dev` | Exploration, architecture, per-feature dev, integration review | Architecture planning and integration review for tightly coupled MVPs |
-| `clean-codebase` | Code review (dead code, comments) | Rarely needed — review tasks are independent |
-| `update-docs` | Codebase exploration (changes, gaps) | Rarely needed — exploration tasks are independent |
-| `create-snapshot` | Codebase exploration (4 agents) | Rarely needed — exploration tasks are independent |
+Teams cost more and add coordination overhead. They pay off mainly in architecture debates (`feature-dev`, `mvp-dev`) and cross-cutting integration reviews.
 
 ## Documentation Structure
 
-This plugin uses a structured documentation approach in projects:
+The workflow skills keep project memory in the project itself:
 
 ```
 .claude/
 ├── checkpoints/
-│   ├── checkpoint-0/           # Pre-development (PRD, initial RFDs)
-│   │   ├── prd.md              # Product Requirements Document
-│   │   └── rfd/                # Request for Development documents
-│   │       └── {N}-{feature}/
-│   │           └── rfd-{date}-{time}.md
-│   ├── checkpoint-1/           # First development checkpoint
-│   │   ├── snapshot.md         # Technical snapshot
-│   │   └── rfd/
-│   └── checkpoint-{N}/         # Additional checkpoints
-└── references/                 # Reference documents (guidelines, specs)
+│   ├── checkpoint-0/            # Before development
+│   │   ├── prd.md               # Product Requirements Document
+│   │   └── rfd/{N}-{feature}/rfd-{YYYY-MM-DD}-{HHMM}.md
+│   └── checkpoint-{N}/          # Development milestones
+│       ├── snapshot.md          # Immutable technical snapshot
+│       └── rfd/
+└── references/                  # Guidelines, specs, package docs
 ```
 
-### Key Document Types
-
-- **PRD (Product Requirements Document)**: Product vision, requirements, and specifications. Created in checkpoint-0 before development begins.
-- **RFD (Request for Development)**: Tracks individual feature requests, implementation progress, and decisions. Created per feature.
-- **Snapshot**: Comprehensive technical snapshot of the codebase at a point in time.
+- **PRD**: product vision and requirements.
+- **RFD** (Request for Development): one per feature or significant fix, covering request, plan, decisions, tests, and files changed.
+- **Snapshot**: the codebase state at a point in time; never edited after creation.
 
 ## Typical Workflows
 
-### Starting a New Project
+- **New project**: `/pr:handle-claude-md` → `/pr:create-prd` → `/pr:mvp-dev` → `/pr:create-snapshot`
+- **New feature**: `/pr:feature-dev <description>` → `/pr:commit-push --pr`
+- **Bug**: describe it; `systematic-debugging` and `test-driven-development` guide the fix
+- **Before a release**: `/pr:web-quality-audit` → `/pr:run-public`
+- **Maintenance**: `/pr:clean-codebase`, `/pr:update-docs`, `/pr:create-snapshot`
 
-1. `/pr:create-prd` - Generate PRD through interactive discovery
-2. `/pr:mvp-dev` - Develop the MVP from the PRD
+## Third-Party Content
 
-### Adding a Feature to Existing Project
+Several skills adapt open-source work; each skill folder's `NOTICE.md` has the details and license text:
 
-1. `/pr:feature-dev [description]` - Develop the feature with full workflow
-
-### Maintenance Tasks
-
-- `/pr:clean-codebase` - Clean up code
-- `/pr:update-docs` - Update documentation
-- `/pr:handle-claude-md` - Initialize or update CLAUDE.md and project structure
-- `/pr:create-snapshot` - Capture current state
-- `/pr:commit-push --pr` - Commit and create PR
+- `frontend-design`: Anthropic's frontend-design and Paul Bakaus's impeccable (Apache-2.0); Vercel's react-best-practices and Seth Hobson's tailwind-design-system (MIT)
+- `systematic-debugging`, `test-driven-development`: obra/superpowers (MIT)
+- `web-quality-audit`: addyosmani/web-quality-skills (MIT)
+- `writing-clearly-and-concisely`: softaworks/agent-toolkit (MIT); Wikipedia's "Signs of AI writing" (CC BY-SA 4.0)
+- `agentation`: benjitaylor/agentation (PolyForm Shield 1.0.0)
 
 ## Version
 
-1.2.0
+2.0.0
 
 ## Author
 

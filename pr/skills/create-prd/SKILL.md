@@ -147,9 +147,11 @@ Stop when: user says "use your judgment", indicates they've shared everything, c
 
 **Actions**:
 
+Use today's date for every "current year" query, and confirm library versions and APIs with Context7 (if available) or the official docs rather than memory.
+
 1. **Technology Stack Research**:
 ```
-Search: "recommended tech stack [project type] 2024"
+Search: "recommended tech stack [project type] [current year]"
 Search: "[framework] latest stable version"
 Search: "[framework A] vs [framework B] for [use case]"
 ```
