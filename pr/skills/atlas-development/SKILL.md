@@ -1,377 +1,117 @@
 ---
 name: atlas-development
-description: Development philosophy for building production-ready applications. ATLAS is a 5-step framework (Architect, Trace, Link, Assemble, Stress-test) that prevents common "vibe coding" failures. Reference this skill when developing features, MVPs, or full applications.
+description: "ATLAS (Architect, Trace, Link, Assemble, Stress-test) is this toolkit's development philosophy for building production-ready software instead of demos: define the problem and success metric, design data and integrations before code, validate every connection before building, assemble in thin end-to-end slices, and prove it works with evidence. Includes a variant for ML and data pipelines. Use when planning or building features, MVPs, or applications, or when deciding how much process a task needs."
 ---
 
 # ATLAS Development Framework
 
-Build production-ready applications, not demos. ATLAS prevents the failures that plague AI-assisted development: building before designing, skipping validation, no data modeling, no testing.
+Most failed AI-assisted builds fail the same ways: code before a clear goal, a data model discovered halfway through, an integration that turns out not to work after hours of building on it, and "done" without proof. ATLAS puts a cheap check in front of each of those failures. It is a way of thinking, not a form to fill in: apply the steps that pay for themselves on the task at hand.
 
-## When to Use ATLAS
+| Step | Phase | Question it answers |
+|------|-------|---------------------|
+| **A** | Architect | What problem, for whom, and how will we know it worked? |
+| **T** | Trace | What data, integrations, and stack does it need, and what can break? |
+| **L** | Link | Does every connection actually work, before we build on it? |
+| **A** | Assemble | How do we build it in layers that stay coherent? |
+| **S** | Stress-test | What evidence shows it works, including when things go wrong? |
 
-**Use full ATLAS for:**
-- New applications or MVPs
-- Features with external integrations (APIs, databases, auth)
-- Features requiring new data models or schema changes
-- Complex multi-component features
+## How Much Process
 
-**Use partial ATLAS (Link + Assemble + Stress-test) for:**
-- Adding features to existing codebases
-- Features using existing patterns and integrations
-- Moderate complexity changes
-
-**Skip ATLAS for:**
-- Bug fixes (use `systematic-debugging`: root cause, regression test, fix)
-- One-line changes
-- Documentation updates
-- Refactoring without behavior changes
-- UI tweaks with no new logic
-
-ATLAS is a thinking philosophy, not a checklist to follow blindly. Apply the steps that add value to your specific task.
-
-## The ATLAS Process
-
-| Step | Phase | What You Do |
-|------|-------|-------------|
-| **A** | Architect | Define problem, users, success metrics |
-| **T** | Trace | Data schema, integrations map, stack proposal |
-| **L** | Link | Validate ALL connections before building |
-| **A** | Assemble | Build with layered architecture |
-| **S** | Stress-test | Test functionality, error handling |
-
-### Skills by Phase
-
-| ATLAS Phase | Related Skills |
-|-------------|---------------|
-| Architect | `create-prd` |
-| Assemble | `frontend-design`, `generate-image`, `generate-svg`, `generate-video`, `test-driven-development` |
-| Stress-test | `test-driven-development` (verification gate), `systematic-debugging`, `web-quality-audit`, `writing-clearly-and-concisely` (docs quality) |
-
----
+| Task | Apply |
+|------|-------|
+| New application or MVP | All five steps (`create-prd` → `mvp-dev`) |
+| Feature with new integrations, schema changes, or architectural choices | T, L, A, S (`feature-dev`, full depth) |
+| Feature that follows existing patterns | L, A, S, briefly (`feature-dev`, light depth) |
+| Bug fix | Not ATLAS: use `systematic-debugging` (root cause, regression test, fix) |
+| One-line change, docs, refactor without behavior change | Just do it and verify |
 
 ## A — Architect
 
-**Purpose:** Know exactly what you're building before touching code.
+Know what you are building before touching code.
 
-### Questions to Answer
+1. **Problem**, in one sentence. If it will not fit in one sentence, it is not understood yet.
+2. **User**, specifically: "me", "the clinic's front-desk staff", not "everyone".
+3. **Success**, measurably: "a radiologist can find a prior study in under 10 seconds", not "it works".
+4. **Constraints**: budget (including API and compute costs), time, required platforms or services, compliance.
 
-1. **What problem does this solve?**
-   - One sentence. If you can't say it simply, you don't understand it.
-
-2. **Who is this for?**
-   - Be specific: "Me" / "Sales team" / "YouTube subscribers"
-   - Not "everyone"
-
-3. **What does success look like?**
-   - Measurable outcome: "I can see my metrics in one dashboard"
-   - Not vague: "It works"
-
-4. **What are the constraints?**
-   - Budget (API costs)
-   - Time (MVP vs full build)
-   - Technical (must use Supabase, must integrate with X)
-
-### Output
-
-```markdown
-## App Brief
-- **Problem:** [One sentence]
-- **User:** [Who specifically]
-- **Success:** [Measurable outcome]
-- **Constraints:** [List]
-```
-
----
+Output: a brief (problem, user, success metric, constraints), or a full PRD from `create-prd`.
 
 ## T — Trace
 
-**Purpose:** Design before building. This is where most "vibe coders" fail.
+Design the parts that are expensive to change later.
 
-### Data Schema
+- **Data model**: entities, fields, relationships, ownership, and lifecycle. Schema changes cascade into every layer, so settle them first.
+- **Integrations map**: every external service with its purpose, auth method, rate limits, cost, and whether access already exists.
 
-Define your source of truth BEFORE building:
+  | Service | Purpose | Auth | Limits / cost | Access confirmed? |
+  |---------|---------|------|---------------|-------------------|
 
-```
-Tables:
-- users (id, email, name, created_at)
-- saved_items (id, user_id, title, content, source, created_at)
-- metrics (id, user_id, platform, value, date)
-
-Relationships:
-- users 1:N saved_items
-- users 1:N metrics
-```
-
-### Integrations Map
-
-List every external connection:
-
-| Service | Purpose | Auth Type | Available? |
-|---------|---------|-----------|------------|
-| Supabase | Database | API Key | Yes |
-| YouTube API | Metrics | OAuth | Via MCP |
-| Notion | Save items | API Key | Yes |
-
-### Technology Stack Proposal
-
-Based on requirements, propose:
-- Database (Supabase, Firebase, Postgres, etc.)
-- Backend (Supabase Functions, n8n, custom API)
-- Frontend (React, Next.js, vanilla, etc.)
-- Any other services needed
-
-User approves or overrides before proceeding.
-
-### Edge Cases
-
-Document what could break:
-
-- API rate limits (YouTube: 10,000 quota/day)
-- Auth token expiry
-- Database connection timeout
-- Invalid user input
-- MCP server unavailability
-
-### Output
-
-- Data schema diagram or markdown table
-- Technology stack (approved by user)
-- Integrations checklist
-- Edge cases documented
-
----
+- **Stack**: propose it with current, verified versions (check Context7 or official docs, not memory), and get the user's approval.
+- **Failure modes**: rate limits, token expiry, timeouts, invalid input, partial failures, an MCP server or API being down. Decide how each is handled.
 
 ## L — Link
 
-**Purpose:** Validate all connections BEFORE building. Nothing worse than building for 2 hours then discovering the API doesn't work.
+Prove every connection works before building on it. Hours of building on a broken integration is the most avoidable waste in software.
 
-### Connection Validation Checklist
+- [ ] Database connects; a trivial query returns rows or an empty result, not an error
+- [ ] Each API key works with a real request, and the response shape matches expectations
+- [ ] OAuth or auth flows complete end to end
+- [ ] MCP servers list their tools and one simple call succeeds
+- [ ] Environment variables load in every runtime (dev server, tests, scripts, deployment)
+- [ ] Rate limits and quotas are known and acceptable
 
-```
-[ ] Database connection tested
-[ ] All API keys verified
-[ ] MCP servers responding
-[ ] OAuth flows working
-[ ] Environment variables set
-[ ] Rate limits understood
-```
-
-### How to Test
-
-**Database:**
-- Test via MCP or direct API call
-- Should return empty array or existing data, not error
-
-**APIs:**
-- Make a simple GET request
-- Verify response format matches expectations
-
-**MCPs:**
-- List available tools
-- Test one simple operation
-
-### Output
-
-All green checkmarks. If anything fails, fix it before proceeding.
-
----
+Everything green before Assemble. Record the results (in the architecture RFD for MVPs).
 
 ## A — Assemble
 
-**Purpose:** Build the actual application with proper architecture.
+Build in layers, but integrate early.
 
-### Architecture Layers
-
-Follow separation of concerns:
-
-1. **Frontend** (what user sees)
-   - UI components
-   - User interactions
-   - Display logic
-
-2. **Backend** (what makes it work)
-   - API routes
-   - Business logic
-   - Data validation
-
-3. **Database** (source of truth)
-   - Schema implementation
-   - Migrations
-   - Indexes
-
-### Build Order
-
-1. Database schema first
-2. Backend API routes second
-3. Frontend UI last
-
-This order prevents building UI for data structures that don't exist.
-
-### Component Strategy
-
-- Use existing component libraries (don't reinvent buttons)
-- Keep components small and focused
-- Document any non-obvious logic
-
-### Output
-
-Working application with:
-- Functional database
-- API endpoints responding
-- UI rendering correctly
-
----
+- **Contracts first**: the schema and API shapes from Trace.
+- **Then a thin end-to-end slice**: one real path through every layer (data → logic → API → UI) working before widening. It surfaces integration problems while they are still cheap.
+- **Then widen** feature by feature, keeping each layer's responsibility clear: UI renders and collects input; the server owns business rules and validation; the database is the source of truth.
+- Use the project's existing component libraries and patterns; do not reinvent primitives.
+- Write tests alongside the code (`test-driven-development`), and keep configuration out of code.
 
 ## S — Stress-test
 
-**Purpose:** Test before shipping. This is the step most "vibe coding" tutorials skip entirely.
+Show evidence, not confidence.
 
-### Proactive Self-Testing
+- **Verify behavior directly**: run the test suite, call the endpoints, exercise the UI in a browser at mobile and desktop widths. Use the verification gate in `test-driven-development`: only claim what fresh output shows.
+- **Break it on purpose**: invalid input, empty states, long text, slow or failing network, expired auth, concurrent use.
+- **Review**: `/simplify` for quality, then `/code-review high` for bugs, and `/security-review` for anything touching auth, payments, uploads, or personal data (it needs an `origin` remote; without one, use a security-focused `pr:code-reviewer` agent); `web-quality-audit` for web performance and accessibility.
+- **Acceptance**: confirm the original problem is solved for the original user, against the success metric from Architect.
+- **Leave it clean**: no temporary scripts, debug output, or test data; code that reads as if a careful senior engineer wrote it.
 
-Test your own work before anyone else sees it. Run the code yourself:
+For production releases, add two more checks: **Validate** (input sanitization, abuse cases, dependency audit) and **Monitor** (logging, error tracking, alerts, and a way to roll back).
 
-- **Backend**: Call your API endpoints, invoke your functions, run database queries. Verify correct responses and data flow.
-- **Frontend**: Open the UI, click through flows, take screenshots. Use Playwright if available.
-- **Logic**: Write quick validation scripts to confirm business logic behaves correctly.
-- **Integration**: Verify new code works with existing features — don't assume, verify.
+## ATLAS for ML and Data Pipelines
 
-After all tests pass, **clean up every test artifact**: remove temporary scripts, debug print statements, console.logs, hardcoded test data, temporary routes, and any code added solely for testing. The codebase must contain zero testing residue.
+| Step | What it means here |
+|------|--------------------|
+| Architect | The decision the model supports, the metric that matters (and its threshold), the baseline to beat, and data or compute budgets. |
+| Trace | Data sources, labeling, splits (by patient, site, or time to prevent leakage), preprocessing contract, experiment tracking, and where artifacts live. |
+| Link | Data access works at full scale, a single batch flows through the whole pipeline, GPUs and environments are available, and the evaluation script runs on a trivial model. |
+| Assemble | Data pipeline → baseline → model, with configuration-driven experiments and fixed seeds. |
+| Stress-test | Beat the baseline on held-out data, check for leakage, examine subgroups and failure cases, confirm reproducibility from a clean environment. |
 
-### Functional Testing
+## Multi-Agent Use
 
-Does it actually work?
+Use subagents for independent work: parallel exploration in Trace, competing designs in Assemble, separate review dimensions in Stress-test. When agents must negotiate (architects settling a shared schema, reviewers challenging each other's findings), first try named subagents that message each other with `SendMessage`; use agent teams (experimental, interactive only, much more expensive) only when that is not enough. Architect stays a conversation with the user.
 
-```
-[ ] All buttons do what they should
-[ ] Data saves to database
-[ ] Data retrieves correctly
-[ ] Navigation works
-[ ] Error states handled
-```
+## Anti-Patterns
 
-### Integration Testing
+1. **Building before designing**: leads to rewrites when the real requirements surface.
+2. **Skipping Link**: hours lost on integrations that never worked.
+3. **No data model**: schema changes cascade into every layer.
+4. **"Done" without evidence**: broken code shipped with confidence.
+5. **Hard-coded configuration**: every environment change becomes a code change.
+6. **Messy handoff**: debug leftovers and duplication erode trust even when the code works.
 
-Do the connections hold?
+## Related Skills
 
-```
-[ ] API calls succeed
-[ ] MCP operations work
-[ ] Auth persists across sessions
-[ ] Rate limits not exceeded
-```
-
-### Edge Case Testing
-
-What breaks?
-
-```
-[ ] Invalid input handled gracefully
-[ ] Empty states display correctly
-[ ] Network errors show feedback
-[ ] Long text doesn't break layout
-```
-
-### User Acceptance
-
-Is this what was wanted?
-
-```
-[ ] Solves the original problem
-[ ] User can accomplish their goal
-[ ] No major friction points
-```
-
-### Code Professionalization
-
-Before handoff, review every file you changed. The code must read as if written by a senior engineer:
-
-```
-[ ] No redundant or duplicated code blocks
-[ ] No dead code, unused imports, or unused variables
-[ ] No debug artifacts (console.log, print, TODO/FIXME/HACK)
-[ ] Consistent naming following project conventions
-[ ] Comments present where logic is non-obvious, absent where obvious
-[ ] No overly complex logic that could be simplified
-[ ] Consistent formatting and style throughout
-[ ] No hardcoded values that should be constants or configuration
-[ ] Error messages are clear and helpful
-```
-
-This is not optional. Messy, careless code erodes trust. Every file should be clean, well-organized, and easy to follow.
-
-### Output
-
-Test report with:
-- What passed
-- What failed
-- What needs fixing
-- What was cleaned up during professionalization
-
----
-
-## Multi-Agent Approaches in ATLAS
-
-Complex ATLAS workflows benefit from running multiple agents. Choose the right strategy based on task needs.
-
-### Subagents (Default)
-
-Subagents are lightweight workers that report results back. Use them for:
-- **Trace**: Multiple code-explorer agents analyzing different parts of the codebase in parallel
-- **Assemble**: Code-architect agents proposing different implementation approaches
-- **Stress-test**: Code-reviewer agents checking different quality dimensions (bugs, security, performance)
-
-Subagents are cheaper, faster, and sufficient when each agent works independently and you synthesize their outputs.
-
-### Agent Teams
-
-Agent teams are independent sessions with inter-agent messaging. Consider them for:
-- **Trace + Link**: When architects need to debate schema decisions, negotiate shared components, and validate that integration plans are consistent across layers
-- **Assemble**: Full-stack features where frontend, backend, and data agents need to coordinate file ownership and share interface contracts
-- **Stress-test**: When reviewers should challenge each other's findings — e.g., security reviewer flagging that a performance optimization bypasses validation
-
-Agent teams are experimental, more expensive, and add coordination overhead. Use them only when inter-agent communication provides a clear advantage over consolidating subagent outputs yourself.
-
-### Decision Guide
-
-| ATLAS Phase | Subagents | Agent Teams |
-|-------------|-----------|-------------|
-| Architect | N/A (interactive with user) | N/A |
-| Trace | Parallel exploration of codebase | Architects debating schema/integration choices |
-| Link | Independent validation checks | Cross-layer validation coordination |
-| Assemble | Independent implementation tasks | Multi-layer features needing coordination |
-| Stress-test | Independent review dimensions | Adversarial review with cross-referencing |
-
----
-
-## Anti-Patterns (What NOT to Do)
-
-These are the mistakes that cause projects to fail:
-
-1. **Building before designing** — You end up rewriting everything
-2. **Skipping connection validation** — Hours wasted on broken integrations
-3. **No data modeling** — Schema changes cascade into UI rewrites
-4. **No testing** — Ship broken code, lose trust
-5. **Hardcoding everything** — No flexibility for changes
-6. **Shipping messy code** — Redundancies, debug leftovers, inconsistent naming, missing or excessive comments. Unprofessional code erodes trust even when it works
-
----
-
-## Quick Reference: When to Apply Each Step
-
-| Context | Apply |
-|---------|-------|
-| PRD creation | A (Architect) — define problem, users, success |
-| MVP planning | A + T — architecture + data schema + integrations |
-| Feature development | T + L + A — trace dependencies, link/validate, assemble |
-| Bug fixes | L + A + S — validate context, fix, test |
-
----
-
-## Extended Framework (Production Builds)
-
-For production builds, add:
-
-+ **V — Validate**: Security/input sanitization, edge cases, unit tests
-+ **M — Monitor**: Logging, observability, alerts
-
-These steps are optional for MVPs but required for production deployments.
+| Phase | Skills |
+|-------|--------|
+| Architect | `create-prd` |
+| Trace, Link | `feature-dev`, `mvp-dev` |
+| Assemble | `frontend-design`, `generate-image`, `generate-svg`, `generate-video`, `test-driven-development` |
+| Stress-test | `test-driven-development`, `systematic-debugging`, `web-quality-audit`, `writing-clearly-and-concisely` |

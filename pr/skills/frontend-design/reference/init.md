@@ -1,8 +1,8 @@
 # Init: capture design context
 
-`init` captures durable product truth and records it where every later session will read it: a `## Design Context` section in the project's CLAUDE.md. It does not invent a visual world; [new-work.md](new-work.md) creates or expands one.
+Capture durable product truth and record it where every later session will read it: a `## Design Context` section in the project's CLAUDE.md. This step does not invent a visual world; [new-work.md](new-work.md) creates or expands one.
 
-Run it once per project, or when the product's audience, purpose, or brand commitments change.
+Do this once per project, or when the product's audience, purpose, or brand commitments change. Other references that need product context send you here when none exists.
 
 ## Contents
 
@@ -17,9 +17,9 @@ Run it once per project, or when the product's audience, purpose, or brand commi
 - **No design context yet:** explore, interview, and write it.
 - **A `## Design Context` section exists:** ask what product knowledge is stale or missing; do not reopen confirmed fields without a reason.
 - **The project keeps PRODUCT.md or DESIGN.md:** treat them as existing context. Update the file the project already uses instead of creating a competing authority, and leave a DESIGN.md's visual decisions untouched.
-- **Redesign or rebrand request:** preserve confirmed product truth unless the user changes it. Visual replacement happens later in new-work, not here.
+- **Redesign or rebrand request:** preserve confirmed product truth unless the user changes it. Visual replacement happens later in [new-work.md](new-work.md), not here.
 
-Never silently overwrite existing context. If another request invoked init, finish the context and resume that request.
+Do not silently overwrite existing context; show the user what changes. If you came here in the middle of another task, finish the context and then resume that task.
 
 ## Step 2: Explore the project
 
@@ -27,11 +27,11 @@ Before asking, scan enough to avoid making the user repeat known facts: README a
 
 Treat repository evidence as a hypothesis, not user approval. Note how mature the visual system is without documenting, extending, or replacing it.
 
-Form a platform hypothesis: `web`, `ios`, `android`, or `adaptive` (one product that genuinely adapts its design language per OS). Mobile web remains `web`; a native wrapper around a website does not make its design language native.
+Form a platform hypothesis: `web`, `ios`, `android`, or `adaptive` (one product that genuinely adapts its design language per OS). Mobile web remains `web`; a native wrapper around a website does not make its design language native. This skill's references cover the web; for native platforms, follow Apple's Human Interface Guidelines or Material Design.
 
 ## Step 3: Interview for product truth
 
-Ask the user with the AskUserQuestion tool. Ask only about material gaps the repository and the original request do not answer with strong evidence. Keep rounds to at most three focused questions, and require one real answer or approval round before writing new context. Confirm inferences instead of asserting them. If no one can answer (an unattended run), infer from the explicit brief, label every inferred fact, and say so in your first reply.
+Ask the user with the AskUserQuestion tool, only about material gaps the repository and the original request do not answer with strong evidence. Usually one round of at most three focused questions is enough; get at least one real answer or approval before writing new context, because unconfirmed context misleads every later session. Present inferences for confirmation rather than asserting them. If no one can answer (an unattended run), infer from the explicit brief, label every inferred fact, and say so in your reply.
 
 Start with the unknowns that most change future product decisions:
 
@@ -96,7 +96,7 @@ web
 [Known user needs or required standard. Omit when no product-specific requirement was established.]
 ```
 
-Platform is the bare value `web`, `ios`, `android`, or `adaptive`. For a native platform, follow the platform's own guidelines (Apple Human Interface Guidelines, Material Design) in later design work.
+Platform is the bare value `web`, `ios`, `android`, or `adaptive`.
 
 Before resuming any build, verify the section exists and contains the confirmed record. Interview notes held only in the conversation do not count.
 
@@ -108,4 +108,4 @@ Summarize the captured and deliberately undecided facts, then recommend the next
 - **Existing coherent interface:** offer to record its visual system (tokens, type, components) in a DESIGN.md file, or as a `### Visual System` subsection of the design context, if the user wants it captured independently of a build.
 - **Existing surface needing work:** name the most relevant reference, such as [critique.md](critique.md), [audit.md](audit.md), or [polish.md](polish.md).
 
-If init was invoked by another request, resume that request now.
+If you came here from another task, resume it now.

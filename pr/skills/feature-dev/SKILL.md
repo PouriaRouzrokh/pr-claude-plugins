@@ -1,396 +1,110 @@
 ---
 name: feature-dev
-description: "Guided feature development for an existing codebase: explores the code with agents, asks clarifying questions, designs the architecture, implements, self-tests, professionalizes the code, and records everything in an RFD. Use when the user wants to build or substantially change a feature."
-argument-hint: "[optional: feature description] [--subagents | --team]"
+description: "Guided feature development for an existing codebase: loads project context from .claude/checkpoints, explores the code with agents, asks clarifying questions, designs and gets the architecture approved, implements, verifies with evidence, reviews with Claude Code's /code-review and /simplify, and records everything in an RFD. Use when the user wants to build or substantially change a feature."
+argument-hint: "[feature description] [--subagents | --team]"
+allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/shared/checkpoint.py *)
 ---
 
-# Feature Development with RFD Management
+# Feature Development
 
-Implement features systematically: understand the codebase, manage RFD documentation, clarify requirements, design architecture, then implement.
+Build one feature from request to reviewed, documented code. The RFD written along the way is the project's memory of this work: future sessions read it instead of re-exploring the code, so keep it specific and current.
 
-## ATLAS Development Philosophy
+**Request**: $ARGUMENTS
 
-This command applies **ATLAS** principles contextually based on task complexity:
+Project documentation conventions (checkpoints, RFD numbering, the template, permissions) are in `${CLAUDE_PLUGIN_ROOT}/shared/checkpoint-system.md`. Read it once per session before creating or editing RFDs. The helper used below is `python3 ${CLAUDE_PLUGIN_ROOT}/shared/checkpoint.py`.
 
-### When to Apply Full Process
+## Match Depth to the Task
 
-**Full process (all phases)** for:
-- New features with integrations or schema changes
-- Complex multi-component features
-- Features requiring architectural decisions
+| Task | Process |
+|------|---------|
+| New feature with integrations, schema changes, or architectural decisions | All phases, with parallel agents |
+| Feature that follows existing patterns and touches a few files | All phases, but explore and design yourself instead of launching agents, and keep the RFD brief |
+| Bug fix | Use the `systematic-debugging` skill. Create a bug-fix RFD only when the fix is non-trivial |
+| One-line change | Make it, verify it, mention it in the summary |
 
-**Simplified process** for:
-- Small features using existing patterns — skip to Phase 5-6
-- Bug fixes — follow `systematic-debugging` (root cause first, regression test, then fix); an RFD only when the fix is non-trivial
-- Minor tweaks — just implement and verify
+This mirrors ATLAS (see `atlas-development`): trace before linking, link before assembling, stress-test before handing off.
 
-### ATLAS Phase Mapping
+## Agents
 
-| Phase | How This Command Applies It |
-|-------|----------------------------|
-| **T** (Trace) | Phase 2-4 traces existing code, maps dependencies, clarifies requirements |
-| **L** (Link) | Phase 5 validates architecture fits existing patterns before building |
-| **A** (Assemble) | Phase 6 implements following chosen architecture |
-| **S** (Stress-test) | Phase 7-8 proactively tests and professionalizes code before handoff |
+Explorer, architect, and reviewer agents keep large reads out of the main conversation and give independent perspectives. Launch them only when the task is big enough to benefit; for small changes, reading the files yourself is faster and cheaper. This plugin's agents are `pr:code-explorer`, `pr:code-architect`, and `pr:code-reviewer`; use the full names, since other plugins ship agents with the same short names.
 
-**Key principle:** Match process depth to task complexity. A one-line fix doesn't need an RFD.
+- **Default**: subagents. They work independently and report back; you synthesize. If a report leaves a gap, continue that agent with `SendMessage` instead of launching a new one: it keeps its context.
+- **`--subagents`**: always subagents.
+- **`--team`**: an agent team, whose members message each other. Teams are experimental, need `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, work only in interactive sessions, and cost several times more. For architects debating trade-offs, a cheaper option usually works: launch them as named subagents and have them challenge each other with `SendMessage`, which does not need teams. If the task is small, say so and confirm before using a team.
 
-For complete ATLAS framework, see `atlas-development` skill.
+## Phase 1: Load Context
 
-## Multi-Agent Strategy
+1. Run `checkpoint.py status` to see checkpoints, the PRD, the latest snapshot, and every RFD with its status.
+2. Read the PRD (if any) and the latest snapshot. Read RFDs whose titles relate to this request.
+3. Decide whether this work **updates an existing RFD** (it refines or extends tracked work) or needs **a new one**. Ask if unclear.
+4. If the request itself is unclear, ask what problem it solves and what the feature should do before exploring.
 
-This command uses agents for codebase exploration, architecture design, and code review. Decide which agent strategy to use based on task complexity and user flags.
+## Phase 2: Explore the Code
 
-### Choosing Between Subagents and Agent Teams
+For a full-depth task, launch 2–3 `pr:code-explorer` agents in parallel, each with a different focus: similar features and how they are built; the architecture and abstractions this feature will touch; UI patterns, tests, or extension points. Ask each to return the 5–10 files most essential to its topic.
 
-**Use subagents (default)** — lightweight workers that report results back:
-- Exploration agents analyzing different parts of the codebase independently
-- Architecture agents proposing approaches that you synthesize
-- Review agents checking different quality dimensions
-- Most feature development tasks
+Read the files they return, then summarize the relevant patterns, conventions, and constraints in a few bullets.
 
-**Use agent teams** — independent sessions with inter-agent messaging:
-- Architecture phase where agents need to debate and challenge each other's proposals
-- Features spanning multiple layers (frontend + backend + data) where agents must coordinate file ownership
-- Complex integrations where one agent's findings directly affect another's approach
+## Phase 3: Clarify
 
-### User Override
+Before designing, resolve what the request leaves open: edge cases, error handling, permissions, integration points, scope boundaries, backward compatibility, performance expectations. Ask all questions at once, using `AskUserQuestion` for discrete choices. Wait for answers; designing on guesses produces rework.
 
-Parse `$ARGUMENTS` for these flags:
-- `--subagents` — Force subagent mode regardless of task complexity
-- `--team` — Force agent team mode for inter-agent collaboration
+If the user says "use your judgment", state your recommendations and get a quick confirmation.
 
-If `--team` is passed but the task is straightforward (small bug fix, single-file change), explain the overhead and ask if the user wants to proceed. If `--subagents` is passed for a task that could benefit from teams, respect their choice — subagents work for any task.
+## Phase 4: Open the RFD
 
-**Without flags**: Default to subagents. Only propose agent teams when inter-agent communication provides a clear advantage, and explain why before proceeding. Agent teams are experimental, more expensive, and add coordination overhead.
+Create it with `checkpoint.py new-rfd "<feature title>"` (or open the existing RFD). Fill **Request** (the original request verbatim, clarified requirements, acceptance criteria as checkboxes, out of scope) and **Context** (related features and RFDs, key files, constraints). Set status to Planning.
 
----
+If this session is in plan mode, `.claude/` writes are blocked: keep the RFD content in your plan and write the file after approval.
 
-## Core Principles
+## Phase 5: Design and Approve
 
-- **Use available tools**: Check what MCP servers and skills are available. Use `frontend-design` for UIs, `generate-image`/`generate-svg` for visual assets, Playwright or the session's browser tools for UI verification, and Context7 for package documentation.
-- **Ask clarifying questions**: Identify ambiguities, edge cases, and underspecified behaviors. Ask specific questions early—after exploring the codebase, before designing.
-- **Understand before acting**: Read existing code patterns first.
-- **Read files from agents**: Ask agents to return 5-10 key files. Read those files before proceeding.
-- **Simple and elegant**: Write readable, maintainable code.
-- **Track progress**: Keep a task list (the task tools, or TodoWrite in older sessions) and update it as phases complete.
-- **Manage RFDs**: Create or update RFDs to track feature requests and implementation.
-- **Write clearly**: Use `writing-clearly-and-concisely` for RFDs. Active voice, omit needless words, avoid AI-isms (pivotal, crucial, leverage).
-- **Validate before building**: Confirm architecture and approach before writing code.
-- **Test proactively**: Use `test-driven-development` for logic and bug fixes. After implementing, test your own work — run endpoints, execute functions, verify behavior — and apply its verification gate before claiming anything works. Clean up temporary test artifacts; keep real tests.
-- **Professionalize code**: Before handoff, review all code for professional quality — no redundancies, proper commenting, clean structure, no debug leftovers.
+For a full-depth task, launch 2–3 `pr:code-architect` agents with different briefs: smallest change that works; cleanest long-term design; pragmatic balance. To have them challenge each other before reporting, name them and ask each to critique the others' proposals with `SendMessage` (or, with `--team`, run them as a team).
 
----
+Then present to the user:
+- each approach in two or three sentences, with its trade-offs and the files it touches
+- your recommendation and why
+- the implementation checklist for the recommended approach
 
-## Phase 0: RFD Discovery & Setup
+Ask for a decision with `AskUserQuestion` (approve / choose another option / revise). If the session is in plan mode, present the plan with `ExitPlanMode` instead; approval switches the session out of plan mode.
 
-**Goal**: Understand existing documentation and prepare RFD for this feature
+Record the chosen approach, the alternatives with why they lost, and the checklist in the RFD. Set status to In Progress.
 
-**Actions**:
+## Phase 6: Implement
 
-1. Check if `.claude/checkpoints/` directory exists
-2. Find the latest checkpoint number by finding the highest existing number (not just counting directories — numbering may have gaps):
+Start only after approval.
 
-```bash
-# Find the highest checkpoint number, not just count directories
-HIGHEST=$(ls -d .claude/checkpoints/checkpoint-* 2>/dev/null | grep -oE 'checkpoint-[0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1)
-CURRENT_CHECKPOINT=${HIGHEST:-0}
-```
+- Follow the codebase's conventions over your own preferences.
+- Use the `test-driven-development` skill for logic: write the failing test, then the code.
+- Track progress against the RFD checklist (use the session's task tools as well if it has them). Add a Progress Log entry at each milestone so an interrupted session can resume.
+- If library behavior matters, check current documentation (Context7 MCP if available) rather than memory.
 
-3. Read existing documentation to understand context:
-   - Read `.claude/checkpoints/checkpoint-0/prd.md` if it exists (product requirements)
-   - Read the most recent `snapshot.md` if it exists
-   - List existing RFDs across all checkpoints:
+**Parallel implementation** pays off only when the work splits into units that own separate files. Launch one agent per unit with `isolation: "worktree"`, ask each to commit its work on its worktree branch, then merge the branches yourself and run the full test suite. Worktrees branch from the remote default branch unless the project sets `"worktree": {"baseRef": "head"}` in its settings, and they contain only tracked files, so an agent would otherwise miss your uncommitted and unpushed work. Before launching, commit the work so far (including the RFD), confirm `baseRef` is `head` (ask before changing settings), and tell each agent to install dependencies first. Gitignored files such as `.env` reach a worktree only through a `.worktreeinclude` file at the project root. For large mechanical changes across many files, suggest Claude Code's `/batch` instead. Otherwise implement sequentially; coordination costs more than it saves on small features.
 
-```bash
-find .claude/checkpoints -path "*/rfd/*" -name "rfd-*.md" 2>/dev/null | sort
-```
+## Phase 7: Verify
 
-4. Check if an RFD already exists for this feature (search by feature name/keywords)
-5. Determine RFD action:
-   - If existing RFD found for this feature → will UPDATE it
-   - If no existing RFD → will CREATE new one
-6. Note the RFD path for later (don't create yet - wait until we have more details)
+Prove the feature works before asking the user to look at it.
 
----
+- Run the project's full test suite and the new tests. Report the actual results.
+- Exercise the behavior directly: call the endpoints, run the functions, query the data.
+- For UI, use Playwright or the session's browser tools: check the main flow, error and empty states, keyboard focus, and both mobile and desktop widths. For a substantial UI change, offer `web-quality-audit`.
+- Apply the verification gate from `test-driven-development`: claim only what fresh command output shows.
+- Remove temporary artifacts (scratch scripts, debug logging, temporary routes, test data). Keep real tests.
 
-## Phase 1: Discovery
+Record what you tested and the results in the RFD.
 
-**Goal**: Understand what needs to be built
+## Phase 8: Review and Professionalize
 
-Initial request: $ARGUMENTS
+1. **Quality**: run `/simplify` on the changed code. It applies reuse, simplification, and efficiency fixes directly, so re-run the tests afterwards. Running it first means the bug review sees the final code.
+2. **Bugs**: run `/code-review high` (type the level: without one, it reuses whatever level the user typed last). The review runs as a background agent, so wait for its findings before editing the files it covers, then fix every confirmed finding and re-run the tests.
+3. **Security**: if the feature touches authentication, authorization, payments, file uploads, or user data, also run `/security-review`. It compares against the `origin` remote's default branch, so when the repository has no `origin` remote, launch a `pr:code-reviewer` agent with a security brief instead.
+4. If those built-ins are unavailable, launch three `pr:code-reviewer` agents instead (correctness, simplicity and duplication, project conventions) and fix what they report.
+5. Read every file you created or modified once more as its future maintainer would: clear names, no dead code or leftover debugging, comments only where the reasoning is not obvious, no hard-coded values that belong in configuration, helpful error messages.
 
-**Actions**:
+Present anything you chose not to fix and ask whether to fix it now or record it as a follow-up. Note review findings and resolutions in the RFD.
 
-1. Create todo list with all phases (including RFD management)
-2. If feature unclear, ask user for:
-   - What problem are they solving?
-   - What should the feature do?
-   - Any constraints or requirements?
-3. Summarize understanding and confirm with user
-4. Record the feature request details for RFD
+## Phase 9: Finish
 
----
-
-## Phase 2: Codebase Exploration
-
-**Goal**: Understand existing code and patterns
-
-**Actions**:
-
-1. Launch 2-3 code-explorer agents in parallel (as subagents by default, or as an agent team if `--team` was specified), each targeting a different aspect:
-   - Similar features and their implementation
-   - Architecture and abstractions
-   - UI patterns, testing, or extension points
-
-   Each agent should return 5-10 key files to read.
-
-   *Subagents are sufficient here — exploration tasks are independent and don't need inter-agent messaging.*
-
-2. Read all files identified by agents
-3. Summarize findings and patterns
-
----
-
-## Phase 3: Clarifying Questions
-
-**Goal**: Resolve ambiguities before designing
-
-**CRITICAL**: Do not skip this phase.
-
-**Actions**:
-
-1. Review codebase findings and original request
-2. Identify underspecified aspects: edge cases, error handling, integration points, scope boundaries, backward compatibility
-3. Present all questions in a clear list
-4. Wait for answers before designing
-
-If the user says "use your judgment", provide your recommendation and get confirmation.
-
----
-
-## Phase 4: Create/Update RFD
-
-**Goal**: Document the feature request and initial planning in an RFD
-
-**Actions**:
-
-1. **Decide whether to CREATE or UPDATE an RFD**:
-   - **Create a new RFD** when: the change request is a distinct new feature, a major architectural change, or a significant scope addition that doesn't belong to any existing RFD
-   - **Update an existing RFD** when: the changes are refinements, bug fixes, or extensions of an already-tracked feature
-   - When in doubt, ask the user whether this warrants a new RFD or is an update to an existing one
-   - If a session involves multiple unrelated changes, create separate RFDs for each distinct change — do NOT lump unrelated work into one RFD
-
-2. Determine the RFD location:
-   - Find the current/latest checkpoint number
-   - If creating new RFD:
-     - Find the highest existing RFD number in the current checkpoint and add 1 (do NOT simply count directories — numbering may have gaps):
-     ```bash
-     # Find highest RFD number in the current checkpoint
-     HIGHEST_RFD=$(ls -d .claude/checkpoints/checkpoint-{current}/rfd/*/ 2>/dev/null | grep -oE '/([0-9]+)-' | grep -oE '[0-9]+' | sort -n | tail -1)
-     NEXT_RFD=$((HIGHEST_RFD + 1))
-     ```
-     - Validate no gaps exist in RFD numbering; if gaps found, warn the user
-     - Create folder: `.claude/checkpoints/checkpoint-{current}/rfd/{next-rfd-number}-{feature-slug}/`
-     - Create file: `rfd-{YYYY-MM-DD}-{HHMM}.md`
-   - If updating existing RFD:
-     - Use the existing RFD path found in Phase 0
-
-3. **RFDs must be thorough**. Include all file changes, architectural decisions, and rationale. Future sessions depend on these documents for context. Do not condense to the point of losing detail — include specific file paths, function names, and the reasoning behind decisions.
-
-4. Write/Update the RFD with this structure:
-
-```markdown
-# RFD-{N}: {Feature Name}
-
-## Metadata
-
-- **Created**: {YYYY-MM-DD HH:MM}
-- **Last Updated**: {YYYY-MM-DD HH:MM}
-- **Status**: Planning | In Progress | Completed | On Hold
-- **Checkpoint**: checkpoint-{N}
-
-## Feature Request
-
-### Original Request
-
-{User's original request verbatim}
-
-### Clarified Requirements
-
-{Summary of requirements after clarifying questions}
-
-- Requirement 1
-- Requirement 2
-- ...
-
-### Out of Scope
-
-{Explicitly noted exclusions}
-
-## Context
-
-### Related Existing Features
-
-{Features found during codebase exploration that are relevant}
-
-### Key Files & Components
-
-{Important files identified by code-explorer agents}
-
-### Technical Constraints
-
-{Any constraints discovered during exploration}
-
-## Implementation Plan
-
-### Chosen Architecture
-
-{Brief description - will be filled in after Phase 5}
-
-### Implementation Phases
-
-{High-level phases - will be detailed after Phase 5}
-
-## Progress Log
-
-### {Date} - Initial Planning
-
-- Created RFD
-- Completed codebase exploration
-- Clarified requirements with user
-
-{Additional entries will be added as implementation progresses}
-
-## Notes & Decisions
-
-{Important decisions made and their rationale}
-```
-
-5. Confirm RFD creation/update with user
-
----
-
-## Phase 5: Architecture Design
-
-**Goal**: Design implementation approaches with trade-offs
-
-**Actions**:
-
-1. Launch 2-3 code-architect agents with different focuses: minimal changes, clean architecture, or pragmatic balance.
-
-   - **With subagents (default)**: Each agent proposes independently; you synthesize and compare approaches.
-   - **With agent teams (`--team`)**: Architects can debate trade-offs and challenge each other's proposals before presenting a consolidated recommendation. This is the phase most likely to benefit from inter-agent communication, especially for complex multi-component features.
-
-2. Form your recommendation (consider: fix vs feature, urgency, complexity)
-3. Present to user: summary of each approach, trade-offs, your recommendation, implementation differences
-4. Ask which approach they prefer
-5. Update RFD with chosen architecture and implementation phases
-
----
-
-## Phase 6: Implementation
-
-**Goal**: Build the feature
-
-**Wait for user approval before starting.**
-
-**Actions**:
-
-1. Read all relevant files from previous phases
-2. Implement following chosen architecture
-3. Follow codebase conventions
-4. Update todos as you progress
-5. Update RFD progress log with milestones
-
----
-
-## Phase 7: Proactive Testing & Verification
-
-**Goal**: Test your own work before asking the user to review
-
-**CRITICAL**: Do not hand off untested code. Test everything yourself first.
-
-**Actions**:
-
-1. **Self-testing** (do this yourself, proactively):
-   - **Backend**: Call API endpoints, invoke functions, run database queries — verify correct responses and data flow
-   - **Frontend**: Use Playwright for UI testing, screenshots, behavior verification (if available)
-   - **Logic**: Write and run quick validation scripts to confirm business logic works as expected
-   - **Integration**: Test that new code works correctly with existing features
-   - Run existing test suites and verify all pass
-
-2. **Clean up test artifacts**: After testing passes, remove all temporary test scripts, debug print statements, console.logs, temporary routes, hardcoded test data, and any code added solely for testing purposes. The codebase must contain zero testing residue.
-
-3. Fix any issues found during testing
-4. Update RFD with testing results (what was tested, what passed, what was fixed)
-
----
-
-## Phase 8: Code Professionalization
-
-**Goal**: Ensure all code is clean, professional, and ready for handoff
-
-**CRITICAL**: Before any user-facing handoff, review and professionalize all code. The code must read as if written by a senior engineer.
-
-**Actions**:
-
-1. Launch 3 code-reviewer agents (subagents by default, or agent team if `--team`): simplicity/DRY, bugs/correctness, conventions/abstractions.
-
-   *With agent teams, reviewers can cross-reference each other's findings — e.g., a bug reviewer can flag that a DRY violation also creates a correctness risk. With subagents, you consolidate their findings yourself.*
-
-2. **Read every file you created or modified** — line by line. Check for and fix:
-   - Redundant or duplicated code blocks — consolidate into shared functions where appropriate
-   - Dead code, unused imports, unused variables — remove completely
-   - Debug artifacts — remove all console.log, print statements, TODO/FIXME/HACK comments left from development
-   - Inconsistent naming — ensure variables, functions, and files follow the project's conventions
-   - Missing or excessive comments — add comments only where logic is non-obvious; remove obvious or redundant comments
-   - Overly complex logic — simplify where possible without changing behavior
-   - Inconsistent formatting — ensure consistent indentation, spacing, and style throughout
-   - Hardcoded values that should be constants or configuration
-   - Error messages that are vague or unhelpful
-
-3. Consolidate review agent findings and address high-severity issues
-
-4. **Verify the code reads cleanly**: A developer opening any changed file for the first time should find it well-organized, well-named, and easy to follow
-
-5. Present findings and ask user: fix now, fix later, or proceed?
-
-6. Update RFD with professionalization notes and significant issues resolved
-
----
-
-## Phase 9: Summary & RFD Finalization
-
-**Goal**: Document completion and finalize RFD
-
-**Actions**:
-
-1. Mark all todos complete
-2. Finalize RFD: update status to "Completed", add completion summary, list all files changed with descriptions of what changed in each. Be thorough — the RFD is the permanent record of this work. Include architectural decisions, trade-offs considered, and rationale for choices made.
-3. Summarize to user: what was built, key decisions, files modified, RFD location, next steps
-
----
-
-## RFD Quick Reference
-
-### RFD Status Values
-
-- **Planning**: Initial request captured, exploring and clarifying
-- **In Progress**: Implementation actively underway
-- **Completed**: Feature fully implemented and reviewed
-- **On Hold**: Paused due to blockers or priority changes
-
-### RFD File Naming
-
-- Folder: `{rfd-number}-{feature-slug}/` (e.g., `4-user-authentication/`)
-- File: `rfd-{YYYY-MM-DD}-{HHMM}.md` (e.g., `rfd-2025-01-26-1430.md`)
-
-### When to Update RFD
-
-- After clarifying requirements (Phase 3)
-- After choosing architecture (Phase 5)
-- During implementation milestones (Phase 6)
-- After proactive testing (Phase 7)
-- After code professionalization (Phase 8)
-- At completion (Phase 9)
+1. Finalize the RFD: status Completed, acceptance criteria checked, every file created or modified with what changed and why, decisions, test evidence, follow-ups. Cross-check against `git status` and `git diff` so nothing is missing.
+2. If the feature changed something the latest snapshot describes (architecture, stack, data model, major flows), say so and suggest `/pr:create-snapshot`.
+3. Summarize for the user: what was built, key decisions, files changed, how it was verified, the RFD path, and suggested next steps (usually `/pr:commit-push`).

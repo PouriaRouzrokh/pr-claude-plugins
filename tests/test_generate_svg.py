@@ -31,7 +31,7 @@ class FakeModels:
         t = self.texts.pop(0)
         if isinstance(t, Exception):
             raise t
-        return types.SimpleNamespace(text=t)
+        return t if hasattr(t, "text") else types.SimpleNamespace(text=t)
 
 
 @pytest.fixture
@@ -91,7 +91,88 @@ def test_sanitize(run, tmp_path):
     run(["x"], texts=[bad])
     out = (tmp_path / "generated.svg").read_text()
     assert "script" not in out and "onload" not in out and "onclick" not in out and "javascript" not in out
-    assert 'href="#"' in out
+    assert "href" not in out
+
+
+NS = 'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"'
+
+
+@pytest.mark.parametrize("fragment,forbidden", [
+    ('<rect onclick="x()" onmouseover="y()" width="1"/>', ["onclick", "onmouseover"]),
+    ('<set attributeName="href" to="javascript:alert(1)"/>', ["<set", "javascript"]),
+    ('<animate attributeName="xlink:href" values="javascript:alert(1)"/>', ["<animate", "javascript"]),
+    ('<foreignObject width="9" height="9"><div>hi</div></foreignObject>', ["foreignObject", "<div"]),
+    ('<use href="https://evil.example/x.svg#a"/>', ["evil.example"]),
+    ('<use xlink:href="//evil.example/x.svg#a"/>', ["evil.example"]),
+    ('<image href="http://evil.example/t.png" width="1" height="1"/>', ["evil.example"]),
+    ('<iframe src="https://evil.example"/>', ["iframe"]),
+    ('<embed src="x.swf"/>', ["embed"]),
+    ('<object data="x.swf"/>', ["object"]),
+    ('<style>@import url(https://evil.example/a.css); .a{fill:red}</style>', ["@import", "evil.example"]),
+])
+def test_sanitize_tree_strips(fragment, forbidden):
+    mod = load_module()
+    out, removed = mod.sanitize(f'<svg {NS} viewBox="0 0 9 9">{fragment}</svg>')
+    assert removed >= 1
+    for needle in forbidden:
+        assert needle not in out
+    assert mod.xml_error(out) is None
+
+
+def test_sanitize_tree_keeps_safe_content():
+    mod = load_module()
+    safe = (f'<svg {NS} viewBox="0 0 9 9"><defs><linearGradient id="g"/></defs>'
+            '<use href="#g"/><rect fill="url(#g)" width="1" height="1"/>'
+            '<animate attributeName="opacity" values="0;1" dur="2s"/>'
+            '<style>.a{fill:red}</style></svg>')
+    out, removed = mod.sanitize(safe)
+    assert removed == 0 and out == safe
+
+
+def test_sanitize_regex_fallback_handles_unquoted_forms():
+    mod = load_module()
+    out, removed = mod.sanitize('<svg xmlns="http://www.w3.org/2000/svg"><rect onclick=alert(1) />'
+                                '<a href=javascript:alert(1)>x</a><script>1</script></svg>')
+    assert removed >= 3
+    assert "onclick" not in out and "javascript" not in out and "script" not in out
+
+
+def test_truncated_output_is_reported(run):
+    truncated = types.SimpleNamespace(
+        text="<svg xmlns='http://www.w3.org/2000/svg'><g>",
+        candidates=[types.SimpleNamespace(finish_reason=types.SimpleNamespace(name="MAX_TOKENS"))])
+    with pytest.raises(SystemExit) as exc:
+        run(["x"], texts=[truncated])
+    assert "truncated" in str(exc.value)
+
+
+def test_argon_alias_and_thinking(run):
+    calls = run(["x", "-m", "argon", "--thinking", "low"])
+    assert calls[0]["model"] == "gemini-4-argon"
+    assert calls[0]["config"].thinking_config.thinking_level.value.lower() == "low"
+    with pytest.raises(SystemExit) as exc:
+        run(["x", "-m", "argon", "--thinking", "minimal"])
+    assert "thinking levels" in str(exc.value)
+
+
+@pytest.mark.parametrize("flag", ["--width", "--height"])
+@pytest.mark.parametrize("value", ["0", "-5", "99999"])
+def test_dimension_bounds(run, flag, value):
+    with pytest.raises(SystemExit) as exc:
+        run(["x", flag, value])
+    assert "between 1 and" in str(exc.value)
+
+
+def test_preview_does_not_overwrite_and_survives_render_failure(run, tmp_path, monkeypatch):
+    (tmp_path / "generated.preview.png").write_bytes(b"old")
+    run(["x", "--preview"])
+    assert (tmp_path / "generated.preview.png").read_bytes() == b"old"
+    assert (tmp_path / "generated.preview-1.png").exists()
+    import resvg_py
+    monkeypatch.setattr(resvg_py, "svg_to_bytes", lambda **kw: (_ for _ in ()).throw(ValueError("bad svg")))
+    run(["x", "-o", "second.svg", "--preview"])
+    assert (tmp_path / "second.svg").exists()
+    assert not (tmp_path / "second.preview.png").exists()
 
 
 def test_edit_includes_existing(run, tmp_path):

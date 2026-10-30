@@ -54,6 +54,8 @@ function Search({ items }: { items: Item[] }) {
 - Expensive visualizations (charts, graphs) reacting to input
 - Any derived state that causes noticeable render delays
 
-**Note:** Wrap the expensive computation in `useMemo` with the deferred value as a dependency, otherwise it still runs on every render.
+**Note:** Wrap the expensive computation in `useMemo` with the deferred value as a dependency, otherwise it still runs on every render. If the slow part is rendering `ResultsList` itself, wrap it in `memo` so it skips re-rendering while only `query` changes; deferring a value does not help a child that re-renders anyway.
+
+> **Note (2026):** With React Compiler enabled, both memoizations happen automatically; keep `useDeferredValue` itself, since the compiler does not change scheduling.
 
 Reference: [React useDeferredValue](https://react.dev/reference/react/useDeferredValue)

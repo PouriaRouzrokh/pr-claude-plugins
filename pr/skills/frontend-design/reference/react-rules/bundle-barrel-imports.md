@@ -24,24 +24,31 @@ import { Button, TextField } from '@mui/material'
 // Loads 2,225 modules, takes ~4.2s extra in dev
 ```
 
-**Correct - Next.js 13.5+ (recommended):**
+**Correct - Next.js (recommended):**
 
-```js
-// next.config.js - automatically optimizes barrel imports at build time
-module.exports = {
-  experimental: {
-    optimizePackageImports: ['lucide-react', '@mui/material']
-  }
-}
-```
+Next.js already rewrites barrel imports for a built-in list of popular packages, including `lucide-react`, `@mui/material`, `@mui/icons-material`, `date-fns`, `lodash-es`, `react-icons/*`, `@headlessui/react`, `@tabler/icons-react`, `@heroicons/react/*`, `recharts`, `rxjs`, `ramda`, `antd`, and `react-use`. Keep standard imports for those:
 
 ```tsx
-// Keep the standard imports - Next.js transforms them to direct imports
+// No config needed for packages on the default list
 import { Check, X, Menu } from 'lucide-react'
-// Full TypeScript support, no manual path wrangling
 ```
 
-This is the recommended approach because it preserves TypeScript type safety and editor autocompletion while still eliminating the barrel import cost.
+Add packages that are not on the list, such as your own design-system package or an internal barrel-heavy library:
+
+```ts
+// next.config.ts
+const nextConfig = {
+  experimental: {
+    optimizePackageImports: ['@acme/ui', 'some-icon-library'],
+  },
+}
+
+export default nextConfig
+```
+
+This preserves TypeScript types and editor autocompletion while still eliminating the barrel import cost.
+
+> **Note (2026):** `optimizePackageImports` is still under `experimental` in Next.js 16.4. Because the common UI and icon libraries are optimized by default, this rule mostly matters for packages outside the default list, for your own internal `index.ts` barrels, and for non-Next.js bundlers.
 
 **Correct - Direct imports (non-Next.js projects):**
 
@@ -57,4 +64,4 @@ These optimizations provide 15-70% faster dev boot, 28% faster builds, 40% faste
 
 Libraries commonly affected: `lucide-react`, `@mui/material`, `@mui/icons-material`, `@tabler/icons-react`, `react-icons`, `@headlessui/react`, `@radix-ui/react-*`, `lodash`, `ramda`, `date-fns`, `rxjs`, `react-use`.
 
-Reference: [How we optimized package imports in Next.js](https://vercel.com/blog/how-we-optimized-package-imports-in-next-js)
+Reference: [How we optimized package imports in Next.js](https://vercel.com/blog/how-we-optimized-package-imports-in-next-js), [`optimizePackageImports`](https://nextjs.org/docs/app/api-reference/config/next-config-js/optimizePackageImports)

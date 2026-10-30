@@ -10,7 +10,7 @@ This skill is adapted from [addyosmani/web-quality-skills](https://github.com/ad
 | `references/core-web-vitals.md` | Condensed from upstream `skills/core-web-vitals/` (SKILL.md and the LCP, INP, and CLS references) and `skills/performance/references/MEASUREMENT.md`; Lighthouse 13 insight ids and Next.js fixes added |
 | `references/accessibility.md` | Condensed from upstream `skills/accessibility/` (SKILL.md, `WCAG.md`, `A11Y-PATTERNS.md`) into a WCAG 2.2 AA checklist with a manual test protocol |
 | `references/seo.md` | Condensed from upstream `skills/seo/` (SKILL.md and `STRUCTURED-DATA.md`); HTTP-level checks and the Next.js Metadata API added |
-| `scripts/analyze.sh` | Copied from upstream `skills/web-quality-audit/scripts/analyze.sh`; only an attribution comment was added |
+| `scripts/analyze.sh` | Copied from upstream `skills/web-quality-audit/scripts/analyze.sh`; added an attribution comment and stopped reporting `http://www.w3.org/` namespace URIs (such as inline SVG `xmlns`) as non-HTTPS URLs |
 | `scripts/summarize.mjs` | Written for this plugin; not from upstream |
 
 Upstream's `best-practices` security material and `performance` skill were not carried over.

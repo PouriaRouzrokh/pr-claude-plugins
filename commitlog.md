@@ -4,6 +4,28 @@ This file tracks significant commits and changes to the pr-claude-plugins market
 
 ---
 
+### 10/30/2026 (main) — done by WatchTower (~/WatchTower), Pouria approved
+
+- **Release v2.2.0 after a full review** (Pouria: "critically evaluate all the skills, make sure nothing is left to be updated, then push"). Four read-only reviews (workflow skills vs current Claude Code, media generators, frontend and audit, vendored process skills) against current docs, package versions and upstream; then fixes:
+  - **Security:** generate-svg's sanitizer now parses the SVG tree (scripts, foreignObject, embeds, `on*` handlers, `javascript:`, external hrefs, href-targeting `<set>`/`<animate>`, CSS imports), regex only as fallback. Frontend skill states the Next.js 16.4.1 / React 19.3.1 security floor (advisories of 2026-10-14).
+  - **Workflow:** worktree agents now commit first and check `worktree.baseRef` (they otherwise start from the remote default branch); `/simplify` then `/code-review high`; `/security-review` falls back to `pr:code-reviewer` without an `origin` remote; MVP integration review over the commit range; full `pr:` agent names; `SendMessage` debates before agent teams; Monitor instead of sleep loops; gitleaks `git --pre-commit`; AGENTS.md and `.claude/rules/` in handle-claude-md; `.claude/settings.local.json` and `.claude/worktrees/` gitignored.
+  - **Media:** `argon` (Gemini 4 Argon) option in generate-svg (default stays Gemini 3.8 Flash); truncation detection; preview failures no longer crash; video create retries only 429/503 (no double billing); cost lines for every model; no silent overwrites.
+  - **Frontend:** React `<ViewTransition>` page (adapted from Vercel, MIT), impeccable synced to skill-v4.8.0 (line breaks, Arabic script, advisory offset shadows), shadcn without the default look, Next 16.4 flags, corrected Baseline claims, agentation `--host`, optional Agentic column in audits.
+  - **Docs:** README update command fixed (`claude plugin update pr@pr-cloud-plugins`); MIT LICENSE (Pouria's choice) with `license` in plugin.json and marketplace.json; NOTICE files record upstream reviews.
+  - Tests: 119 pass (40 new); `claude plugin validate` passes for the plugin and the marketplace.
+
+---
+
+### 10/9/2026 - 15:07 (main)
+
+- **Refactor: skill instruction overhaul, v2.2.0** (RFD-5)
+  - Shared `pr/shared/` conventions, RFD template, and `checkpoint.py` helper replace five duplicated copies of the checkpoint rules and shell snippets
+  - Rewrote feature-dev, mvp-dev, clean-codebase, update-docs, create-snapshot (now a fork), handle-claude-md, create-prd, atlas-development, commit-push, run-local, run-public: built-in /code-review, /simplify, /security-review; approvals via questions or plan mode; worktree guidance; calm, explained instructions
+  - Audited and fixed frontend-design references, the React rules (React 19.3, Compiler, Next.js 16.4) and Tailwind 4.3, agentation, web-quality-audit, and the SVG guide and generator prompt
+  - 4 new helper tests (79 total)
+
+---
+
 ### 10/9/2026 - 14:36 (main)
 
 - **Feature: GPT Image (ChatGPT image models) in generate-image** (RFD-4)

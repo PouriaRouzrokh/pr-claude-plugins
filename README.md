@@ -11,11 +11,13 @@ Inside Claude Code:
 /plugin install pr@pr-cloud-plugins
 ```
 
-To update later:
+To update later, run this in your shell:
 
 ```
-/plugin marketplace update pr-cloud-plugins
+claude plugin update pr@pr-cloud-plugins
 ```
+
+or, inside Claude Code, open `/plugin` → **Marketplaces** → `pr-cloud-plugins` and choose **Update marketplace** (it refreshes the listing and updates the installed plugin) or **Enable auto-update**. Auto-update is off by default for third-party marketplaces, and refreshing the listing alone (`claude plugin marketplace update`) can leave the installed plugin at its old version. Run `/reload-plugins` or start a new session to load the new version.
 
 ## Prerequisites
 
@@ -28,7 +30,7 @@ To update later:
 | Playwright | UI verification in `feature-dev`, `mvp-dev`, `frontend-design` | `/plugin install playwright@claude-plugins-official` |
 | Node.js 22+ and Chrome | `web-quality-audit` (Lighthouse, axe), optional `svgo` | Any recent Node install. |
 | ffmpeg (optional) | Reviewing and post-processing generated video | `brew install ffmpeg` |
-| Agent teams (optional) | `--team` flag on multi-agent skills | Set `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` under `env` in `settings.json`. |
+| Agent teams (optional) | `--team` flag on multi-agent skills | Enable for one session: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude`. Avoid setting it permanently: while it is on, Claude may turn the subagents it names into teammates, which costs more, even when you did not ask for a team. |
 
 Without uv, the scripts also run with `python3` (3.10+) after `python3 -m pip install -U "google-genai>=2.3,<3" "openai>=2,<4"`.
 
@@ -50,3 +52,7 @@ The plugin follows the **ATLAS** framework (Architect, Trace, Link, Assemble, St
 ## Author
 
 Pouria Rouzrokh
+
+## License
+
+MIT (see `LICENSE`). Vendored skills keep their own licenses; see each skill's `NOTICE.md`.

@@ -1,354 +1,121 @@
 # Harden
 
-Designs that only work with perfect data aren't production-ready. Harden the interface against the inputs, errors, languages, and network conditions that real users will throw at it.
+Designs that only work with perfect data are not production-ready. Harden the interface against the inputs, errors, languages, and network conditions real users bring. Empty-state and error copy are covered in [clarify.md](clarify.md) and [onboard.md](onboard.md); this file covers the structural and technical side.
 
 ## Contents
 
-- [Assess Hardening Needs](#assess-hardening-needs)
-- [Hardening Dimensions](#hardening-dimensions)
-- [Testing Strategies](#testing-strategies)
-- [Verify Hardening](#verify-hardening)
+- [Assess](#assess)
+- [Text overflow and wrapping](#text-overflow-and-wrapping)
+- [Internationalization](#internationalization)
+- [Errors and failure](#errors-and-failure)
+- [Edge cases and boundaries](#edge-cases-and-boundaries)
+- [Input validation](#input-validation)
+- [Accessibility resilience](#accessibility-resilience)
+- [Verify](#verify)
 
-## Assess Hardening Needs
+## Assess
 
-Identify weaknesses and edge cases:
+List the conditions the target will meet, then check each one:
 
-1. **Test with extreme inputs**:
-   - Very long text (names, descriptions, titles)
-   - Very short text (empty, single character)
-   - Special characters (emoji, RTL text, accents)
-   - Large numbers (millions, billions)
-   - Many items (1000+ list items, 50+ options)
-   - No data (empty states)
+- **Extreme content:** very long and very short text, empty values, large numbers (millions, billions), 1,000+ list items, 50+ options, no data at all.
+- **Failure:** offline, slow, timeouts; API errors (400, 401, 403, 404, 409, 429, 500); validation and permission errors; concurrent edits.
+- **Languages:** long translations (German runs about 30% longer than English), RTL scripts (Arabic, Hebrew), CJK, emoji, and locale formats for dates, numbers, and currency.
 
-2. **Test error scenarios**:
-   - Network failures (offline, slow, timeout)
-   - API errors (400, 401, 403, 404, 500)
-   - Validation errors
-   - Permission errors
-   - Rate limiting
-   - Concurrent operations
+## Text overflow and wrapping
 
-3. **Test internationalization**:
-   - Long translations (German is often 30% longer than English)
-   - RTL languages (Arabic, Hebrew)
-   - Character sets (Chinese, Japanese, Korean, emoji)
-   - Date/time formats
-   - Number formats (1,000 vs 1.000)
-   - Currency symbols
-
-**CRITICAL**: Designs that only work with perfect data aren't production-ready. Harden against reality.
-
-## Hardening Dimensions
-
-Systematically improve resilience:
-
-### Text Overflow & Wrapping
-
-**Long text handling**:
 ```css
 /* Single line with ellipsis */
-.truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* Multi-line with clamp */
-.line-clamp {
+/* Multi-line clamp (the prefixed form is the interoperable one today) */
+.clamp-3 {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
   overflow: hidden;
 }
 
-/* Allow wrapping */
-.wrap {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-}
+/* Let long words and URLs break instead of overflowing */
+.prose { overflow-wrap: break-word; hyphens: auto; } /* hyphens needs a lang attribute */
+.user-content { overflow-wrap: anywhere; }
+
+/* Flex and grid children default to min-width: auto and refuse to shrink */
+.flex-child, .grid-child { min-width: 0; }
 ```
 
-**Flex/Grid overflow**:
-```css
-/* Prevent flex items from overflowing */
-.flex-item {
-  min-width: 0; /* Allow shrinking below content size */
-  overflow: hidden;
-}
+- Truncated text needs a way to read the whole value (a tooltip, an expanded view, or a title attribute at minimum).
+- Keep body text at 16px or larger on mobile; iOS Safari zooms the page when a focused input's font size is under 16px.
+- Check 200% zoom and 400% zoom at a 1280px viewport (WCAG reflow: content must work at 320 CSS px wide without two-dimensional scrolling).
+- Let containers grow with their text; avoid fixed heights on anything holding copy.
 
-/* Prevent grid items from overflowing */
-.grid-item {
-  min-width: 0;
-  min-height: 0;
-}
+## Internationalization
+
+- **Expansion:** budget 30–40% extra space, use layouts that size to content, and avoid fixed widths on buttons and labels (`px-4` rather than `w-24`).
+- **RTL:** use logical properties (`margin-inline-start`, `padding-inline`, `border-inline-end`, `inset-inline-start`) instead of left/right. Mirror directional icons with `:dir(rtl) .arrow { transform: scaleX(-1); }`; leave non-directional icons (play, check, clock) alone.
+- **Arabic-script languages** (Arabic, Persian, Urdu, Pashto, Kurdish):
+  - Preserve Zero-Width Non-Joiner (U+200C). Persian and Kurdish use it between compound-word parts to break cursive joining while keeping the word together; a sanitizer or filter that strips it changes meaning.
+  - Handle Yeh and Kaf variants. Persian uses ی (U+06CC) and ک (U+06A9); Arabic uses ي (U+064A) and ك (U+0643). Store the original form; for search and validation treat the pairs as equivalent so an Arabic keyboard matches Persian text.
+  - Use locale-aware digits through `Intl.NumberFormat` (`new Intl.NumberFormat('fa-IR').format(1234)` gives ۱٬۲۳۴) instead of hardcoding Western digits.
+  - Respect calendars: Persian users expect Solar Hijri, many Arabic-speaking users expect Hijri. Use `Intl.DateTimeFormat` with the locale or `-u-ca-` extension (`'ar-SA-u-ca-islamic'`).
+- **Scripts:** serve UTF-8 everywhere and choose fonts (or fallbacks) that cover the target scripts; CJK text needs line-breaking rules (`word-break: keep-all` for Korean, `line-break: strict` where appropriate).
+- **Formats:** use the `Intl` APIs instead of hand-built strings:
+
+```js
+new Intl.DateTimeFormat('de-DE').format(date);                                // 15.1.2026
+new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(1234.56); // $1,234.56
+new Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(-1, 'day');     // yesterday
 ```
 
-**Responsive text sizing**:
-- Use `clamp()` for fluid typography
-- Set minimum readable sizes (16px body on mobile, the same floor the typography guidance sets; 14px only for genuinely secondary text. iOS Safari force-zooms focused inputs under 16px, which breaks form layouts)
-- Test text scaling (zoom to 200%)
-- Ensure containers expand with text
+- **Plurals:** never build plurals with `count !== 1 ? 's' : ''`. Use the project's i18n library or `Intl.PluralRules`, which handles languages with several plural forms.
 
-### Internationalization (i18n)
+## Errors and failure
 
-**Text expansion**:
-- Add 30-40% space budget for translations
-- Use flexbox/grid that adapts to content
-- Test with longest language (usually German)
-- Avoid fixed widths on text containers
+- **Network:** say what failed, keep the user's input, offer a retry, and handle timeouts. Cancel stale requests (`AbortController`) when the user navigates or retypes.
+- **Forms:** show errors inline next to the field, keep everything the user entered, and do not block submission on rules the server will check anyway.
+- **By status:** 400 → field-level validation messages; 401 → re-authenticate and return the user to where they were; 403 → explain the missing permission and who can grant it; 404 → a not-found state with a way forward; 409 → show the conflict and let the user choose; 429 → say when to retry; 5xx → a plain explanation that the problem is on the server, plus a retry or support path.
+- **Containment:** one failing widget should not blank the page. Use error boundaries (or equivalent) around independent regions.
+- **Progressive enhancement:** server-rendered content and native links and forms keep working when JavaScript is slow or fails; feature-detect (`@supports`, `'x' in window`) rather than browser-sniff.
 
-```jsx
-// ❌ Bad: Assumes short English text
-<button className="w-24">Submit</button>
+## Edge cases and boundaries
 
-// ✅ Good: Adapts to content
-<button className="px-4 py-2">Submit</button>
-```
+- **Empty:** first use, no results, filtered to nothing, no permission, and failed-to-load each need their own state and next action.
+- **Loading:** initial load, pagination, and refresh; name what is loading and reserve its space so nothing shifts.
+- **Large datasets:** paginate or virtualize; never render 10,000 rows at once.
+- **Concurrency:** disable or debounce submit while a request is in flight, make writes idempotent where possible, roll back optimistic updates on failure, and surface conflicts instead of silently overwriting.
+- **Permissions:** read-only and no-access states explain why and how to get access.
+- **Interrupted gestures** (custom sliders, drag surfaces, scrollable control strips): when a second pointer lands mid-drag, the browser cancels the gesture to scroll (`pointercancel`), capture is lost (`lostpointercapture`), the pointer is released outside the control, or the window blurs, clear the dragging state and release capture. Set `touch-action` on drag surfaces so the browser knows which axis it owns. After each interruption, the next drag must work without a reload.
 
-**RTL (Right-to-Left) support**:
-```css
-/* Use logical properties */
-margin-inline-start: 1rem; /* Not margin-left */
-padding-inline: 1rem; /* Not padding-left/right */
-border-inline-end: 1px solid; /* Not border-right */
+## Input validation
 
-/* Or use dir attribute */
-[dir="rtl"] .arrow { transform: scaleX(-1); }
-```
+- Use native constraints first (`required`, `type="email"`, `maxlength`, `pattern`, `inputmode`, `autocomplete`) and connect hints with `aria-describedby`.
+- Style errors with `:user-invalid` so fields don't turn red before the user has interacted with them.
+- Validate again on the server, always; client-side checks are for convenience, not security.
 
-**Character set support**:
-- Use UTF-8 encoding everywhere
-- Test with Chinese/Japanese/Korean (CJK) characters
-- Test with emoji (they can be 2-4 bytes)
-- Handle different scripts (Latin, Cyrillic, Arabic, etc.)
-
-**Date/Time formatting**:
-```javascript
-// ✅ Use Intl API for proper formatting
-new Intl.DateTimeFormat('en-US').format(date); // 1/15/2024
-new Intl.DateTimeFormat('de-DE').format(date); // 15.1.2024
-
-new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD'
-}).format(1234.56); // $1,234.56
-```
-
-**Pluralization**:
-```javascript
-// ❌ Bad: Assumes English pluralization
-`${count} item${count !== 1 ? 's' : ''}`
-
-// ✅ Good: Use proper i18n library
-t('items', { count }) // Handles complex plural rules
-```
-
-### Error Handling
-
-**Network errors**:
-- Show clear error messages
-- Provide retry button
-- Explain what happened
-- Offer offline mode (if applicable)
-- Handle timeout scenarios
-
-```jsx
-// Error states with recovery
-{error && (
-  <ErrorMessage>
-    <p>Failed to load data. {error.message}</p>
-    <button onClick={retry}>Try again</button>
-  </ErrorMessage>
-)}
-```
-
-**Form validation errors**:
-- Inline errors near fields
-- Clear, specific messages
-- Suggest corrections
-- Don't block submission unnecessarily
-- Preserve user input on error
-
-**API errors**:
-- Handle each status code appropriately
-  - 400: Show validation errors
-  - 401: Redirect to login
-  - 403: Show permission error
-  - 404: Show not found state
-  - 429: Show rate limit message
-  - 500: Show generic error, offer support
-
-**Graceful degradation**:
-- Core functionality works without JavaScript
-- Images have alt text
-- Progressive enhancement
-- Fallbacks for unsupported features
-
-### Edge Cases & Boundary Conditions
-
-**Empty states**:
-- No items in list
-- No search results
-- No notifications
-- No data to display
-- Provide clear next action
-
-**Loading states**:
-- Initial load
-- Pagination load
-- Refresh
-- Show what's loading ("Loading your projects...")
-- Time estimates for long operations
-
-**Large datasets**:
-- Pagination or virtual scrolling
-- Search/filter capabilities
-- Performance optimization
-- Don't load all 10,000 items at once
-
-**Concurrent operations**:
-- Prevent double-submission (disable button while loading)
-- Handle race conditions
-- Optimistic updates with rollback
-- Conflict resolution
-
-**Interrupted gestures** (custom sliders, drag surfaces, scrollable control strips):
-- A second finger or pointer lands mid-drag: the first drag keeps its pointer or ends cleanly, never jumps to the new one
-- The browser cancels the gesture to scroll (`pointercancel`), capture is lost (`lostpointercapture`), the pointer is released outside the control, or the window loses focus (`blur`) mid-drag: clear the dragging state and release capture
-- After each of these, the next tap or drag works without a reload
-
-**Permission states**:
-- No permission to view
-- No permission to edit
-- Read-only mode
-- Clear explanation of why
-
-**Browser compatibility**:
-- Polyfills for modern features
-- Fallbacks for unsupported CSS
-- Feature detection (not browser detection)
-- Test in target browsers
-
-### Input Validation & Sanitization
-
-**Client-side validation**:
-- Required fields
-- Format validation (email, phone, URL)
-- Length limits
-- Pattern matching
-- Custom validation rules
-
-**Server-side validation** (always):
-- Never trust client-side only
-- Validate and sanitize all inputs
-- Protect against injection attacks
-- Rate limiting
-
-**Constraint handling**:
 ```html
-<!-- Set clear constraints -->
-<input
-  type="text"
-  maxlength="100"
-  pattern="[A-Za-z0-9]+"
-  required
-  aria-describedby="username-hint"
-/>
-<small id="username-hint">
-  Letters and numbers only, up to 100 characters
-</small>
+<label for="username">Username</label>
+<input id="username" name="username" required maxlength="30"
+       pattern="[A-Za-z0-9_]+" autocomplete="username" aria-describedby="username-hint">
+<p id="username-hint">Letters, numbers, and underscores, up to 30 characters.</p>
 ```
 
-### Accessibility Resilience
+## Accessibility resilience
 
-**Keyboard navigation**:
-- All functionality accessible via keyboard
-- Logical tab order
-- Focus management in modals
-- Skip links for long content
+- **Keyboard:** everything reachable and operable, logical order, focus moved into and restored out of dialogs, skip link on long pages.
+- **Screen readers:** semantic HTML first, accessible names on every control, live regions (`aria-live="polite"`) for async results and errors.
+- **Forced colors:** test with Windows contrast themes (`@media (forced-colors: active)`); borders and focus outlines must survive when backgrounds and shadows are stripped, and meaning must not rely on color alone.
+- **Resources:** clean up listeners, timers, subscriptions, and pending requests when components unmount.
 
-**Screen reader support**:
-- Proper ARIA labels
-- Announce dynamic changes (live regions)
-- Descriptive alt text
-- Semantic HTML
+## Verify
 
-**High contrast mode**:
-- Test in Windows high contrast mode
-- Don't rely only on color
-- Provide alternative visual cues
+Exercise each case, preferably in the browser:
 
-### Performance Resilience
+- 100+ character names, emoji in every text field, an RTL language, CJK text.
+- Offline and throttled network; forced API errors for each status the UI handles.
+- 0, 1, and 1,000+ items; empty and filtered-to-nothing states.
+- Submit clicked ten times quickly; two tabs editing the same record.
+- Interrupted gestures: second finger mid-drag, scroll across the control, release outside it, switch windows; then drag again.
+- Keyboard-only pass, a screen-reader spot check, forced-colors mode, 200% zoom.
 
-**Slow connections**:
-- Progressive image loading
-- Skeleton screens
-- Optimistic UI updates
-- Offline support (service workers)
-
-**Memory leaks**:
-- Clean up event listeners
-- Cancel subscriptions
-- Clear timers/intervals
-- Abort pending requests on unmount
-
-**Throttling & Debouncing**:
-```javascript
-// Debounce search input
-const debouncedSearch = debounce(handleSearch, 300);
-
-// Throttle scroll handler
-const throttledScroll = throttle(handleScroll, 100);
-```
-
-## Testing Strategies
-
-**Manual testing**:
-- Test with extreme data (very long, very short, empty)
-- Test in different languages
-- Test offline
-- Test slow connection (throttle to 3G)
-- Test with screen reader
-- Test keyboard-only navigation
-- Test on old browsers
-
-**Automated testing**:
-- Unit tests for edge cases
-- Integration tests for error scenarios
-- E2E tests for critical paths
-- A behavioral regression for each confirmed gesture fix, when the project's test runner can drive input
-- Visual regression tests
-- Accessibility tests (axe, WAVE)
-
-**IMPORTANT**: Hardening is about expecting the unexpected. Real users will do things you never imagined.
-
-**NEVER**:
-- Assume perfect input (validate everything)
-- Ignore internationalization (design for global)
-- Leave error messages generic ("Error occurred")
-- Forget offline scenarios
-- Trust client-side validation alone
-- Use fixed widths for text
-- Assume English-length text
-- Block entire interface when one component errors
-
-## Verify Hardening
-
-Test thoroughly with edge cases:
-
-- **Long text**: Try names with 100+ characters
-- **Emoji**: Use emoji in all text fields
-- **RTL**: Test with Arabic or Hebrew
-- **CJK**: Test with Chinese/Japanese/Korean
-- **Network issues**: Disable internet, throttle connection
-- **Large datasets**: Test with 1000+ items
-- **Concurrent actions**: Click submit 10 times rapidly
-- **Interrupted gestures**: Add a second finger mid-drag, scroll across the control, release outside it, switch windows mid-drag; then drag again
-- **Errors**: Force API errors, test all error states
-- **Empty**: Remove all data, test empty states
-
-For gestures, say what produced the evidence (emulated viewport, synthesized touch, which engine, physical device) and name what stayed untested.
+Say what produced the evidence (emulated viewport, synthesized touch, which engine, physical device) and name what stayed untested; Chromium emulation does not prove Safari behavior. Add automated coverage where the project's runner allows: unit tests for edge-case formatting, end-to-end tests for error paths, and axe checks.
 
 When edge cases are covered, finish with a polish pass ([polish.md](polish.md)).

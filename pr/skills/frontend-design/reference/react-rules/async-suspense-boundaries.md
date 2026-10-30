@@ -97,3 +97,9 @@ Both components share the same promise, so only one fetch occurs. Layout renders
 - When you want to avoid layout shift (loading → content jump)
 
 **Trade-off:** Faster initial paint vs potential layout shift. Choose based on your UX priorities.
+
+In the shared-promise variant, `DataDisplay` and `DataSummary` are typically Client Components (`'use client'`) receiving the promise from a Server Component. Inside Server Components, prefer `async`/`await` over `use()`.
+
+> **Note (2026):** With Next.js Cache Components (enabled by default for new apps since Next.js 16.4), this rule becomes a requirement. Any component that reads uncached data or request-time APIs (`cookies()`, `headers()`, `searchParams`, dynamic `params`) must sit inside `<Suspense>` or `'use cache'`; otherwise the dev overlay reports a blocking route. Everything outside those boundaries is prerendered into a static shell. Pushing `await` deeper in the tree, for example passing the `params` promise down instead of awaiting it in a layout, keeps more of the page in that shell.
+
+Reference: [Next.js caching](https://nextjs.org/docs/app/getting-started/caching), [React `use`](https://react.dev/reference/react/use)

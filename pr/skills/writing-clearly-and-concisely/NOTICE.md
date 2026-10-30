@@ -2,7 +2,7 @@
 
 - **Skill structure and Strunk summaries**: adapted from `writing-clearly-and-concisely` in [softaworks/agent-toolkit](https://github.com/softaworks/agent-toolkit) (MIT, license below), which credits [obra/the-elements-of-style](https://github.com/obra/the-elements-of-style). Local additions: the RFD/PRD triggers, the 5-second checklist, and the agent-strategy note.
 - **`elements-of-style/`**: William Strunk Jr., *The Elements of Style* (1918), public domain.
-- **`signs-of-ai-writing.md`**: converted from the Wikipedia project page [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (January 2026 revision) by Wikipedia contributors, licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). This file is shared under the same license. Changes: converted to Markdown.
+- **`signs-of-ai-writing.md`**: converted from the Wikipedia project page [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (snapshot as of January 2026; not refreshed since, and the live page is updated often) by Wikipedia contributors, licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). This file is shared under the same license. Changes: converted to Markdown.
 
 ```
 MIT License

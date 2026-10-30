@@ -1,339 +1,69 @@
 ---
 name: create-snapshot
-description: Generate comprehensive technical snapshot of a codebase using code-explorer agents for deep analysis. Reads existing checkpoints, PRDs, RFDs, and references to build context. Saves to .claude/checkpoints/checkpoint-N/snapshot.md with auto-incrementing checkpoint numbers.
+description: "Writes a comprehensive technical snapshot of a codebase into a new checkpoint (.claude/checkpoints/checkpoint-N/snapshot.md): reads the PRD, previous snapshots, RFDs, and references, explores the code with four parallel pr:code-explorer agents (architecture, features, development context, and UI/UX or ML pipeline), compares with the previous checkpoint, and fills the snapshot template. Runs in its own context so the exploration does not fill the conversation. Use for handoffs, milestones, after an MVP, or when onboarding an existing codebase."
 argument-hint: "[optional: path/to/project]"
+context: fork
+agent: general-purpose
+background: false
+allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/shared/checkpoint.py *)
 ---
 
-# Project Snapshot Generator
+# Create Snapshot
 
-Generate a comprehensive technical snapshot of a codebase that serves as a complete handoff document for developers unfamiliar with the project, using code-explorer agents for deep analysis.
+Write a snapshot that lets a developer who has never seen this project understand it fully: what it is for, how it is built, how it looks and behaves, how to run and change it, and how it got here. You are running in a separate context without the main conversation, and you cannot ask the user questions, so make reasonable decisions yourself and explain them in your final report.
 
-## Multi-Agent Strategy
+**Project root**: $ARGUMENTS (empty means the current directory)
 
-This skill launches 4 code-explorer agents in parallel for deep codebase analysis. Each agent focuses on a different dimension (architecture, features, dev context, UI/UX) and returns findings independently.
+Documentation conventions are in `${CLAUDE_PLUGIN_ROOT}/shared/checkpoint-system.md`; read it first. The helper is `python3 ${CLAUDE_PLUGIN_ROOT}/shared/checkpoint.py` (pass `--root <path>` when a path was given).
 
-**Default: subagents.** Snapshot exploration agents are independent — each analyzes a different aspect of the codebase and reports key files. There is no need for inter-agent communication since findings are synthesized by you after all agents complete.
+## Rules
 
-**When agent teams could help**: For very large codebases where exploration agents might benefit from sharing discoveries in real-time (e.g., the architecture agent finding a pattern that the feature agent should trace differently). In practice, this is rare — subagents are sufficient for nearly all snapshot generation tasks.
+- **Never edit an earlier snapshot.** Snapshots are point-in-time records. Always create a new checkpoint, even if little has changed; record what changed in the new snapshot instead.
+- Do not edit the PRD, RFDs, or reference documents. Read them for context only.
+- Be specific: real file paths, function names, configuration values, versions, hex colors, commands.
+- Be complete rather than brief. If a topic needs three paragraphs, write three. Mark a section "N/A — reason" instead of dropping it.
 
-If the calling command passes `--team`, respect that flag and launch agents as a team. Otherwise, use subagents.
+## Phase 1: Check the Project
 
----
-
-## Core Principles
-
-- **NEVER edit prior snapshots**: Previous snapshots are immutable point-in-time records. Always create a NEW checkpoint with a new snapshot. Even if nothing has changed since the last checkpoint, create a fresh snapshot capturing the current state. Never go back to modify, update, or "fix" an earlier snapshot.
-- **Read existing context first**: Always read PRDs, previous snapshots, and RFDs before exploring — but only for context, never to edit them
-- **Use agents for depth**: Launch code-explorer agents to understand codebase deeply
-- **Be specific**: Use actual file paths, function names, and code references
-- **Track evolution**: Note how things have changed from previous checkpoints (in the NEW snapshot, not by editing old ones)
-- **Clarity over brevity**: Prioritize clear, thorough communication over keeping things concise. A snapshot should be comprehensive enough that any developer can fully understand the project without needing to ask questions. Avoid unnecessary summarization that loses important details.
-- **Do NOT over-summarize**: Every section should contain enough detail that a developer can understand the full picture without reading the source code. If a section needs 3 paragraphs, write 3 paragraphs. Brevity at the cost of completeness defeats the purpose of a snapshot. Include specific file paths, function names, configuration values, and architectural rationale.
-- **Capture the full picture**: Include UI/UX, design, aesthetics, and multimedia aspects—not just backend logic
-
----
-
-## Phase 0: Determine Target
-
-**Goal**: Identify project root
-
-**Target Directory**: $ARGUMENTS
-
-- If `$ARGUMENTS` is provided, use that path as the project root
-- If no argument is provided, use the current working directory
-
-**Output Location**: `{project_root}/.claude/checkpoints/checkpoint-{N}/snapshot.md`
-
----
-
-## Phase 0.5: Existing Codebase Detection & Setup
-
-**Goal**: Detect whether this is an existing codebase being onboarded vs. a new project, and set up checkpoint structure accordingly
-
-**Actions**:
-
-1. **Detect project type** by checking for:
-   - Source files (`src/`, `lib/`, `app/`, `package.json`, `requirements.txt`, `Cargo.toml`, `go.mod`, `*.py`, `*.js`, `*.ts`, etc.)
-   - Existing checkpoint structure (`.claude/checkpoints/`)
-
-2. **If existing codebase WITHOUT checkpoint structure** (has source files but no `.claude/checkpoints/`):
-   - This is an existing codebase being onboarded to the checkpoint system
-   - Create `.claude/checkpoints/` directory
-   - Create `checkpoint-1` (NOT checkpoint-0 — checkpoint-0 is reserved for new projects that start with a PRD before any code exists)
-   - If no `CLAUDE.md` exists in the project root, suggest: "Consider running `/pr:handle-claude-md` to set up a CLAUDE.md for this project"
-   - Proceed with snapshot generation in checkpoint-1
-
-3. **If existing codebase WITH checkpoint structure** (has both source files and `.claude/checkpoints/`):
-   - Proceed normally to Phase 1 (auto-increment checkpoint number)
-
-4. **If new/empty project** (no source files, no checkpoint structure):
-   - Suggest: "This appears to be a new project with no source code yet. Consider using `/pr:create-prd` first to set up checkpoint-0 with a Product Requirements Document."
-   - If user wants to proceed anyway, create checkpoint-1 and generate a minimal snapshot
-
----
-
-## Phase 1: Checkpoint Setup
-
-**Goal**: Determine checkpoint number and create directory
-
-**Actions**:
-
-1. Check if `.claude/checkpoints/` directory exists
-
-2. If it doesn't exist, create it and use `checkpoint-1`
-
-3. If it exists, find the highest existing checkpoint number and increment by 1 (do NOT simply count directories — numbering may have gaps):
-
-```bash
-# Find the highest checkpoint number, not just count directories
-HIGHEST=$(ls -d {project_root}/.claude/checkpoints/checkpoint-* 2>/dev/null | grep -oE 'checkpoint-[0-9]+' | grep -oE '[0-9]+' | sort -n | tail -1)
-NEXT_CHECKPOINT=$((HIGHEST + 1))
-```
-
-4. **Validate sequential numbering**: Check that existing checkpoints are sequentially numbered (0, 1, 2, ...) with no gaps. If gaps are found, warn the user before proceeding.
-
-5. Create the new checkpoint directory: `.claude/checkpoints/checkpoint-{N}/`
-
----
+1. Run `checkpoint.py status`.
+2. If the project has no source code yet (no package manifest, no source files), do not create a checkpoint. Finish with a report recommending `/pr:create-prd` for a new project.
+3. Note any numbering gaps or checkpoints without snapshots from the status output; mention them in your final report but do not renumber anything.
 
 ## Phase 2: Read Existing Documentation
 
-**Goal**: Build context from existing documentation before exploring
+Read, in order: the PRD (`checkpoint-0/prd.md`), the most recent previous snapshot (and skim older ones for how the project evolved), every RFD across all checkpoints (status, decisions, files), and every file under `.claude/references/`. Also read the project's CLAUDE.md and README.
 
-**CRITICAL**: This phase must complete before codebase exploration.
+Extract: the product vision, how the codebase evolved, which features are completed or in progress, design decisions and their reasons, known issues and technical debt, team guidelines.
 
-**Actions**:
+## Phase 3: Explore the Code
 
-1. **List all existing checkpoints**:
-```bash
-ls -d {project_root}/.claude/checkpoints/checkpoint-* 2>/dev/null | sort -V
-```
+Launch four `pr:code-explorer` agents in parallel. Give each the project root and ask for detailed findings with file:line references plus the 5–10 files most essential to its topic.
 
-2. **For each checkpoint (in order), read**:
-   - `prd.md` (if exists, typically in checkpoint-0)
-   - `snapshot.md` (if exists)
-   - All RFDs in the `rfd/` folder:
-   ```bash
-   find {project_root}/.claude/checkpoints/checkpoint-*/rfd -name "rfd-*.md" 2>/dev/null | sort
-   ```
+1. **Architecture**: directory structure and module boundaries, stack and versions (from manifests and lockfiles), design patterns, configuration and build, entry points and main execution flows, data model and storage, API surface.
+2. **Features**: every user-facing feature with its implementation, partially implemented work (TODOs, flags, stubs), planned work mentioned in code or docs, key components and responsibilities.
+3. **Development context**: tests (framework, locations, coverage, how to run), CI/CD and deployment, scripts and developer workflow, dependencies and external services, security-relevant code (auth, secrets handling), known issues and technical debt.
+4. **Choose by project type**:
+   - *Projects with a UI*: the design system and component library, color tokens (with values), typography, spacing scale, component styles, icons and media assets, animation, responsive breakpoints, accessibility, theming, CSS architecture.
+   - *ML and data projects without a UI*: datasets and their sources, preprocessing and feature pipelines, model architectures, training configuration and entry points, experiment tracking, evaluation metrics and latest results, model artifacts and where they live, inference or serving path, reproducibility (seeds, environment, data versioning).
 
-3. **Read all reference documents**:
-```bash
-find {project_root}/.claude/references -name "*.md" 2>/dev/null | sort
-```
+Read the files the agents return, plus anything else needed to fill gaps in their findings.
 
-4. **Extract insights from existing documentation**:
-   - Project vision and goals (from PRD)
-   - Evolution of the codebase (from snapshots)
-   - Feature requests and their implementation status (from RFDs)
-   - Design decisions made along the way
-   - Known issues and technical debt mentioned previously
-   - Team guidelines and coding standards (from references)
-   - Internal tooling and package usage (from references)
-   - Workflow procedures (from references)
+## Phase 4: Compare With the Previous Checkpoint
 
----
+If there is an earlier snapshot, list what changed since then: new features (with their RFDs), modified or refactored areas, bug fixes, dependency upgrades, architecture and configuration changes. Use `git log` between the snapshot's date and now to catch changes that no RFD recorded, and point those out explicitly. For the first snapshot, say so.
 
-## Phase 3: Codebase Exploration with Agents
+## Phase 5: Write the Snapshot
 
-**Goal**: Deep understanding of the current codebase using code-explorer agents
+1. Create the checkpoint with `checkpoint.py new-checkpoint` and note its number.
+2. Write `snapshot.md` in it, following the template at `${CLAUDE_SKILL_DIR}/template.md` section by section:
 
-**Actions**:
+   Executive summary · changes since the last checkpoint · user context · vision and goals · feature inventory · architecture and system design · key components · UI design · UX design · development guidelines · testing · deployment and operations · security · dependencies and external services · known issues and technical debt · RFD summary · references summary · glossary · quick reference.
 
-1. Launch 4 code-explorer agents in parallel (subagents by default) with different focuses:
+   For ML projects without a UI, replace the UI and UX sections with "Data and model pipeline" and "Experiments and evaluation", covering the findings from the fourth explorer.
+3. Use ASCII diagrams for architecture and data flow where they help, short code excerpts where they clarify, and links to RFDs wherever a feature is discussed.
 
-   **Agent 1 - Architecture Overview**:
-   ```
-   Analyze the overall architecture of this codebase. Focus on:
-   - Directory structure and module organization
-   - Technology stack (frontend, backend, database, infrastructure)
-   - Design patterns and architectural decisions
-   - Configuration and build setup
-   - Entry points and main execution flow
+Writing the file under `.claude/` may trigger a permission prompt; that is expected.
 
-   Return a list of 5-10 key architectural files to read.
-   ```
+## Phase 6: Report
 
-   **Agent 2 - Feature Analysis**:
-   ```
-   Identify and analyze all features in this codebase. Focus on:
-   - Completed features and their implementation
-   - In-progress features (partial implementation, TODOs)
-   - Planned features (mentioned in docs/comments)
-   - Key components and their responsibilities
-
-   Return a list of 5-10 key feature files to read.
-   ```
-
-   **Agent 3 - Development Context**:
-   ```
-   Analyze the development context of this codebase. Focus on:
-   - Testing strategy and coverage
-   - Deployment and CI/CD setup
-   - Development workflow (scripts, commands)
-   - Dependencies and third-party integrations
-   - Known issues and technical debt
-
-   Return a list of 5-10 key development files to read.
-   ```
-
-   **Agent 4 - UI/UX & Design Analysis**:
-   ```
-   Analyze the UI, UX, and visual design aspects of this codebase. Focus on:
-   - Design system and component library used (e.g., shadcn/ui, Material UI, custom)
-   - Color palette, themes, and color variables/tokens
-   - Typography: fonts, sizes, weights, line heights
-   - Spacing system and layout patterns
-   - Button styles, form elements, and interactive components
-   - Icons, images, and multimedia assets
-   - Animation and transition patterns
-   - Responsive design breakpoints and mobile considerations
-   - Accessibility features (ARIA, keyboard nav, screen reader support)
-   - Dark mode / light mode implementation
-   - CSS architecture (Tailwind, CSS modules, styled-components, etc.)
-   - Design tokens and theming configuration files
-
-   Return a list of 5-10 key design/style files to read (CSS, theme configs, component files with significant styling).
-   ```
-
-2. Wait for all agents to complete
-
-3. Read all key files identified by agents
-
-4. Synthesize findings into comprehensive understanding
-
----
-
-## Phase 4: Compare with Previous Checkpoint
-
-**Goal**: Identify changes since last snapshot
-
-**Actions**:
-
-1. If this is not checkpoint-1:
-   - Compare current state with previous snapshot
-   - Identify new features implemented
-   - Note features modified or refactored
-   - List bug fixes
-   - Document dependency updates
-   - Highlight architecture changes
-   - Note configuration changes
-
-2. If this is checkpoint-1:
-   - Note: "First codebase snapshot - no previous checkpoint to compare."
-
----
-
-## Phase 5: Generate Snapshot
-
-**Goal**: Write comprehensive snapshot document
-
-**Actions**:
-
-Generate the snapshot following the template structure (see supporting template.md).
-
-Key sections to include:
-
-1. **Executive Summary** - Project overview, status, checkpoint info
-2. **Changes Since Last Checkpoint** - What's new since previous snapshot
-3. **User Context** - Target users, needs, use cases
-4. **Project Vision & Goals** - Core purpose, objectives, philosophy
-5. **Features Inventory** - Completed, in-progress, and planned features
-6. **Architecture & System Design** - High-level architecture, tech stack, data flow
-7. **Key Components Deep Dive** - Detailed component documentation
-8. **User Interface (UI) Design** - Visual design system, colors, typography, components, styling architecture
-9. **User Experience (UX) Design** - Interaction patterns, user flows, navigation, accessibility, responsive behavior
-10. **Development Guidelines** - Coding conventions, patterns, environment setup
-11. **Testing Strategy** - Test framework, types, coverage
-12. **Deployment & Operations** - Build process, deployment, monitoring
-13. **Security Considerations** - Auth, authorization, data protection
-14. **Dependencies & Third-Party Services** - Critical dependencies, external services
-15. **Known Issues & Technical Debt** - Open issues, TODOs, tech debt
-16. **RFD Summary** - Table of all RFDs with status
-17. **References Summary** - Table of all reference documents
-18. **Glossary** - Project-specific terms
-19. **Quick Reference** - Common commands, important files
-
----
-
-## Phase 6: Save and Report
-
-**Goal**: Write file and confirm completion
-
-**Actions**:
-
-1. Write the snapshot to `{project_root}/.claude/checkpoints/checkpoint-{N}/snapshot.md`
-
-2. Report completion with:
-   - File path
-   - Checkpoint number
-   - Summary of key findings
-   - Notable changes since last checkpoint (if applicable)
-
----
-
-## Writing Guidelines
-
-1. **Be Specific**: Use actual file paths, function names, and code references
-2. **Be Honest**: If something is unclear or poorly documented, note it
-3. **Be Complete**: Don't skip sections—mark as "N/A" or "Not found" if truly not applicable
-4. **Be Practical**: Focus on information a new developer would actually need
-5. **Use Code Examples**: Include short code snippets where they clarify understanding
-6. **ASCII Diagrams**: Use text diagrams for architecture when helpful
-7. **Reference RFDs**: When discussing features, reference their RFD documents if available
-8. **Track Evolution**: Note how things have changed from previous checkpoints
-9. **Document References**: List all available reference documents so developers know what resources exist
-10. **Prioritize Clarity Over Brevity**: Write thorough explanations. Do NOT over-summarize or condense information just to save space. A complete picture is more valuable than a short document. If explaining something fully takes 3 paragraphs, use 3 paragraphs.
-11. **Capture Visual/Design Details**: Document colors (with hex codes), fonts, spacing values, animation timings, and other design specifics. Developers recreating the UI need these exact values.
-12. **Include Multimedia Context**: Note any images, icons, videos, audio, or other media assets used, where they're stored, and how they're integrated.
-
----
-
-## .claude Folder Structure Reference
-
-```
-.claude/
-├── checkpoints/                     # Project checkpoints (snapshots over time)
-│   ├── checkpoint-0/                # Initial checkpoint (before development)
-│   │   ├── prd.md                   # Product Requirements Document
-│   │   └── rfd/                     # Request for Development documents
-│   │       ├── 1-authentication/
-│   │       │   └── rfd-2025-01-24-1430.md
-│   │       └── ...
-│   │
-│   ├── checkpoint-1/                # First development checkpoint
-│   │   ├── snapshot.md              # Codebase snapshot at this point
-│   │   └── rfd/
-│   │       └── ...
-│   │
-│   └── checkpoint-{N}/              # Additional checkpoints
-│       ├── snapshot.md
-│       └── rfd/
-│
-└── references/                      # Reference documents
-    ├── team-guidelines/
-    ├── package-docs/
-    ├── workflows/
-    ├── api-specs/
-    └── {other-reference-folders}/
-```
-
-### Document Types
-
-- **prd.md**: Product Requirements Document - exists in checkpoint-0, describes product vision and requirements
-- **snapshot.md**: Technical snapshot of the codebase at a point in time (this is what you're creating)
-- **rfd/**: Request for Development documents
-  - Each RFD is in a numbered folder: `{N}-{feature-name}/`
-  - Inside each folder: `rfd-{YYYY-MM-DD}-{HHMM}.md` with timestamp of creation
-  - RFDs describe: user's feature request, implementation progress, current status
-- **references/**: Reference documents providing context but not directly part of development
-
----
-
-## Safety Guidelines
-
-**DO NOT:**
-- Edit, modify, or overwrite any previous checkpoint's `snapshot.md` — they are immutable historical records
-- Edit `prd.md` or prior RFDs unless explicitly requested by the user
-- Skip creating a new checkpoint even if the codebase hasn't changed much since the last one — the point is to capture the state at this moment in time
-- Reuse an existing checkpoint number — always increment to the next available number
+Finish with a short report for the main conversation: the snapshot path and checkpoint number, a summary of the project's current state, the most important changes since the last checkpoint, changes that no RFD documents, numbering issues found, and any assumptions you made.

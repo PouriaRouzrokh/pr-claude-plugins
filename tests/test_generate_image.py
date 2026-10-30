@@ -209,3 +209,30 @@ def test_request_validates_against_sdk_types(run):
     from google.genai._gaos.types.interactions.createmodelinteraction import CreateModelInteraction
     calls = run(["x", "-s", "2K", "-a", "16:9", "--search", "--thinking", "high", "--continue", "p"])
     CreateModelInteraction.model_validate(calls[0])
+
+
+@pytest.mark.parametrize("argv,expected", [
+    (["x"], "about $0.034 for the 1K image"),
+    (["x", "-s", "4k"], "about $0.113 for the 4K image"),
+    (["x", "-m", "pro", "-s", "2K"], "about $0.134 for the 2K image"),
+    (["x", "-m", "nb2", "-s", "512"], "about $0.045 for the 512 image"),
+    (["x", "-m", "lite"], "about $0.034 for the 1K image"),
+])
+def test_google_cost_line(run, capsys, argv, expected):
+    run(argv)
+    out = capsys.readouterr().out
+    assert expected in out and "Interaction ID: int_123" in out
+
+
+def test_google_cost_line_skipped_for_unknown_model(run, capsys):
+    run(["x", "-m", "gemini-2.5-flash-image"])
+    out = capsys.readouterr().out
+    assert "Estimated cost" not in out and "Interaction ID" in out
+
+
+def test_search_html_does_not_overwrite(run, tmp_path):
+    (tmp_path / "generated_image.search.html").write_text("old")
+    steps = [ns(type="google_search_result", result=[ns(search_suggestions="<div>new</div>")])]
+    run(["x", "--search"], responses=[ok(steps=steps)])
+    assert (tmp_path / "generated_image.search.html").read_text() == "old"
+    assert (tmp_path / "generated_image.search-1.html").read_text() == "<div>new</div>"

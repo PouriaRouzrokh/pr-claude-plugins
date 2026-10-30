@@ -72,3 +72,7 @@ function Profile() {
   // ...
 }
 ```
+
+This version depends on SWR. Without it, a module-level, reference-counted listener (add the global listener when the first subscriber registers, remove it when the last one leaves) or a `useSyncExternalStore` store achieves the same single listener.
+
+> **Note (2026):** The registration effect lists `callback` as a dependency, so an inline callback re-registers on every render. React Compiler stabilizes most inline callbacks automatically; without the compiler, wrap the callback with `useEffectEvent` (React 19.2+) or keep it in a ref (see [Store Event Handlers in Refs](./advanced-event-handler-refs.md)).

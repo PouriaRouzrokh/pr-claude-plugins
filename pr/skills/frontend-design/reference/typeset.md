@@ -2,14 +2,13 @@
 
 Typography carries information, hierarchy, and voice. Improve it inside the established visual world; do not replace the identity unless the user asked to.
 
----
-
 ## Contents
 
 - [Visitor mode](#visitor-mode)
-- [Two isolated assessments](#two-isolated-assessments)
+- [Assess](#assess)
 - [Set the system](#set-the-system)
 - [Apply](#apply)
+- [Line breaks](#line-breaks)
 - [Verify](#verify)
 - [Technical reference](#technical-reference)
 
@@ -20,18 +19,18 @@ Typography carries information, hierarchy, and voice. Improve it inside the esta
 
 If typography replacement would create a new identity, route through [new-work.md](new-work.md) and update the recorded design context. Otherwise preserve confirmed families and improve their use.
 
-## Two isolated assessments
+## Assess
 
-When a sub-agent tool is available and permitted, run these independently; otherwise run them yourself in this order. Do not let scan findings anchor the design assessment.
+Do the typographic read first and the mechanical scan second, so scan output doesn't anchor your judgment. For a large surface, the two can run as parallel subagents.
 
 1. **Typographic assessment:** inspect representative pages and styles. Answer every question below with a file, selector, or computed value:
    - **Authority and fit:** Which faces, weights, and roles are established? Do they fit the product and selected world, or are they unexamined defaults? Is every family necessary?
    - **Hierarchy:** Can heading, body, label, metadata, and data roles be distinguished at a glance? Are adjacent sizes or weights too close to carry different jobs?
    - **Scale and consistency:** Is there a deliberate role scale, or a collection of arbitrary values? Do repeated roles stay identical across screens and states?
-   - **Reading:** Does body copy stay within a comfortable 45–75 character measure? Are line height, paragraph rhythm, contrast, and tracking tuned to the actual face, width, language, and surface?
+   - **Reading:** Does body prose sit at a 65–75 character measure (narrow columns down to about 45ch are acceptable)? Are line height, paragraph rhythm, contrast, and tracking tuned to the actual face, width, language, and surface?
    - **Stress:** What happens with long headings, localization expansion, zoom, narrow containers, missing weights, and font fallback?
    - **Delivery:** Are only used assets loaded? Do fallback metrics, loading strategy, and variable-font settings avoid invisible text and disruptive reflow?
-2. **Mechanical scan:** Search the target's markup and styles for the bans in [craft-floor.md](craft-floor.md) (gradient text, side-stripe borders, identical card grids, eyebrow labels, decorative glass, hard offset shadows, glyph icons) and for arbitrary values outside the project's scale. Also list every font family, size, weight, and line-height value in use, including dynamic ones. Synthesize both assessments before editing, noting what each caught alone. A clean scan is a floor, not proof of good typography.
+2. **Mechanical scan:** List every font family, size, weight, line-height, and letter-spacing value in use, including dynamic ones, and flag values outside the project's scale. Check the typographic refusals in [craft-floor.md](craft-floor.md): gradient text, monospace as costume, tracking tighter than -0.04em, eyebrow labels, single accented words in headlines, and a system display face on a brand page. Synthesize both assessments before editing, noting what each caught alone. A clean scan is a floor, not proof of good typography.
 
 ## Set the system
 
@@ -48,8 +47,8 @@ Use the fewest roles and families that make the hierarchy unmistakable. Combine 
 ## Apply
 
 - Keep body copy comfortably readable and zoomable. Use 1rem / 16px as the ordinary web body floor unless a dense role, platform convention, or user setting justifies otherwise.
-- Keep prose in the 45–75ch range. Tune line height inversely with measure: wider lines generally need more leading.
-- Compensate light text on dark surfaces on all three perceptual axes: slightly more line height, a touch more tracking, and one step more weight when the face needs it.
+- Keep body prose at 65–75ch; narrower columns (sidebars, multi-column layouts) can go down to about 45ch. Wider lines need more leading.
+- Compensate light text on dark surfaces: slightly more line height and a touch more tracking, then judge weight on the render. Light-on-dark can bloom and look heavier, or thin out under grayscale antialiasing; adjust weight one step in whichever direction the screenshot needs, and avoid hairline weights.
 - Tune line height to the face, width, language, and contrast, not a universal ratio.
 - Keep repeated roles consistent across screens and states.
 - Use numeric, tabular, code, and label features when their content benefits.
@@ -57,8 +56,21 @@ Use the fewest roles and families that make the hierarchy unmistakable. Combine 
 - Let marketing display type respond to available space when useful; keep dense product and reading surfaces spatially predictable.
 - Preserve browser zoom, user font settings, Dynamic Type, and platform text scaling.
 - Use paragraph spacing or first-line indentation as the primary paragraph rhythm; combining both usually double-marks the boundary.
+- Balance headings with `text-wrap: balance` (Baseline 2024) and reduce orphans in prose with `text-wrap: pretty` (Chromium and Safari; Firefox falls back to normal wrapping, which is harmless).
+
+Line breaks are part of the typography ([Line breaks](#line-breaks)).
 
 Do not make type decorative at the expense of comprehension, or introduce a second family without a clear role it alone can perform.
+
+## Line breaks
+
+After Matthew Butterick's *Practical Typography*, paraphrased.
+
+- Set `text-wrap: balance` on headings and short centered blocks, and `text-wrap: pretty` on body copy. Both are progressive: a browser that ignores them keeps its default wrap.
+- `pretty` pulls a word down beside a lone last word. It does not fill the last line, and a two-word tail is fine.
+- In a column too narrow for either to help, edit the copy or widen the column.
+- Break a heading by hand only between phrases, and check the break at every width the heading renders at. A hard break that lands mid-line on a phone is worse than the default wrap.
+- An uneven break can carry meaning (a headline landing on one word for weight, a poster line, a pull quote). Make it deliberate with a hard break or a wrap set on that element, and keep it rare. Automated checks for a lone last word (a straggler) or a stub on a heading's last line are advisory for this reason.
 
 ## Verify
 
@@ -93,7 +105,9 @@ Common ratios: 1.125-1.2 for dense product UI, 1.25 (major third), 1.333 (perfec
 
 For vertical rhythm, derive spacing from the body line-height: with `line-height: 1.5` on 16px type (24px), vertical spacing in multiples of 24px makes text and space share one foundation.
 
-Set measure with `ch` units (`max-width: 65ch`). On light-on-dark text, add 0.05-0.1 to the usual line-height.
+Set measure with `ch` units (`max-width: 65ch`). On light-on-dark text, add 0.05–0.1 to the usual line-height.
+
+`text-box: trim-both cap alphabetic` trims the space above cap height and below the baseline so text aligns optically with icons and box edges (Chromium and Safari; harmless where unsupported).
 
 ### Families and pairing
 
@@ -150,4 +164,4 @@ Check which features a font supports with [Wakamai Fondue](https://wakamaifondue
 - Name type tokens by role (`--text-body`, `--text-heading`), not value (`--font-size-16`). Include stacks, sizes, weights, line-heights, and tracking.
 - Never disable zoom (`user-scalable=no`). If the layout breaks at 200% zoom, fix the layout.
 - Use `rem` or `em` for font sizes so user settings apply; keep body text at 16px or larger.
-- Give text links enough padding or line-height for a 44px tap target.
+- Give standalone text links (navigation, buttons styled as links) at least a 24×24px target, 44px for primary touch controls. Links inside a sentence are exempt from WCAG's target-size rule.

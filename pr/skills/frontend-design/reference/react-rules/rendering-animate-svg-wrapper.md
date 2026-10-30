@@ -45,3 +45,7 @@ function LoadingSpinner() {
 ```
 
 This applies to all CSS transforms and transitions (`transform`, `opacity`, `translate`, `scale`, `rotate`). The wrapper div allows browsers to use GPU acceleration for smoother animations.
+
+> **Note (2026):** Chromium 89+ and Firefox already composite `transform`, `opacity`, and `filter` animations on SVG elements, so this wrapper mainly helps older engines. Profile the animation in DevTools (look for per-frame paints) before restructuring markup.
+
+Reference: [Chrome: hardware-accelerated animation updates](https://developer.chrome.com/blog/hardware-accelerated-animations)

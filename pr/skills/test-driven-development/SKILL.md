@@ -72,6 +72,8 @@ Read [references/writing-good-tests.md](references/writing-good-tests.md) before
 
 ### Stack notes
 
+Current majors (October 2026): Vitest 5, Jest 30, pytest 9. Check the repo's lockfile before assuming any of them.
+
 - **TypeScript/React**: Vitest or Jest with Testing Library; query by role and label (`getByRole('button', { name: /save/i })`); `userEvent` over `fireEvent`; MSW for network boundaries; Playwright for end-to-end flows that are committed to the repo.
 - **Python**: pytest with fixtures and `parametrize`; `tmp_path` for files; `monkeypatch` for env and time; `pytest -x -q` while iterating.
 - **ML code**: test shapes, dtypes, and value ranges of each transform; golden-output tests with tolerances (`np.testing.assert_allclose`); a tiny-data overfit test for training loops; fixed seeds; keep heavy tests behind a marker (`@pytest.mark.slow`).

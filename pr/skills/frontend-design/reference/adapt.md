@@ -1,326 +1,100 @@
 # Adapt
 
-> **Additional context needed**: target platforms/devices and usage contexts.
+Adapt an existing design to a different context: another screen size, input method, or medium. Adaptation is rethinking the experience for the new context, not scaling pixels. Before starting, establish the target devices and usage context from the brief or the design context; ask only if they cannot be inferred.
 
-Adapt an existing design to a different context: another screen size, device, platform, or use case. The trap is treating adaptation as scaling. The job is rethinking the experience for the new context.
-
-**Web only** (mobile web included). For native iOS or Android apps, follow the platform's own guidelines (Apple Human Interface Guidelines, Material Design) instead.
-
----
+This file covers the web, mobile web included. For native iOS or Android apps, follow the platform's own guidelines (Apple Human Interface Guidelines, Material Design).
 
 ## Contents
 
-- [Assess Adaptation Challenge](#assess-adaptation-challenge)
-- [Plan Adaptation Strategy](#plan-adaptation-strategy)
-- [Implement Adaptations](#implement-adaptations)
-- [Verify Adaptations](#verify-adaptations)
-- [Reference Material](#reference-material)
+- [Assess](#assess)
+- [Strategies by context](#strategies-by-context)
+- [Techniques](#techniques)
+- [Verify](#verify)
 
-## Assess Adaptation Challenge
+## Assess
 
-Understand what needs adaptation and why:
+1. **Source context:** what was it designed for, and what did that assume (large screen, mouse, fast connection)? What works well now?
+2. **Target context:** device, input method (touch, mouse, keyboard, stylus), screen size and orientation, connection quality, and usage (on the go vs. at a desk, glance vs. focused reading).
+3. **Challenges:** what won't fit, what won't work (hover on touch, small targets), and which patterns are wrong for the target.
 
-1. **Identify the source context**:
-   - What was it designed for originally? (Desktop web? Mobile app?)
-   - What assumptions were made? (Large screen? Mouse input? Fast connection?)
-   - What works well in current context?
+## Strategies by context
 
-2. **Understand target context**:
-   - **Device**: Mobile, tablet, desktop, TV, watch, print?
-   - **Input method**: Touch, mouse, keyboard, voice, gamepad?
-   - **Screen constraints**: Size, resolution, orientation?
-   - **Connection**: Fast wifi, slow 3G, offline?
-   - **Usage context**: On-the-go vs desk, quick glance vs focused reading?
-   - **User expectations**: What do users expect on this platform?
+| Context | Layout | Interaction | Content and navigation |
+|---------|--------|-------------|------------------------|
+| **Phone** | Single column, full-width components, vertical stacking | Targets of 44×44px where possible (24×24px is the WCAG 2.2 AA minimum), primary actions within thumb reach, bottom sheets for option lists | Progressive disclosure; primary content first; bottom navigation or a drawer; nothing core removed, only reorganized |
+| **Tablet** | Two columns, master-detail, layouts that change with orientation | Touch and pointer both supported | Side panels for secondary content |
+| **Desktop** | Multi-column, persistent side navigation, a max-width so content doesn't stretch across 4K screens | Hover for supplementary information (never essential), keyboard shortcuts, drag and drop, multi-select | More information up front; denser tables |
+| **Print** | Logical page breaks (`break-inside: avoid` on figures and cards); hide navigation and interactive chrome | — | Print full URLs after links, expand collapsed sections, add title and date; use `@media print` and `@page` |
+| **Email** | 600px wide, single column, table-based layout, inline CSS | Large button-style CTAs; no reliance on hover or scripts | Deep links into the app for anything complex |
 
-3. **Identify adaptation challenges**:
-   - What won't fit? (Content, navigation, features)
-   - What won't work? (Hover states on touch, tiny touch targets)
-   - What's inappropriate? (Desktop patterns on mobile, mobile patterns on desktop)
+Keep the same information architecture across contexts; users moving between devices should find things where they expect them.
 
-**CRITICAL**: Adaptation is rethinking the experience for the new context, not scaling pixels.
+## Techniques
 
-## Plan Adaptation Strategy
+### Mobile-first and content-driven breakpoints
 
-Create context-appropriate strategy:
+Write base styles for the narrowest layout and layer complexity with `min-width` queries; additive overrides are simpler to reason about than undoing desktop styles. Let content choose breakpoints: widen the viewport until the design breaks and add one there. Three or so usually suffice (around 640, 768, and 1024px is a common starting set). Use `clamp()` for values that should scale smoothly, and container queries for components that appear in different-width slots ([layout.md](layout.md#container-queries)).
 
-### Mobile Adaptation (Desktop → Mobile)
+### Viewport units
 
-**Layout Strategy**:
-- Single column instead of multi-column
-- Vertical stacking instead of side-by-side
-- Full-width components instead of fixed widths
-- Bottom navigation instead of top/side navigation
-
-**Interaction Strategy**:
-- Touch targets 44x44px minimum (not hover-dependent)
-- Swipe gestures where appropriate (lists, carousels)
-- Bottom sheets instead of dropdowns
-- Thumbs-first design (controls within thumb reach)
-- Larger tap areas with more spacing
-
-**Content Strategy**:
-- Progressive disclosure (don't show everything at once)
-- Prioritize primary content (secondary content in tabs/accordions)
-- Shorter text (more concise)
-- Larger text (16px minimum)
-
-**Navigation Strategy**:
-- Hamburger menu or bottom navigation
-- Reduce navigation complexity
-- Sticky headers for context
-- Back button in navigation flow
-
-### Tablet Adaptation (Hybrid Approach)
-
-**Layout Strategy**:
-- Two-column layouts (not single or three-column)
-- Side panels for secondary content
-- Master-detail views (list + detail)
-- Adaptive based on orientation (portrait vs landscape)
-
-**Interaction Strategy**:
-- Support both touch and pointer
-- Touch targets 44x44px but allow denser layouts than phone
-- Side navigation drawers
-- Multi-column forms where appropriate
-
-### Desktop Adaptation (Mobile → Desktop)
-
-**Layout Strategy**:
-- Multi-column layouts (use horizontal space)
-- Side navigation always visible
-- Multiple information panels simultaneously
-- Fixed widths with max-width constraints (don't stretch to 4K)
-
-**Interaction Strategy**:
-- Hover states for additional information
-- Keyboard shortcuts
-- Right-click context menus
-- Drag and drop where helpful
-- Multi-select with Shift/Cmd
-
-**Content Strategy**:
-- Show more information upfront (less progressive disclosure)
-- Data tables with many columns
-- Richer visualizations
-- More detailed descriptions
-
-### Print Adaptation (Screen → Print)
-
-**Layout Strategy**:
-- Page breaks at logical points
-- Remove navigation, footer, interactive elements
-- Black and white (or limited color)
-- Proper margins for binding
-
-**Content Strategy**:
-- Expand shortened content (show full URLs, hidden sections)
-- Add page numbers, headers, footers
-- Include metadata (print date, page title)
-- Convert charts to print-friendly versions
-
-### Email Adaptation (Web → Email)
-
-**Layout Strategy**:
-- Narrow width (600px max)
-- Single column only
-- Inline CSS (no external stylesheets)
-- Table-based layouts (for email client compatibility)
-
-**Interaction Strategy**:
-- Large, obvious CTAs (buttons not text links)
-- No hover states (not reliable)
-- Deep links to web app for complex interactions
-
-## Implement Adaptations
-
-Apply changes systematically:
-
-### Responsive Breakpoints
-
-Choose appropriate breakpoints:
-- Mobile: 320px-767px
-- Tablet: 768px-1023px
-- Desktop: 1024px+
-- Or content-driven breakpoints (where design breaks)
-
-### Layout Adaptation Techniques
-
-- **CSS Grid/Flexbox**: Reflow layouts automatically
-- **Container Queries**: Adapt based on container, not viewport
-- **`clamp()`**: Fluid sizing between min and max
-- **Media queries**: Different styles for different contexts
-- **Display properties**: Show/hide elements per context
-
-### Touch Adaptation
-
-- Increase touch target sizes (44x44px minimum)
-- Add more spacing between interactive elements
-- Remove hover-dependent interactions
-- Add touch feedback (ripples, highlights)
-- Consider thumb zones (easier to reach bottom than top)
-
-### Content Adaptation
-
-- Use `display: none` sparingly (still downloads)
-- Progressive enhancement (core content first, enhancements on larger screens)
-- Lazy loading for off-screen content
-- Responsive images (`srcset`, `picture` element)
-
-### Navigation Adaptation
-
-- Transform complex nav to hamburger/drawer on mobile
-- Bottom nav bar for mobile apps
-- Persistent side navigation on desktop
-- Breadcrumbs on smaller screens for context
-
-**IMPORTANT**: Test on real devices. Device emulation in DevTools is helpful but not perfect.
-
-**NEVER**:
-- Hide core functionality on mobile (if it matters, make it work)
-- Assume desktop = powerful device (consider accessibility, older machines)
-- Use different information architecture across contexts (confusing)
-- Break user expectations for platform (mobile users expect mobile patterns)
-- Forget landscape orientation on mobile/tablet
-- Use generic breakpoints blindly (use content-driven breakpoints)
-- Ignore touch on desktop (many desktop devices have touch)
-
-## Verify Adaptations
-
-Test thoroughly across contexts:
-
-- **Real devices**: Test on actual phones, tablets, desktops
-- **Different orientations**: Portrait and landscape
-- **Different browsers**: Safari, Chrome, Firefox, Edge
-- **Different OS**: iOS, Android, Windows, macOS
-- **Different input methods**: Touch, mouse, keyboard
-- **Edge cases**: Very small screens (320px), very large screens (4K)
-- **Slow connections**: Test on throttled network
-
-**Custom controls** (sliders, drag surfaces, scrollable control strips): a before/after slider can pass every width check above and still refuse to drag on iOS, so exercise each one in scope in the same batched round as the checks above:
-
-- **Primary gesture**: Tap it and confirm it responds as designed, then drag it with the target input method; the drag must complete, not just start
-- **Scroll across it**: A swipe along the page's scroll axis across the control scrolls the page or container without activating it; a drag that starts on the control along its axis moves the control, not the page. Neither failure throws an error, so try both
-- **Evidence**: Say what produced the evidence: an emulated viewport, synthesized touch input through a browser tool, which engine ran it (Chromium is not Safari), or a physical device. Screenshots and resized viewports verify layout, never a gesture. Name what stayed untested and move on; unreachable hardware is a reported gap, not a blocker
-
-When the adaptation feels native to each context, finish with a polish pass ([polish.md](polish.md)).
-
----
-
-## Reference Material
-
-### Responsive Design
-
-#### Mobile-First: Write It Right
-
-Start with base styles for mobile, use `min-width` queries to layer complexity. Desktop-first (`max-width`) means mobile loads unnecessary styles first.
-
-#### Breakpoints: Content-Driven
-
-Don't chase device sizes; let content tell you where to break. Start narrow, stretch until design breaks, add breakpoint there. Three breakpoints usually suffice (640, 768, 1024px). Use `clamp()` for fluid values without breakpoints.
-
-#### Detect Input Method, Not Just Screen Size
-
-**Screen size doesn't tell you input method.** A laptop with touchscreen, a tablet with keyboard. Use pointer and hover queries:
+Use the dynamic viewport units for full-height mobile layouts; `100vh` ignores the collapsing browser toolbar. These are Baseline widely available.
 
 ```css
-/* Fine pointer (mouse, trackpad) */
-@media (pointer: fine) {
-  .button { padding: 8px 16px; }
-}
-
-/* Coarse pointer (touch, stylus) */
-@media (pointer: coarse) {
-  .button { padding: 12px 20px; }  /* Larger touch target */
-}
-
-/* Device supports hover */
-@media (hover: hover) {
-  .card:hover { transform: translateY(-2px); }
-}
-
-/* Device doesn't support hover (touch) */
-@media (hover: none) {
-  .card { /* No hover state - use active instead */ }
-}
+.hero { min-height: 100svh; }      /* small viewport: never hidden behind browser UI */
+.app-shell { height: 100dvh; }     /* tracks toolbar show/hide */
 ```
 
-**Critical**: Don't rely on hover for functionality. Touch users can't hover.
+### Input method, not screen size
 
-#### Safe Areas: Handle the Notch
-
-Modern phones have notches, rounded corners, and home indicators. Use `env()`:
+A touchscreen laptop and a tablet with a keyboard break the "small screen = touch" assumption. Query capabilities instead:
 
 ```css
-body {
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-}
-
-/* With fallback */
-.footer {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-}
+@media (pointer: coarse) { .button { min-height: 44px; padding-inline: 20px; } }
+@media (hover: hover) and (pointer: fine) { .card:hover { translate: 0 -2px; } }
 ```
 
-**Enable viewport-fit** in your meta tag:
+Never put essential functionality behind hover; touch users cannot hover, and keyboard users need the same content on focus.
+
+### Safe areas
+
+Handle notches, rounded corners, and home indicators with `env()` once the viewport opts in:
+
 ```html
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 ```
 
-#### Responsive Images: Get It Right
-
-##### srcset with Width Descriptors
-
-```html
-<img
-  src="hero-800.jpg"
-  srcset="
-    hero-400.jpg 400w,
-    hero-800.jpg 800w,
-    hero-1200.jpg 1200w
-  "
-  sizes="(max-width: 768px) 100vw, 50vw"
-  alt="Hero image"
->
+```css
+.footer { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.header { padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right)); }
 ```
 
-**How it works**:
-- `srcset` lists available images with their actual widths (`w` descriptors)
-- `sizes` tells the browser how wide the image will display
-- Browser picks the best file based on viewport width AND device pixel ratio
+### Responsive images
 
-##### Picture Element for Art Direction
-
-When you need different crops/compositions (not just resolutions):
+Use `srcset` with width descriptors and an accurate `sizes` so the browser picks a file for the layout width and pixel density; use `<picture>` only when the crop or composition changes (art direction).
 
 ```html
+<img src="hero-800.jpg"
+     srcset="hero-400.jpg 400w, hero-800.jpg 800w, hero-1200.jpg 1200w"
+     sizes="(max-width: 768px) 100vw, 50vw"
+     width="1200" height="800" alt="…">
+
 <picture>
   <source media="(min-width: 768px)" srcset="wide.jpg">
-  <source media="(max-width: 767px)" srcset="tall.jpg">
-  <img src="fallback.jpg" alt="...">
+  <img src="tall.jpg" width="800" height="1000" alt="…">
 </picture>
 ```
 
-#### Layout Adaptation Patterns
+### Layout patterns
 
-**Navigation**: Three stages: hamburger + drawer on mobile, horizontal compact on tablet, full with labels on desktop. **Tables**: Transform to cards on mobile using `display: block` and `data-label` attributes. **Progressive disclosure**: Use `<details>/<summary>` for content that can collapse on mobile.
+- **Navigation:** drawer or bottom bar on phones, compact horizontal on tablets, full labels on desktop.
+- **Tables:** on narrow screens, let the table scroll horizontally inside a labeled region with a sticky first column, or reflow rows into cards using `data-label` attributes.
+- **Collapsible content:** `<details>`/`<summary>` for sections that can fold on small screens; `display: none` removes content from the accessibility tree and images inside it may still download.
+- **Avoid:** separate mobile and desktop codebases, user-agent sniffing, and forgetting landscape phones and tablets.
 
-#### Testing: Don't Trust DevTools Alone
+## Verify
 
-DevTools device emulation is useful for layout but misses:
+- Check widths from 320px to wide desktop, both orientations, and 200% zoom, in the browser tools available (Playwright MCP or the session's browser). Emulation verifies layout but not real touch behavior, CPU limits, font rendering, or on-screen keyboards; report which of those stayed unverified.
+- Test touch, mouse, and keyboard paths. Check the main engines the project supports (Chromium, WebKit, Gecko); Chromium emulation is not Safari.
+- **Custom controls** (sliders, drag surfaces, scrollable strips) can pass every width check and still refuse to drag on iOS. For each one in scope: tap it and confirm the response, then drag with the target input and confirm the drag completes; swipe across it along the page's scroll axis and confirm the page scrolls without activating the control; drag along the control's own axis and confirm the control moves, not the page. Say what produced the evidence (emulated viewport, synthesized touch, which engine, physical device) and name what stayed untested; unreachable hardware is a reported gap, not a blocker.
 
-- Actual touch interactions
-- Real CPU/memory constraints
-- Network latency patterns
-- Font rendering differences
-- Browser chrome/keyboard appearances
-
-**Test on at least**: One real iPhone, one real Android, a tablet if relevant. Cheap Android phones reveal performance issues you'll never see on simulators.
-
----
-
-**Avoid**: Desktop-first design. Device detection instead of feature detection. Separate mobile/desktop codebases. Ignoring tablet and landscape. Assuming all mobile devices are powerful.
+When the adaptation feels native to each context, finish with a polish pass ([polish.md](polish.md)).

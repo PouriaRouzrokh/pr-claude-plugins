@@ -77,4 +77,6 @@ function onAuthChange() {
 
 Use a Map (not a hook) so it works everywhere: utilities, event handlers, not just React components.
 
+On the server, a module-level Map lives for the whole process and is shared by all requests. Bound it (for example with `lru-cache`, see [Cross-Request LRU Caching](./server-cache-lru.md)) and never cache user-specific values in it (see [Avoid Shared Module State for Request Data](./server-no-shared-module-state.md)).
+
 Reference: [How we made the Vercel Dashboard twice as fast](https://vercel.com/blog/how-we-made-the-vercel-dashboard-twice-as-fast)

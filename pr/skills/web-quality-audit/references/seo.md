@@ -137,7 +137,7 @@ Adapt the environment check to however the project distinguishes production. Sit
 - Describe only content that is visible on the page; never add types or claims just to win rich results.
 - Use the most specific applicable type (`Article`, `Product`, `Organization`, `BreadcrumbList`, `SoftwareApplication`).
 - Validate the rendered output with the [Rich Results Test](https://search.google.com/test/rich-results) or the [Schema.org validator](https://validator.schema.org/). Valid syntax does not guarantee a rich result.
-- Google limits FAQ rich results to authoritative government and health sites, so `FAQPage` markup rarely changes how other sites appear.
+- Google stopped showing FAQ rich results on May 7, 2026 (HowTo results ended in 2023). Do not add `FAQPage` or `HowTo` markup to win a search feature; keep existing markup only if it is accurate, since unused structured data does no harm.
 
 In Next.js, render JSON-LD as a `<script>` in the page or layout and escape `<` to prevent script injection from content fields:
 
@@ -181,7 +181,7 @@ Other common shapes:
 
 ## AI crawlers and agentic browsing
 
-Lighthouse 13 adds an **Agentic Browsing** category (`agent-accessibility-tree`, optional `llms-txt`, WebMCP checks). It measures whether agents can understand and operate the rendered page; it is not evidence of search ranking or AI citation. Fix `agent-accessibility-tree` failures as accessibility defects. Treat `llms.txt` and WebMCP as optional unless the user wants them.
+Lighthouse 13 adds an **Agentic Browsing** category (`agent-accessibility-tree`, the `webmcp-*` audits, and the discoverability audits `llms-txt` and `ard-schema`, which validates an `ai-catalog.json` manifest). It measures whether agents can understand and operate the rendered page; it is not evidence of search ranking or AI citation. Fix `agent-accessibility-tree` failures as accessibility defects. Treat `llms.txt`, `ai-catalog.json`, and WebMCP as optional unless the user wants them.
 
 AI crawler controls are product-specific. Search and user-fetch agents (for example `OAI-SearchBot`, `Claude-SearchBot`, `Claude-User`, `PerplexityBot`) are separate from training crawlers (`GPTBot`, `ClaudeBot`), and `Google-Extended` does not affect Google Search. Confirm current user-agent names in each vendor's documentation before editing `robots.txt`, and change them only when the user asks.
 

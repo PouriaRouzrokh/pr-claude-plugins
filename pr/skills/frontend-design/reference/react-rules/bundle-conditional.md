@@ -28,4 +28,6 @@ function AnimationPlayer({ enabled, setEnabled }: { enabled: boolean; setEnabled
 }
 ```
 
-The `typeof window !== 'undefined'` check prevents bundling this module for SSR, optimizing server bundle size and build speed.
+Effects never run on the server, so the `typeof window !== 'undefined'` check does nothing at runtime here. Its value is at build time: Next.js replaces `typeof window` with a constant in each bundle, so the server build drops the `import()` as dead code and never bundles the module.
+
+> **Note (2026):** To skip server rendering for a whole component instead of one module, use `next/dynamic` with `ssr: false` from a Client Component (see [Dynamic Imports for Heavy Components](./bundle-dynamic-imports.md)), or, on React 19.3+, call `use(browser())` from `react-dom` inside the component so the server renders the nearest Suspense fallback.

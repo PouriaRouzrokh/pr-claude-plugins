@@ -1,7 +1,5 @@
 # Clarify
 
-> **Additional context needed**: audience knowledge and emotional state.
-
 Rewrite unclear interface text so users understand what happened, what matters, and what to do next. Preserve factual meaning, product terminology, and brand voice.
 
 ## Contents

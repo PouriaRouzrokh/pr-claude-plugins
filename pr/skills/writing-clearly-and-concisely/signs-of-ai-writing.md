@@ -1,4 +1,4 @@
-> Source: [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (January 2026 revision), by Wikipedia contributors, licensed CC BY-SA 4.0 and converted to Markdown. The live page is updated often; see it for the newest patterns.
+> Source: [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (snapshot as of January 2026), by Wikipedia contributors, licensed CC BY-SA 4.0 and converted to Markdown. The live page is updated often; see it for the newest patterns.
 
 # Signs of AI Writing
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Vendored from addyosmani/web-quality-skills (MIT), unmodified apart from this line. See ../NOTICE.md.
+# Vendored from addyosmani/web-quality-skills (MIT). Changed: this line and the w3.org namespace filter. See ../NOTICE.md.
 # Read-only HTML quality analyzer (v2). No filesystem mutations.
 # stderr = human logs, stdout = structured JSON.
 set -euo pipefail
@@ -54,7 +54,7 @@ analyze_html() {
     alt_count=$((alt_count + 1))
   done < <(grep -noE '<img[^>]*>' "$file" || true)
 
-  # Non-HTTPS URLs with line numbers
+  # Non-HTTPS URLs with line numbers (XML namespace URIs such as SVG's xmlns are identifiers, not requests)
   local http_count=0
   while IFS=: read -r ln _; do
     if [ "$http_count" -ge "$MAX_PER_CATEGORY_PER_FILE" ]; then
@@ -63,7 +63,7 @@ analyze_html() {
     fi
     WARNINGS+=("$file:$ln: Non-HTTPS URL")
     http_count=$((http_count + 1))
-  done < <(grep -noE 'http://[^"'\''[:space:]>]*' "$file" || true)
+  done < <(grep -noE 'http://[^"'\''[:space:]>]*' "$file" | grep -v ':http://www\.w3\.org/' || true)
 }
 
 # Process substitution keeps arrays in main shell (fixes v1 subshell bug)

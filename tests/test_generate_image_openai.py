@@ -177,3 +177,16 @@ def test_params_match_sdk_signature(run, tmp_path):
         (name, params), = run(argv, result=response(2))
         assert name == method
         assert set(params) <= set(inspect.signature(getattr(client.images, method)).parameters)
+
+
+@pytest.mark.parametrize("model,cost", [("gpt-image-1.5", "$0.195"), ("chatgpt-image-latest", "$0.195"),
+                                        ("gpt-image-2", "$0.183")])
+def test_cost_for_priced_models(run, capsys, model, cost):
+    run(["x", "-m", model])
+    assert f"≈ {cost}" in capsys.readouterr().out
+
+
+def test_unknown_openai_model_shows_tokens_without_cost(run, capsys):
+    run(["x", "-m", "gpt-image-9"])
+    out = capsys.readouterr().out
+    assert "6,400 tokens" in out and "cost unknown for gpt-image-9" in out

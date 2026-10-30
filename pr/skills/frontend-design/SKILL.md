@@ -10,7 +10,7 @@ Approach this as the design lead at a studio known for giving every client a dis
 
 ## Ground designs in the subject matter
 
-If the brief does not identify the product or subject, identify it yourself before designing and confirm it with the user: propose one concrete subject, the design's audience, and its primary job. Use anything you know about the user's preferences or project as a hint, and read the project's design context if one exists (a `## Design Context` section in CLAUDE.md, or DESIGN.md; [init.md](reference/init.md) creates one). The subject's industry, materials, and vernacular are where distinctive choices come from: a toy for girls aged 8–11 looks nothing like a dashboard for financial analysts. Build with the brief's real content and subject matter throughout.
+If the brief does not identify the product or subject, identify it yourself before designing and confirm it with the user in one short question (the AskUserQuestion tool): propose one concrete subject, the design's audience, and its primary job. Use anything you know about the user's preferences or project as a hint, and read the project's design context if one exists (a `## Design Context` section in CLAUDE.md, or DESIGN.md; [init.md](reference/init.md) creates one). The subject's industry, materials, and vernacular are where distinctive choices come from: a toy for girls aged 8–11 looks nothing like a dashboard for financial analysts. Build with the brief's real content and subject matter throughout.
 
 Name the visitor mode of the surface, because it decides how far the design may go ([details](reference/new-work.md#4-visitor-modes)):
 
@@ -45,7 +45,7 @@ Name the visitor mode of the surface, because it decides how far the design may 
 - Decide alignment deliberately; centering everything is a default, not a choice. Asymmetry and intentional grid breaks create emphasis when the content earns them.
 - Use fluid spacing with `clamp()` on expressive surfaces and container queries for component-level responsiveness ([layout.md](reference/layout.md)).
 
-**Motion.** Use non-user-triggered motion sparingly, only to draw attention. One orchestrated moment (a page-load sequence or a reveal) lands better than scattered effects; fade-and-slide-up on every section and hover transitions on every card read as AI-generated. Motion that answers a person's action (opening, expanding, confirming) is welcome when it shows what changed. Use exponential ease-out, never bounce or elastic; avoid animating layout properties; animate height through `grid-template-rows` ([animate.md](reference/animate.md)).
+**Motion.** Use non-user-triggered motion sparingly, only to draw attention. One orchestrated moment (a page-load sequence or a reveal) lands better than scattered effects; fade-and-slide-up on every section and hover transitions on every card read as AI-generated. Motion that answers a person's action (opening, expanding, confirming) is welcome when it shows what changed. Use exponential ease-out rather than bounce or elastic curves, which read as dated; avoid animating layout properties, and animate height through `grid-template-rows` ([animate.md](reference/animate.md)).
 
 **Interaction.**
 - Make interactions feel fast: optimistic updates for low-stakes actions, skeletons rather than spinners in content.
@@ -57,7 +57,9 @@ Name the visitor mode of the surface, because it decides how far the design may 
 
 **Written content.** Copy can make a design feel as templated as the visuals. When the brief has no real content, write it with the same care (see [Writing in design](#writing-in-design)).
 
-**CSS hygiene.** Watch selector specificity: it is easy to generate classes that cancel each other out (a type selector like `.section` against an element selector like `.cta`), especially for padding and margin between sections.
+**CSS hygiene.** Watch selector specificity: it is easy to generate rules that cancel each other out (a generic `.section` rule fighting a component rule like `.cta`), especially for padding and margin between sections; cascade layers (`@layer`) and `@scope` keep this predictable.
+
+**Platform features.** Prefer Baseline features, and check Baseline status before relying on newer ones. As of late 2026, scroll-driven animations, cross-document view transitions, customizable `<select>`, and `interpolate-size` are not yet in every engine: wrap them in `@supports` and make the fallback look intentional ([overdrive.md](reference/overdrive.md#browser-support-snapshot)).
 
 ## Process: plan, review against the brief, build, critique
 
@@ -73,7 +75,7 @@ For calibration, AI-generated design currently clusters around these traits:
 
 Each is legitimate for some brief, but they are defaults rather than choices, and they appear regardless of subject. Where the brief pins a visual direction, follow it exactly; the brief's own words always win, including when it asks for one of these looks. Where it leaves an axis free, do not spend that freedom on a default.
 
-### Two passes
+### Steps
 
 1. **Plan.** Brainstorm a compact token system from the brief:
    - **Color:** the core palette as 4–6 named hex values.
@@ -91,7 +93,7 @@ For a new surface or a replacement identity, [new-work.md](reference/new-work.md
 Build to this floor without announcing it. The brief's own words can earn any item in the Refuse list; your habit cannot. Full list with rationale: [craft-floor.md](reference/craft-floor.md). Where references disagree, the user's explicit request wins, then this file.
 
 **Verify on the built result:**
-- **Contrast:** body and placeholder text ≥ 4.5:1, large text ≥ 3:1, controls and focus indicators ≥ 3:1.
+- **Contrast (WCAG 2.2 AA):** body and placeholder text ≥ 4.5:1; large text (24px, or 18.66px bold) ≥ 3:1; controls and focus indicators ≥ 3:1.
 - **Type:** body measure 65–75ch, display at most 6rem, tracking no tighter than -0.04em, balanced headings, obvious scale and weight steps. Run the real copy at every breakpoint and fix overflow.
 - **States:** default, hover, focus, active, disabled, loading, error, empty, success, with real content and visible keyboard focus.
 - **Responsive:** composed down to mobile, not merely shrunk. Reduced motion respected.
@@ -162,10 +164,10 @@ Load references only when the task needs them. Starting points:
 | [typeset](reference/typeset.md) | Type hierarchy, scale, pairing, font loading, fluid type, OpenType features. |
 | [colorize](reference/colorize.md) | Color strategy and roles, OKLCH ramps, contrast, dark themes, tokens. |
 | [layout](reference/layout.md) | Reading order, grouping, spacing rhythm, grids, container queries, touch targets. |
-| [animate](reference/animate.md) | Motion thesis, timing, easing, reduced motion, perceived performance. |
+| [animate](reference/animate.md) | Motion thesis, timing, easing, reduced motion, perceived performance. React 19.3 `<ViewTransition>`: [react-view-transitions](reference/react-view-transitions.md). |
 | [clarify](reference/clarify.md) | Labels, errors, empty and loading states, voice and tone, localization. |
 | [adapt](reference/adapt.md) | Responsive and cross-device adaptation, input methods, safe areas, responsive images. |
-| [tailwind-design-system](reference/tailwind-design-system.md) | Tailwind CSS v4 (CSS-first `@theme`) tokens, CVA variants, theming, dark mode. Deeper: [tailwind/details](reference/tailwind/details.md), [tailwind/advanced-patterns](reference/tailwind/advanced-patterns.md). |
+| [tailwind-design-system](reference/tailwind-design-system.md) | Tailwind CSS v4 (CSS-first `@theme`) tokens, CVA variants, theming, dark mode, and shadcn/ui (init, add, then restyle the tokens). Deeper: [tailwind/details](reference/tailwind/details.md), [tailwind/advanced-patterns](reference/tailwind/advanced-patterns.md). |
 
 ### Evaluate
 
@@ -182,7 +184,7 @@ Load references only when the task needs them. Starting points:
 | [quieter](reference/quieter.md) | A design is loud or overstimulating; refine without going generic. |
 | [distill](reference/distill.md) | A design is cluttered; strip it to its essence. |
 | [delight](reference/delight.md) | Adding earned moments of personality and joy. |
-| [overdrive](reference/overdrive.md) | Pushing past conventional limits: view transitions, WebGL, scroll-driven motion, virtualized data. |
+| [overdrive](reference/overdrive.md) | Pushing past conventional limits: view transitions, WebGL, scroll-driven motion, virtualized data; includes a browser-support snapshot. |
 
 ### Harden and ship
 
@@ -196,7 +198,7 @@ Load references only when the task needs them. Starting points:
 
 ## React & Next.js Best Practices
 
-When building React or Next.js applications, apply Vercel's performance rules. The compiled guide is [react-rules/REACT-BEST-PRACTICES.md](reference/react-rules/REACT-BEST-PRACTICES.md) (70 rules with a table of contents); each rule also has its own file in `reference/react-rules/`, named by category prefix (`async-`, `bundle-`, `server-`, `client-`, `rerender-`, `rendering-`, `js-`, `advanced-`).
+When building React or Next.js applications, apply Vercel's performance rules, updated for React 19.3.1, React Compiler 1.0, Next.js 16.4.1 or later (16.4.1 fixed critical RCE bugs in `use cache` and `next/image`; see the security floor in the index), and Cache Components. Start from the index [react-rules/REACT-BEST-PRACTICES.md](reference/react-rules/REACT-BEST-PRACTICES.md), which summarizes and links all 70 rules and lists what changed in 2026; each rule has its own file in `reference/react-rules/`, named by category prefix (`async-`, `bundle-`, `server-`, `client-`, `rerender-`, `rendering-`, `js-`, `advanced-`). With React Compiler enabled, skip manual `memo`/`useMemo`/`useCallback` except where a rule's note says it still matters.
 
 | Priority | Category | Impact | Prefix |
 |----------|----------|--------|--------|

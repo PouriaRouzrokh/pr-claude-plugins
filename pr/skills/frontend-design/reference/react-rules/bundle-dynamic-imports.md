@@ -22,6 +22,8 @@ function CodePanel({ code }: { code: string }) {
 **Correct (Monaco loads on demand):**
 
 ```tsx
+'use client'
+
 import dynamic from 'next/dynamic'
 
 const MonacoEditor = dynamic(
@@ -33,3 +35,7 @@ function CodePanel({ code }: { code: string }) {
   return <MonacoEditor value={code} />
 }
 ```
+
+`ssr: false` is only allowed in Client Components; Next.js throws if a Server Component uses it. Server Components are code-split automatically, so `next/dynamic` is for Client Components and client-only libraries. Outside Next.js, `React.lazy()` with `<Suspense>` gives the same split.
+
+Reference: [Next.js lazy loading](https://nextjs.org/docs/app/guides/lazy-loading)

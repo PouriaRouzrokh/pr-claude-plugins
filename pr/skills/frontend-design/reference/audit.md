@@ -1,6 +1,6 @@
 # Audit
 
-Run systematic **technical** quality checks and generate a comprehensive report. Don't fix issues; document them for the other references to address.
+Run systematic technical quality checks and write a report. Do not fix issues during the audit; document them so the other references can address them.
 
 This is a code-level audit, not a design critique. Check what's measurable and verifiable in the implementation.
 
@@ -19,13 +19,14 @@ Run comprehensive checks across 5 dimensions. Score each dimension 0-4 using the
 ### 1. Accessibility (A11y)
 
 **Check for**:
-- **Contrast issues**: Text contrast ratios < 4.5:1 (or 7:1 for AAA)
+- **Contrast issues**: Text below 4.5:1, large text (24px, or 18.66px bold) below 3:1, and controls, icons, and focus indicators below 3:1 against adjacent colors (WCAG 2.2 AA)
 - **Motion sensitivity**: `prefers-reduced-motion` needs an intentional alternative that preserves state change and hierarchy; flag a global `0.01ms` kill that destroys useful feedback, flashing above threshold, and motion that blocks focus, reading, or task completion
 - **Missing ARIA**: Interactive elements without proper roles, labels, or states
 - **Keyboard navigation**: Missing focus indicators, illogical tab order, keyboard traps
 - **Semantic HTML**: Improper heading hierarchy, missing landmarks, divs instead of buttons
 - **Alt text**: Missing or poor image descriptions
-- **Form issues**: Inputs without labels, poor error messaging, missing required indicators
+- **Form issues**: Inputs without labels, poor error messaging, missing required indicators, missing `autocomplete` tokens
+- **WCAG 2.2 additions**: Focus hidden behind sticky headers (2.4.11), targets smaller than 24×24 CSS px without spacing (2.5.8), drag-only interactions without a pointer alternative (2.5.7), and re-asking for information already entered (3.3.7)
 
 **Score 0-4**: 0=Inaccessible (fails WCAG A), 1=Major gaps (few ARIA labels, no keyboard nav), 2=Partial (some a11y effort, significant gaps), 3=Good (WCAG AA mostly met, minor gaps), 4=Excellent (WCAG AA fully met, approaches AAA)
 
@@ -34,10 +35,10 @@ Run comprehensive checks across 5 dimensions. Score each dimension 0-4 using the
 **Check for**:
 - **Layout thrashing**: Reading/writing layout properties in loops
 - **Expensive animations**: Casual layout-property animation, unbounded blur/filter/shadow effects, or effects that visibly drop frames
-- **Missing optimization**: Images without lazy loading, unoptimized assets
+- **Missing optimization**: Below-the-fold images without lazy loading, a lazy-loaded or low-priority LCP image, media without dimensions (layout shift), unoptimized assets
 - **will-change overuse**: `will-change` applied broadly or left on at rest (it is a targeted hint for known expensive animations, not a baseline requirement)
 - **Bundle size**: Unnecessary imports, unused dependencies
-- **Render performance**: Unnecessary re-renders, missing memoization
+- **Render performance**: Unnecessary re-renders, long tasks during interaction (INP above 200ms); for React, check against [react-rules](react-rules/REACT-BEST-PRACTICES.md)
 
 **Score 0-4**: 0=Severe issues (layout thrash, unoptimized everything), 1=Major problems (no lazy loading, expensive animations), 2=Partial (some optimization, gaps remain), 3=Good (mostly optimized, minor improvements possible), 4=Excellent (fast, lean, well-optimized)
 
@@ -55,7 +56,7 @@ Run comprehensive checks across 5 dimensions. Score each dimension 0-4 using the
 
 **Check for**:
 - **Fixed widths**: Hard-coded widths that break on mobile
-- **Touch targets**: Interactive elements < 44x44px
+- **Touch targets**: Interactive elements below 24×24 CSS px (the WCAG 2.2 AA floor), and primary touch controls below the recommended 44×44px. SC 2.5.8 has exceptions: spacing (a 24 CSS px circle centered on the target's bounding box overlaps no other target or undersized target's circle), an equivalent control elsewhere, inline text links, user-agent-styled controls, and an essential size
 - **Broken touch interaction**: Custom sliders, drag surfaces, and scrollable control strips whose primary gesture fails under touch, that swallow page scroll or lose the drag to it, or that stay stuck after an interrupted gesture. Code tells: mouse-only handlers, no `touch-action` on a pointer-event drag surface, drag state that nothing clears on cancel, lost capture, or blur. Exercise the gesture when a browser tool can synthesize touch (a rendered viewport proves layout, not the gesture), then say what produced the evidence (emulated viewport, synthesized touch, which engine, physical device) and what stayed untested
 - **Horizontal scroll**: Content overflow on narrow viewports
 - **Text scaling**: Layouts that break when text size increases
@@ -63,9 +64,9 @@ Run comprehensive checks across 5 dimensions. Score each dimension 0-4 using the
 
 **Score 0-4**: 0=Desktop-only (breaks on mobile), 1=Major issues (some breakpoints, many failures), 2=Partial (works on mobile, rough edges), 3=Good (responsive, minor touch target or overflow issues), 4=Excellent (fluid, all viewports, proper touch targets, gestures work under touch)
 
-### 5. Implementation Integrity (CRITICAL)
+### 5. Implementation Integrity
 
-Search the target's markup and styles for the bans in [craft-floor.md](craft-floor.md) (gradient text, side-stripe borders, identical card grids, eyebrow labels, decorative glass, hard offset shadows, glyph icons) and for arbitrary values outside the project's scale. Verify each finding in context. Look for repeated implementation shortcuts, design-system drift, misleading or decorative content, and structure that is interchangeable with an unrelated product. Keep deterministic findings separate from visual judgment and call out false positives.
+This dimension decides whether the build expresses a real design system or a pile of defaults, so weigh it heavily. Search the target's markup and styles for the bans in [craft-floor.md](craft-floor.md) (gradient text, side-stripe borders, identical card grids, eyebrow labels, decorative glass, hard offset shadows, glyph icons) and for arbitrary values outside the project's scale. Verify each finding in context. Look for repeated implementation shortcuts, design-system drift, misleading or decorative content, and structure that is interchangeable with an unrelated product. Keep deterministic findings separate from visual judgment and call out false positives.
 
 **Score 0-4**: 0=systemic drift, 1=major repeated failures, 2=several verified issues, 3=minor isolated issues, 4=coherent and intentional
 
@@ -108,13 +109,13 @@ For each issue, document:
 - **Impact**: How it affects users
 - **WCAG/Standard**: Which standard it violates (if applicable)
 - **Recommendation**: How to fix it
-- **Suggested reference**: Which reference to apply next (one of: adapt, animate, bolder, clarify, colorize, delight, distill, extract, harden, layout, onboard, optimize, overdrive, polish, quieter, typeset)
+- **Suggested reference**: Which reference to apply next (see the list under [Recommended Actions](#recommended-actions))
 
 ### Patterns & Systemic Issues
 
 Identify recurring problems that indicate systemic gaps rather than one-off mistakes:
 - "Hard-coded colors appear in 15+ components, should use design tokens"
-- "Touch targets consistently too small (<44px) throughout mobile experience"
+- "Touch targets consistently under 24px throughout the mobile experience"
 
 ### Positive Findings
 
@@ -129,17 +130,6 @@ List recommended passes in priority order (P0 first, then P1, then P2):
 
 **Rules**: Only recommend references from: adapt, animate, bolder, clarify, colorize, delight, distill, extract, harden, layout, onboard, optimize, overdrive, polish, quieter, typeset. Map findings to the most appropriate reference. End with a polish pass ([polish.md](polish.md)) if any fixes were recommended.
 
-After presenting the summary, tell the user:
+After the summary, offer to run these one at a time or together, and to re-run the audit afterwards to show the score change. For measured Lighthouse and axe results (Core Web Vitals, WCAG 2.2 AA), follow up with the `web-quality-audit` skill.
 
-> You can ask me to run these one at a time, all at once, or in any order you prefer.
->
-> Ask me to re-run the audit after fixes to see the score improve.
-
-**IMPORTANT**: Be thorough but actionable. Too many P3 issues creates noise. Focus on what actually matters.
-
-**NEVER**:
-- Report issues without explaining impact (why does this matter?)
-- Provide generic recommendations (be specific and actionable)
-- Skip positive findings (celebrate what works)
-- Forget to prioritize (everything can't be P0)
-- Report false positives without verification
+Keep the report actionable: explain each issue's impact, make recommendations specific, include what works, prioritize honestly (not everything is P0), verify findings before reporting them, and keep P3 noise to a minimum.

@@ -1,8 +1,8 @@
 # Notice
 
-This skill is adapted from [obra/superpowers](https://github.com/obra/superpowers) (commit `8ca22db`, 2026-09-25) by Jesse Vincent, used under the MIT License below.
+This skill is adapted from [obra/superpowers](https://github.com/obra/superpowers) (commit `8ca22db`, 2026-09-25) by Jesse Vincent; upstream reviewed through v7.0.1 (2026-10-21), with no later change to this skill, used under the MIT License below.
 
-Changes from upstream: rewrote SKILL.md for this plugin (cross-references, RFD integration, Python/ML guidance, proportional rigor), renamed "your human partner" to neutral wording, moved supporting files into `references/` and `scripts/`, generalized `find-polluter.sh` to accept any test command, and merged `verification-before-completion` into `test-driven-development`.
+Changes from upstream: rewrote SKILL.md for this plugin (cross-references, RFD integration, Python/ML guidance, proportional rigor), renamed "your human partner" to neutral wording, moved supporting files into `references/` and `scripts/`, generalized `find-polluter.sh` to accept any test command, and merged upstream `verification-before-completion` into this skill (the verification gate); `find-polluter.sh` lives in `systematic-debugging`.
 
 ```
 MIT License

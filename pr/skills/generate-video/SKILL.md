@@ -9,7 +9,7 @@ allowed-tools: Bash(uv run ${CLAUDE_SKILL_DIR}/scripts/generate_video.py *) Bash
 
 Generate and edit video by running the bundled script, which calls `gemini-omni-1.1-flash` through the Interactions API. Veo 3.1 previews shut down on 2026-10-22; Omni Flash is Google's current video model.
 
-**Cost**: about $0.10 per second of 720p output (paid tier only). Confirm with the user before generating long, high-resolution, or many clips.
+**Cost**: about $0.10 per second of 720p output (paid tier only; ai.google.dev pricing, checked 2026-10-30). The script prints an estimate from the saved clip's length after each run. Confirm with the user before generating long, high-resolution, or many clips.
 
 ## Run the Script
 
@@ -22,6 +22,8 @@ shaft of window light; a potter's hands shape a spinning bowl in the foreground,
 focus. Warm, filmic color grade, shallow depth of field. Ambient sound of the wheel humming.
 PROMPT
 ```
+
+The script retries only HTTP 429 and 503 (twice, after 15 s and 45 s). Other server errors are not retried, because a 500, 502 or 504 can arrive after the clip was already rendered and billed; check the output folder and your usage before running again.
 
 `uv run` installs dependencies automatically. Without uv, use `python3` (3.10+) after `python3 -m pip install -U "google-genai>=2.3,<3"`.
 
@@ -76,6 +78,7 @@ Keep each clip to one shot. Build sequences by generating several clips and join
 - Input videos for editing or extension: 10 s max when uploaded. Video references: up to 3 clips of 3 s.
 - Uploading or editing media with certain recognizable people is blocked; safety filters apply to prompts and output and vary by region.
 - No YouTube URLs as inputs.
+- With `delivery: uri` (1080p and 4k), the download link is only valid in the response to the create call; fetching the interaction later returns inline base64 instead. The script saves the clip right away, so this only matters if you call the API yourself.
 - All output carries a SynthID watermark.
 
 ## Troubleshooting

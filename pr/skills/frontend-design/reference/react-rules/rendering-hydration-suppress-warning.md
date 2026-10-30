@@ -28,3 +28,7 @@ function Timestamp() {
   )
 }
 ```
+
+`suppressHydrationWarning` works one level deep: it covers the element's own attributes and text content, not its descendants. React does not patch the mismatched text, so the server value stays until the next client render. If the value must be correct on screen, render it on the client instead (set it in an effect, or on React 19.3+ call `use(browser())` from `react-dom` to render a Suspense fallback on the server).
+
+Reference: [React: suppressing unavoidable hydration mismatch errors](https://react.dev/reference/react-dom/client/hydrateRoot#suppressing-unavoidable-hydration-mismatch-errors)

@@ -16,7 +16,7 @@ function LoadingSkeleton() {
   return <div className="animate-pulse h-20 bg-gray-200" />
 }
 
-function Container() {
+function Container({ loading }: { loading: boolean }) {
   return (
     <div>
       {loading && <LoadingSkeleton />}
@@ -32,7 +32,7 @@ const loadingSkeleton = (
   <div className="animate-pulse h-20 bg-gray-200" />
 )
 
-function Container() {
+function Container({ loading }: { loading: boolean }) {
   return (
     <div>
       {loading && loadingSkeleton}
@@ -43,4 +43,4 @@ function Container() {
 
 This is especially helpful for large and static SVG nodes, which can be expensive to recreate on every render.
 
-**Note:** If your project has [React Compiler](https://react.dev/learn/react-compiler) enabled, the compiler automatically hoists static JSX elements and optimizes component re-renders, making manual hoisting unnecessary.
+**Note (2026):** With [React Compiler](https://react.dev/learn/react-compiler) enabled, the compiler caches static JSX automatically, so manual hoisting is unnecessary in compiled components.

@@ -147,3 +147,7 @@ When not to use this pattern:
 With Vercel's [Fluid Compute](https://vercel.com/docs/fluid-compute), module-level caching is especially effective because multiple concurrent requests share the same function instance. The static assets stay loaded in memory across requests without cold start penalties.
 
 In traditional serverless, each cold start re-executes module-level code, but subsequent warm invocations reuse the loaded assets until the instance is recycled.
+
+> **Note (2026):** The Next.js 16 caching guide recommends this pattern: with Cache Components enabled, an `await readFile()` inside a component counts as uncached data that must sit inside `'use cache'` or a `<Suspense>` boundary, while a module-scope read of a file that never changes needs neither. Use `fs` (the synchronous example above) on the Node.js runtime; the `fetch(new URL(..., import.meta.url))` form is for the Edge runtime.
+
+Reference: [Next.js caching: predictable values](https://nextjs.org/docs/app/getting-started/caching#predictable-values)

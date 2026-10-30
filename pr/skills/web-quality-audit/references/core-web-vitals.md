@@ -76,6 +76,7 @@ Lighthouse 13 replaced many older performance audits with shared Performance Ins
 | `legacy-javascript-insight`, `duplicated-javascript-insight` | Polyfills or duplicated modules in bundles | Modern browserslist, dedupe dependencies |
 | `unused-javascript`, `bootup-time`, `mainthread-work-breakdown` | JavaScript cost that drives TBT | Code-split, move work to the server |
 | `cache-insight` | Short cache lifetimes on static assets | Long `max-age` with `immutable` for hashed files |
+| `modern-http-insight` | Requests served over HTTP/1.1 | Serve through a CDN or server with HTTP/2 or HTTP/3 |
 | `dom-size-insight` | Very large DOM | Virtualize long lists, paginate |
 | `viewport-insight` | Missing mobile viewport meta tag | `width=device-width, initial-scale=1` |
 
@@ -154,7 +155,7 @@ new PerformanceObserver((list) => {
 
 ## Next.js fixes
 
-**LCP image.** Use `next/image` with explicit `sizes`. `next/image` lazy-loads by default, and `fetchPriority="high"` alone does not change that. In Next.js 16 and later, give the single LCP image `loading="eager"` plus `fetchPriority="high"`, or `preload` when it must start from `<head>` (the `priority` prop is deprecated). On Next.js 15 and earlier, use `priority`.
+**LCP image.** Use `next/image` with explicit `sizes`. `next/image` lazy-loads by default, and `fetchPriority="high"` alone does not change that. In Next.js 16 and later, give the single LCP image `loading="eager"` plus `fetchPriority="high"`. Use the `preload` prop instead only when the image must start loading from `<head>`, and never combine it with `loading` or `fetchPriority`. Next.js 16 deprecated `priority`; on Next.js 15 and earlier, `priority` is the equivalent.
 
 ```tsx
 import Image from 'next/image';

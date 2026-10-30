@@ -53,7 +53,7 @@ See `atlas-development` skill for complete framework details.
 When a task benefits from running multiple agents, choose the right approach:
 
 - **Subagents (default)**: Lightweight workers that report results back. Use for independent parallel tasks — exploration, architecture proposals, code review. Cheaper and sufficient for most work.
-- **Agent teams**: Independent sessions with inter-agent messaging. Use only when agents need to communicate, challenge each other, or coordinate (e.g., architecture debates, cross-layer coordination, adversarial review). Experimental, more expensive, higher coordination overhead.
+- **Agent teams**: Independent sessions with inter-agent messaging. Use only when agents need to communicate, challenge each other, or coordinate (e.g., architecture debates, cross-layer coordination, adversarial review). Experimental, more expensive, higher coordination overhead. Named subagents can already message each other with `SendMessage` without teams, so try that first. While `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set, subagents Claude names launch as teammates, so enable it per session only.
 - **User override**: Commands that support agents accept `--subagents` or `--team` flags. Respect the user's choice, but warn if the flag adds unnecessary overhead for the task.
 
 **Priority**: Always default to subagents. Only propose agent teams when inter-agent communication has a clear benefit. See `atlas-development` skill for per-phase guidance.
@@ -71,7 +71,7 @@ Before starting any task, check what skills and MCP servers are available in you
 
 For significant changes (features, bug fixes, architectural changes - not one-line fixes), create or update an RFD:
 
-- **Path**: `.claude/checkpoints/checkpoint-{N}/rfd/{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`
+- **Path**: `.claude/checkpoints/checkpoint-{C}/rfd/{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md` (`{C}` = latest checkpoint, `{N}` = next RFD number in it)
 - **Workflow**: Write question → Document plan → Implement → Update RFD with results
 
 ### Planning First
@@ -130,6 +130,7 @@ pr-claude-plugins/
 ├── pr/                               # The pr plugin
 │   ├── .claude-plugin/plugin.json    # Plugin manifest
 │   ├── agents/                       # code-explorer, code-architect, code-reviewer
+│   ├── shared/                       # checkpoint.py, checkpoint-system.md, rfd-template.md (used by workflow skills)
 │   └── skills/<name>/                # SKILL.md + references/, scripts/, NOTICE.md
 ├── tests/                            # Offline pytest suite for the Gemini scripts (not shipped)
 ├── CLAUDE.md
@@ -155,6 +156,12 @@ license: "..."                    # vendored skills: upstream license + See NOTI
 - Keep SKILL.md under 500 lines; move templates and long material to `references/` (one level deep, table of contents when over 100 lines).
 - Reference bundled files as `${CLAUDE_SKILL_DIR}/scripts/...` inside SKILL.md; Claude Code substitutes the absolute path. Reference files are not substituted.
 - Scripts are Python with PEP 723 inline dependencies so `uv run` works from any project. Do not add Node scripts that import npm packages: they cannot resolve modules from the plugin cache.
+- Write instructions in a calm, explained style: plain imperatives with the reason, not ALL-CAPS "CRITICAL/MUST/NEVER" (current Claude models over-apply shouted rules). Only add what Claude does not already know.
+- Checkpoint and RFD conventions live only in `pr/shared/checkpoint-system.md`; skills call `python3 ${CLAUDE_PLUGIN_ROOT}/shared/checkpoint.py` (stdlib, Python 3.8+) instead of hand-written shell snippets. `${CLAUDE_PLUGIN_ROOT}`/`${CLAUDE_SKILL_DIR}` are substituted in SKILL.md only, not in reference files.
+- Prefer Claude Code built-ins over re-implementing them: `/simplify`, then `/code-review high` (always type the level; it runs in the background, so wait for findings), and `/security-review` (needs an `origin` remote); the plugin's agents are the fallback.
+- Refer to the plugin's agents by their full names (`pr:code-explorer`, `pr:code-architect`, `pr:code-reviewer`); other plugins ship agents with the same short names.
+- Worktree-isolated agents branch from the remote default branch unless `worktree.baseRef` is `"head"`, and get only tracked files: skills that use them must commit first and say so.
+- `context: fork` only for skills that need no mid-run user input (forks cannot ask questions); approvals use `AskUserQuestion`, or `ExitPlanMode` when the session is in plan mode (plan mode blocks writes to `.claude/`).
 - Vendored content keeps its upstream license in the skill's `NOTICE.md`.
 - Bump `version` in both manifests on every release, or installed copies will not update.
 

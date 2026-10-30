@@ -2,16 +2,16 @@
 title: Authenticate Server Actions Like API Routes
 impact: CRITICAL
 impactDescription: prevents unauthorized access to server mutations
-tags: server, server-actions, authentication, security, authorization
+tags: server, server-actions, server-functions, authentication, security, authorization
 ---
 
 ## Authenticate Server Actions Like API Routes
 
 **Impact: CRITICAL (prevents unauthorized access to server mutations)**
 
-Server Actions (functions with `"use server"`) are exposed as public endpoints, just like API routes. Always verify authentication and authorization **inside** each Server Action—do not rely solely on middleware, layout guards, or page-level checks, as Server Actions can be invoked directly.
+Server Actions (functions marked `'use server'`, also called Server Functions) are reachable by direct POST requests, just like API routes. Verify authentication and authorization **inside** each action. Do not rely on Proxy (formerly middleware), layout guards, or page-level checks: a page-level check controls which UI renders, but the action is a separate entry point.
 
-Next.js documentation explicitly states: "Treat Server Actions with the same security considerations as public-facing API endpoints, and verify if the user is allowed to perform a mutation."
+The Next.js data security guide puts it this way: "you should still treat Server Actions as reachable via direct POST requests and verify authentication and authorization inside each one."
 
 **Incorrect (no authentication check):**
 
@@ -25,33 +25,30 @@ export async function deleteUser(userId: string) {
 }
 ```
 
-**Correct (authentication inside the action):**
+**Correct (authentication and authorization inside the action):**
 
 ```typescript
 'use server'
 
 import { verifySession } from '@/lib/auth'
-import { unauthorized } from '@/lib/errors'
 
 export async function deleteUser(userId: string) {
-  // Always check auth inside the action
   const session = await verifySession()
-  
   if (!session) {
-    throw unauthorized('Must be logged in')
+    throw new Error('Unauthorized')
   }
-  
-  // Check authorization too
+
+  // Authorization: can this user act on this resource?
   if (session.user.role !== 'admin' && session.user.id !== userId) {
-    throw unauthorized('Cannot delete other users')
+    throw new Error('Forbidden')
   }
-  
+
   await db.user.delete({ where: { id: userId } })
   return { success: true }
 }
 ```
 
-**With input validation:**
+**With input validation (Zod 4):**
 
 ```typescript
 'use server'
@@ -60,37 +57,36 @@ import { verifySession } from '@/lib/auth'
 import { z } from 'zod'
 
 const updateProfileSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.uuid(),
   name: z.string().min(1).max(100),
-  email: z.string().email()
+  email: z.email(),
 })
 
 export async function updateProfile(data: unknown) {
-  // Validate input first
-  const validated = updateProfileSchema.parse(data)
-  
-  // Then authenticate
+  // 1. Authenticate
   const session = await verifySession()
   if (!session) {
     throw new Error('Unauthorized')
   }
-  
-  // Then authorize
+
+  // 2. Validate untrusted input
+  const validated = updateProfileSchema.parse(data)
+
+  // 3. Authorize against the validated input
   if (session.user.id !== validated.userId) {
     throw new Error('Can only update own profile')
   }
-  
-  // Finally perform the mutation
+
   await db.user.update({
     where: { id: validated.userId },
-    data: {
-      name: validated.name,
-      email: validated.email
-    }
+    data: { name: validated.name, email: validated.email },
   })
-  
+
+  // Return only what the UI needs, never the raw database record
   return { success: true }
 }
 ```
 
-Reference: [https://nextjs.org/docs/app/guides/authentication](https://nextjs.org/docs/app/guides/authentication)
+For larger apps, move auth checks and queries into a `server-only` Data Access Layer and keep `'use server'` files thin, so every entry point shares the same checks.
+
+Reference: [Next.js data security guide](https://nextjs.org/docs/app/guides/data-security), [Next.js authentication guide](https://nextjs.org/docs/app/guides/authentication)

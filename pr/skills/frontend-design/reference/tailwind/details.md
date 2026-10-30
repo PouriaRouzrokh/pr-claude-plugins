@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
   // Base styles - v4 uses native CSS variables
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -46,29 +46,16 @@ const buttonVariants = cva(
   }
 )
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-}
+// React 19: ref is a regular prop and React.ComponentProps<'button'> includes it,
+// so no forwardRef is needed; ref passes through with ...props
+export type ButtonProps = React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+  }
 
-// React 19: No forwardRef needed
-export function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ref,
-  ...props
-}: ButtonProps & { ref?: React.Ref<HTMLButtonElement> }) {
+export function Button({ className, variant, size, asChild = false, ...props }: ButtonProps) {
   const Comp = asChild ? Slot : 'button'
-  return (
-    <Comp
-      className={cn(buttonVariants({ variant, size, className }))}
-      ref={ref}
-      {...props}
-    />
-  )
+  return <Comp className={cn(buttonVariants({ variant, size, className }))} {...props} />
 }
 
 // Usage
@@ -83,15 +70,10 @@ export function Button({
 // components/ui/card.tsx
 import { cn } from '@/lib/utils'
 
-// React 19: ref is a regular prop, no forwardRef
-export function Card({
-  className,
-  ref,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement> & { ref?: React.Ref<HTMLDivElement> }) {
+// React 19: ref is a regular prop and is included in React.ComponentProps
+export function Card({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
-      ref={ref}
       className={cn(
         'rounded-lg border border-border bg-card text-card-foreground shadow-sm',
         className
@@ -101,70 +83,29 @@ export function Card({
   )
 }
 
-export function CardHeader({
-  className,
-  ref,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement> & { ref?: React.Ref<HTMLDivElement> }) {
-  return (
-    <div
-      ref={ref}
-      className={cn('flex flex-col space-y-1.5 p-6', className)}
-      {...props}
-    />
-  )
+export function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
+  return <div className={cn('flex flex-col gap-1.5 p-6', className)} {...props} />
 }
 
-export function CardTitle({
-  className,
-  ref,
-  ...props
-}: React.HTMLAttributes<HTMLHeadingElement> & { ref?: React.Ref<HTMLHeadingElement> }) {
+export function CardTitle({ className, ...props }: React.ComponentProps<'h3'>) {
   return (
     <h3
-      ref={ref}
       className={cn('text-2xl font-semibold leading-none tracking-tight', className)}
       {...props}
     />
   )
 }
 
-export function CardDescription({
-  className,
-  ref,
-  ...props
-}: React.HTMLAttributes<HTMLParagraphElement> & { ref?: React.Ref<HTMLParagraphElement> }) {
-  return (
-    <p
-      ref={ref}
-      className={cn('text-sm text-muted-foreground', className)}
-      {...props}
-    />
-  )
+export function CardDescription({ className, ...props }: React.ComponentProps<'p'>) {
+  return <p className={cn('text-sm text-muted-foreground', className)} {...props} />
 }
 
-export function CardContent({
-  className,
-  ref,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement> & { ref?: React.Ref<HTMLDivElement> }) {
-  return (
-    <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
-  )
+export function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
+  return <div className={cn('p-6 pt-0', className)} {...props} />
 }
 
-export function CardFooter({
-  className,
-  ref,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement> & { ref?: React.Ref<HTMLDivElement> }) {
-  return (
-    <div
-      ref={ref}
-      className={cn('flex items-center p-6 pt-0', className)}
-      {...props}
-    />
-  )
+export function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
+  return <div className={cn('flex items-center p-6 pt-0', className)} {...props} />
 }
 
 // Usage
@@ -188,22 +129,20 @@ export function CardFooter({
 // components/ui/input.tsx
 import { cn } from '@/lib/utils'
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export type InputProps = React.ComponentProps<'input'> & {
   error?: string
-  ref?: React.Ref<HTMLInputElement>
 }
 
-export function Input({ className, type, error, ref, ...props }: InputProps) {
+export function Input({ className, type, error, ...props }: InputProps) {
   return (
     <div className="relative">
       <input
         type={type}
         className={cn(
-          'flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+          'flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
           error && 'border-destructive focus-visible:ring-destructive',
           className
         )}
-        ref={ref}
         aria-invalid={!!error}
         aria-describedby={error ? `${props.id}-error` : undefined}
         {...props}
@@ -228,23 +167,17 @@ const labelVariants = cva(
   'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
 )
 
-export function Label({
-  className,
-  ref,
-  ...props
-}: React.LabelHTMLAttributes<HTMLLabelElement> & { ref?: React.Ref<HTMLLabelElement> }) {
-  return (
-    <label ref={ref} className={cn(labelVariants(), className)} {...props} />
-  )
+export function Label({ className, ...props }: React.ComponentProps<'label'>) {
+  return <label className={cn(labelVariants(), className)} {...props} />
 }
 
-// Usage with React Hook Form + Zod
+// Usage with React Hook Form + Zod 4 (@hookform/resolvers v5+)
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
 const schema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 })
 
@@ -324,11 +257,12 @@ export function Grid({ className, cols, gap, ...props }: GridProps) {
 const containerVariants = cva('mx-auto w-full px-4 sm:px-6 lg:px-8', {
   variants: {
     size: {
-      sm: 'max-w-screen-sm',
-      md: 'max-w-screen-md',
-      lg: 'max-w-screen-lg',
-      xl: 'max-w-screen-xl',
-      '2xl': 'max-w-screen-2xl',
+      // v4: max-w-screen-* is deprecated; read the breakpoint variables directly
+      sm: 'max-w-(--breakpoint-sm)',
+      md: 'max-w-(--breakpoint-md)',
+      lg: 'max-w-(--breakpoint-lg)',
+      xl: 'max-w-(--breakpoint-xl)',
+      '2xl': 'max-w-(--breakpoint-2xl)',
       full: 'max-w-full',
     },
   },
@@ -359,8 +293,8 @@ export function Container({ className, size, ...props }: ContainerProps) {
 
 For advanced animation and dark mode patterns, see [advanced-patterns.md](advanced-patterns.md):
 
-- **Pattern 5: Native CSS Animations** — dialog `@keyframes`, native popover API with `@starting-style`, `allow-discrete` transitions, and a full `DialogContent`/`DialogOverlay` implementation using Radix UI
-- **Pattern 6: Dark Mode** — `ThemeProvider` context with `localStorage` persistence, `prefers-color-scheme` detection, meta `theme-color` update, and a `ThemeToggle` button component
+- **Pattern 5: Native CSS Animations** — dialog `@keyframes`, native popover API with `@starting-style` (and the `starting:` / `transition-discrete` utilities), and a `DialogContent`/`DialogOverlay` implementation using Radix UI
+- **Pattern 6: Dark Mode** — a no-flash `<head>` script, a `ThemeProvider` context with `localStorage` persistence, `prefers-color-scheme` detection, meta `theme-color` update, and a `ThemeToggle` button component
 
 ## Utility Functions
 
@@ -375,7 +309,7 @@ export function cn(...inputs: ClassValue[]) {
 
 // Focus ring utility
 export const focusRing = cn(
-  "focus-visible:outline-none focus-visible:ring-2",
+  "focus-visible:outline-hidden focus-visible:ring-2",
   "focus-visible:ring-ring focus-visible:ring-offset-2",
 );
 
@@ -383,12 +317,14 @@ export const focusRing = cn(
 export const disabled = "disabled:pointer-events-none disabled:opacity-50";
 ```
 
+Use `tailwind-merge` v3 with Tailwind v4 (v2 targets Tailwind v3). It understands the default theme and arbitrary values. If you add tokens to a namespace whose names it can't infer, such as custom font sizes (`--text-display` gives `text-display`, which it would treat as a color and fail to merge with `text-sm`), register them with `extendTailwindMerge`. `class-variance-authority` 0.7 is still current and works unchanged with v4.
+
 For advanced v4 CSS patterns, the full v3-to-v4 migration checklist, and complete best practices, see [advanced-patterns.md](advanced-patterns.md):
 
-- **Custom `@utility`** — reusable CSS utilities for decorative lines and text gradients
+- **Custom `@utility`** — reusable CSS utilities for decorative lines and text gradients, and `@reference` for `@apply` in CSS modules
 - **Theme modifiers** — `@theme inline` (reference other CSS vars), `@theme static` (always output), `@import "tailwindcss" theme(static)`
 - **Namespace overrides** — clearing default Tailwind color scales with `--color-*: initial`
-- **Semi-transparent variants** — `color-mix()` for alpha scale generation
-- **Container queries** — `--container-*` token definitions
-- **v3→v4 migration checklist** — 10-item checklist covering config, directives, colors, dark mode, animations, React 19 ref changes
+- **Semi-transparent variants** — opacity modifiers, `--alpha()`, and `color-mix()` alpha tokens
+- **Container queries** — built-in `@container` variants and adding `--container-*` sizes
+- **v3→v4 migration checklist** — upgrade tool, config, directives, renamed and removed utilities, default changes, dark mode, animations, React 19 ref changes
 - **Best practices** — full Do's and Don'ts list

@@ -73,4 +73,6 @@ In Next.js, the `fetch` API is automatically extended with request memoization. 
 
 Use `React.cache()` to deduplicate these operations across your component tree.
 
+> **Note (2026):** `React.cache()` is scoped to one request; nothing is shared between requests. For cross-request caching in Next.js 16 with Cache Components, use `'use cache'` (or `'use cache: private'` for functions that read `cookies()` or `headers()`); see [Cross-Request LRU Caching](./server-cache-lru.md).
+
 Reference: [React.cache documentation](https://react.dev/reference/react/cache)

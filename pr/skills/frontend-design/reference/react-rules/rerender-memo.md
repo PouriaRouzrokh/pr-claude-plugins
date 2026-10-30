@@ -41,4 +41,6 @@ function Profile({ user, loading }: Props) {
 }
 ```
 
-**Note:** If your project has [React Compiler](https://react.dev/learn/react-compiler) enabled, manual memoization with `memo()` and `useMemo()` is not necessary. The compiler automatically optimizes re-renders.
+The structural point holds with or without memoization: an early return placed before expensive work skips it entirely.
+
+> **Note (2026):** React Compiler 1.0 (stable since October 2025; `reactCompiler: true` in Next.js 16, off by default) memoizes components and values automatically, so in compiled code you don't need `memo()` or `useMemo()` for this. Manual memoization still matters when the compiler is not enabled, when it skips a component that breaks the Rules of React (no ✨ badge in React DevTools), or when you need a guaranteed-stable value, for example as an effect dependency. React's guidance for existing code is to leave current `useMemo`/`useCallback`/`memo` in place, or test carefully before removing them.

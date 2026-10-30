@@ -88,7 +88,7 @@ PROMPT
 | `--quality` | `low`, `medium`, `high`, `xhigh`, `max`, `auto` | Default `auto`. `low` for drafts; `xhigh`/`max` only on the 2.5 models and cost more tokens. |
 | `-n` | 1–10 | Variations, saved as `name.png`, `name-1.png`, ... |
 
-The script validates every combination before calling an API, retries on rate limits, and prints the saved paths plus either an **Interaction ID** (Google) or the **token usage and estimated cost** (GPT).
+The script validates every combination before calling an API, retries on rate limits, and prints the saved paths plus either an estimated cost and an **Interaction ID** (Google) or the **token usage and estimated cost** (GPT). Search attribution files (`.search.html`) never overwrite an existing file either.
 
 ## Workflow
 
@@ -132,8 +132,8 @@ PROMPT
 
 ## Cost
 
-- **Nano Banana** (per image, Oct 2026): `nb` about $0.034 at 1K and $0.11 at 4K; `pro` about $0.13 at 1K–2K and $0.24 at 4K; `nb2` $0.045 at 512px.
-- **GPT Image 2.5** is billed by tokens: $30 per 1M image output tokens, $8 per 1M image input tokens, $5 per 1M text input tokens. Cost grows with size, quality, and `-n`. The script prints the actual usage and estimate after each call; use `--quality low` while exploring.
+- **Nano Banana** (per image, ai.google.dev pricing, checked 2026-10-30): `nb` $0.034 at 1K, $0.050 at 2K, $0.113 at 4K; `pro` $0.134 at 1K–2K and $0.24 at 4K; `nb2` $0.045 at 512px, $0.067 at 1K; `lite` $0.034 at 1K. The script prints an output-only estimate after each call (input images and thinking tokens add a little).
+- **GPT Image 2.5** is billed by tokens: $30 per 1M image output tokens, $8 per 1M image input tokens, $5 per 1M text input tokens. Cost grows with size, quality, and `-n`. The script prints the actual usage and estimate after each call (for `gpt-image-1.5` and `chatgpt-image-latest`, which cost $32 per 1M image output tokens; models it has no price for show tokens only); use `--quality low` while exploring.
 
 ## Limits
 

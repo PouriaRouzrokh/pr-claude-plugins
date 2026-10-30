@@ -1,6 +1,6 @@
 # Bolder
 
-> **Additional context needed**: which section is the target, and what must stay untouched.
+Before starting, know which section is the target and what must stay untouched; ask if the request leaves either unclear.
 
 If the user says "bolder" while a visual direction is still being chosen, treat it as a request for bolder direction options ([new-work.md](new-work.md)), not this pass. This pass refines a surface whose visual world already shipped.
 

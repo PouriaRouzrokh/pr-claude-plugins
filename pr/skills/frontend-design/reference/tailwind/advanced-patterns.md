@@ -13,7 +13,8 @@ Advanced Tailwind CSS v4 patterns including animations, dark mode theming, custo
 ## Pattern 5: Native CSS Animations (v4)
 
 ```css
-/* In your CSS file - native @starting-style for entry animations */
+/* In your CSS file. Keyframes outside @theme are always emitted;
+   inside @theme they are emitted only when an --animate-* variable uses them. */
 @theme {
   --animate-dialog-in: dialog-fade-in 0.2s ease-out;
   --animate-dialog-out: dialog-fade-out 0.15s ease-in;
@@ -64,23 +65,27 @@ Advanced Tailwind CSS v4 patterns including animations, dark mode theming, custo
 }
 ```
 
+The same popover transition with utilities: `transition-discrete` adds `allow-discrete`, and the `starting:` variant writes the `@starting-style` block.
+
+```html
+<div popover class="opacity-0 scale-95 transition-all transition-discrete duration-200
+                    open:opacity-100 open:scale-100 starting:open:opacity-0 starting:open:scale-95">
+```
+
 ```typescript
-// components/ui/dialog.tsx - Using native popover API
+// components/ui/dialog.tsx - Radix Dialog animated with the keyframes above via data-state
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { cn } from '@/lib/utils'
 
 const DialogPortal = DialogPrimitive.Portal
 
+// React 19: React.ComponentProps includes ref, so it passes through with ...props
 export function DialogOverlay({
   className,
-  ref,
   ...props
-}: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> & {
-  ref?: React.Ref<HTMLDivElement>
-}) {
+}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
     <DialogPrimitive.Overlay
-      ref={ref}
       className={cn(
         'fixed inset-0 z-50 bg-black/80',
         'data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out',
@@ -94,16 +99,12 @@ export function DialogOverlay({
 export function DialogContent({
   className,
   children,
-  ref,
   ...props
-}: React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
-  ref?: React.Ref<HTMLDivElement>
-}) {
+}: React.ComponentProps<typeof DialogPrimitive.Content>) {
   return (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
-        ref={ref}
         className={cn(
           'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border border-border bg-background p-6 shadow-lg sm:rounded-lg',
           'data-[state=open]:animate-dialog-in data-[state=closed]:animate-dialog-out',
@@ -119,6 +120,27 @@ export function DialogContent({
 ```
 
 ## Pattern 6: Dark Mode with CSS (v4)
+
+By default, `dark:` follows `prefers-color-scheme`. For a user toggle, override the variant (`@custom-variant dark (&:where(.dark, .dark *));`, or `[data-theme=dark]` for an attribute) and set the class on `<html>` **before first paint**: an inline script in `<head>` plus `suppressHydrationWarning` on `<html>`. The provider below only manages the toggle; on its own it applies the class after hydration, which flashes the wrong theme. In Next.js, the `next-themes` package implements both halves.
+
+```tsx
+// app/layout.tsx - runs before paint (script from the Tailwind dark mode docs;
+// the 'theme' key must match the provider's storageKey)
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{document.documentElement.classList.toggle('dark',localStorage.theme==='dark'||(!('theme' in localStorage)&&matchMedia('(prefers-color-scheme: dark)').matches))}catch(e){}`,
+          }}
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
 
 ```typescript
 // providers/ThemeProvider.tsx - Simplified for v4
@@ -145,13 +167,15 @@ export function ThemeProvider({
   defaultTheme?: Theme
   storageKey?: string
 }) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
+  // Read the stored choice on the first client render so the effect below never
+  // re-applies the default over the class the <head> script already set.
+  // Don't render `theme` as text before mount: the server always sees the default.
+  const [theme, setTheme] = useState<Theme>(() =>
+    typeof window === 'undefined'
+      ? defaultTheme
+      : ((localStorage.getItem(storageKey) as Theme | null) ?? defaultTheme)
+  )
   const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>('light')
-
-  useEffect(() => {
-    const stored = localStorage.getItem(storageKey) as Theme | null
-    if (stored) setTheme(stored)
-  }, [storageKey])
 
   useEffect(() => {
     const root = document.documentElement
@@ -175,7 +199,9 @@ export function ThemeProvider({
     <ThemeContext.Provider value={{
       theme,
       setTheme: (newTheme) => {
-        localStorage.setItem(storageKey, newTheme)
+        // Match the <head> script: no stored key means "follow the system"
+        if (newTheme === 'system') localStorage.removeItem(storageKey)
+        else localStorage.setItem(storageKey, newTheme)
         setTheme(newTheme)
       },
       resolvedTheme,
@@ -192,6 +218,8 @@ export const useTheme = () => {
 }
 
 // components/ThemeToggle.tsx
+'use client'
+
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from '@/providers/ThemeProvider'
 
@@ -216,7 +244,7 @@ export function ThemeToggle() {
 
 ### Custom Utilities with `@utility`
 
-Define reusable custom utilities:
+Define reusable custom utilities. Unlike plain classes, `@utility` classes work with every variant (`hover:`, `md:`, `dark:`) and sort correctly against other utilities:
 
 ```css
 /* Custom utility for decorative lines */
@@ -226,9 +254,11 @@ Define reusable custom utilities:
 
 /* Custom utility for text gradients */
 @utility text-gradient {
-  @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  @apply bg-linear-to-r from-primary to-accent bg-clip-text text-transparent;
 }
 ```
+
+`@apply` works in the main stylesheet. In a separately processed stylesheet (CSS modules, Vue or Svelte `<style>` blocks), add `@reference "../app.css";` first so it can see your theme and custom utilities without duplicating CSS.
 
 ### Theme Modifiers
 
@@ -243,7 +273,8 @@ Define reusable custom utilities:
   --color-brand: oklch(65% 0.15 240);
 }
 
-/* Import with theme options */
+/* Or apply an option to the whole default theme. This replaces the plain
+   @import "tailwindcss" and, like any @import, must come first in the file. */
 @import "tailwindcss" theme(static);
 ```
 
@@ -265,9 +296,12 @@ Define reusable custom utilities:
 
 ### Semi-transparent Color Variants
 
+Usually unnecessary: opacity modifiers such as `bg-primary/10` already compile to `color-mix()`, and the `--alpha(var(--color-primary) / 10%)` function does the same inside custom CSS. Define named alpha tokens only when you want them as part of the design system:
+
 ```css
-@theme {
-  /* Use color-mix() for alpha variants */
+/* inline: utilities evaluate the expression where they are used, so the
+   tokens follow a --color-primary redefined under .dark */
+@theme inline {
   --color-primary-50: color-mix(in oklab, var(--color-primary) 5%, transparent);
   --color-primary-100: color-mix(
     in oklab,
@@ -284,27 +318,37 @@ Define reusable custom utilities:
 
 ### Container Queries
 
+Container queries are built into v4; no plugin is needed. Mark a parent with `@container` and style children with `@sm:`, `@md:`, and so on (sizes `@3xs` at 16rem through `@7xl` at 80rem), `@max-md:` for below a size, `@container/name` with `@md/name:` for named containers, and `@min-[475px]:` for one-off sizes. v4.3 adds `@container-size` for block-size units like `cqb`.
+
+```html
+<div class="@container">
+  <div class="flex flex-col @md:flex-row @max-xs:text-sm">...</div>
+</div>
+```
+
+`--container-*` theme variables drive both these variants and the `max-w-*` scale, so add new sizes rather than redefining the defaults:
+
 ```css
 @theme {
-  --container-xs: 20rem;
-  --container-sm: 24rem;
-  --container-md: 28rem;
-  --container-lg: 32rem;
+  --container-8xl: 96rem; /* adds @8xl: and max-w-8xl */
 }
 ```
 
 ## v3 to v4 Migration Checklist
 
-- [ ] Replace `tailwind.config.ts` with CSS `@theme` block
-- [ ] Change `@tailwind base/components/utilities` to `@import "tailwindcss"`
-- [ ] Move color definitions to `@theme { --color-*: value }`
-- [ ] Replace `darkMode: "class"` with `@custom-variant dark`
-- [ ] Move `@keyframes` inside `@theme` blocks (ensures keyframes output with theme)
-- [ ] Replace `require("tailwindcss-animate")` with native CSS animations
-- [ ] Update `h-10 w-10` to `size-10` (new utility)
-- [ ] Remove `forwardRef` (React 19 passes ref as prop)
-- [ ] Consider OKLCH colors for better color perception
-- [ ] Replace custom plugins with `@utility` directives
+- [ ] Run `npx @tailwindcss/upgrade` (Node.js 20+) on a new branch and review the diff
+- [ ] Replace `@tailwind base/components/utilities` with `@import "tailwindcss"`
+- [ ] Move `tailwind.config.ts` theme values into `@theme`; until then, load the old file with `@config` (`corePlugins`, `safelist`, and `separator` are not supported)
+- [ ] Load plugins with `@plugin`, or rewrite simple ones as `@utility`; replace `safelist` with `@source inline()`
+- [ ] Replace `darkMode: "class"` with `@custom-variant dark (&:where(.dark, .dark *))`
+- [ ] Rename shifted utilities: `shadow-sm` to `shadow-xs`, `shadow` to `shadow-sm` (same for `rounded`, `blur`, `drop-shadow`), `outline-none` to `outline-hidden`, `ring` to `ring-3`
+- [ ] Replace removed utilities: `bg-opacity-*` with `/50` modifiers, `flex-shrink-*` with `shrink-*`, `flex-grow-*` with `grow-*`, `overflow-ellipsis` with `text-ellipsis`
+- [ ] Add explicit colors to `border`, `divide`, and `ring` (they now default to `currentColor`)
+- [ ] Update arbitrary variables (`bg-[--x]` to `bg-(--x)`) and important (`!flex` to `flex!`)
+- [ ] Replace `theme()` in CSS with `var(--...)`; add `@reference` to CSS modules and component `<style>` blocks that use `@apply`
+- [ ] Replace `tailwindcss-animate` with `tw-animate-css` or native `@keyframes`
+- [ ] Prefer `size-*`, `bg-linear-*`, and OKLCH colors in new code
+- [ ] Remove `forwardRef` (React 19 passes `ref` as a prop)
 
 ## Best Practices
 
@@ -314,14 +358,15 @@ Define reusable custom utilities:
 - **Use OKLCH colors** - Better perceptual uniformity than HSL
 - **Compose with CVA** - Type-safe variants
 - **Use semantic tokens** - `bg-primary` not `bg-blue-500`
-- **Use `size-*`** - New shorthand for `w-* h-*`
+- **Use `size-*`** - Shorthand for `w-* h-*`
+- **Use `gap` over `space-*`** - Flex and grid gaps avoid the v4 `space-*` selector edge cases
 - **Add accessibility** - ARIA attributes, focus states
 
 ### Don'ts
 
-- **Don't use `tailwind.config.ts`** - Use CSS `@theme` instead
+- **Don't start new projects with `tailwind.config.ts`** - Use CSS `@theme`; keep `@config` for legacy migration only
 - **Don't use `@tailwind` directives** - Use `@import "tailwindcss"`
 - **Don't use `forwardRef`** - React 19 passes ref as prop
-- **Don't use arbitrary values** - Extend `@theme` instead
+- **Don't repeat arbitrary values** - Promote a value used more than once into `@theme`
 - **Don't hardcode colors** - Use semantic tokens
 - **Don't forget dark mode** - Test both themes

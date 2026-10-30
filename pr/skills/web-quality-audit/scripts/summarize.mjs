@@ -38,13 +38,18 @@ const median = (values) => {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 };
 
-// Lists the first offending nodes or resources; "list" details nest tables inside sections.
+// Lighthouse "list" details (used by insights) hold tables, list sections, checklists, and node items.
+const tableRows = (item) => {
+  if (Array.isArray(item?.value?.items)) return item.value.items; // list-section wrapping a table
+  if (item?.type === 'table' && Array.isArray(item.items)) return item.items;
+  return [item];
+};
+
+// Lists the first offending nodes or resources of a failing audit.
 function offenders(details) {
-  const items = (Array.isArray(details?.items) ? details.items : []).flatMap((item) =>
-    Array.isArray(item.value?.items) ? item.value.items : [item],
-  );
+  const items = (Array.isArray(details?.items) ? details.items : []).flatMap(tableRows);
   return items
-    .map((item) => item.node?.selector || item.url || item.sourceLocation?.url || item.description || item.label)
+    .map((item) => item?.node?.selector || item?.selector || item?.url || item?.sourceLocation?.url || item?.description || item?.label)
     .filter((entry) => typeof entry === 'string' && entry)
     .slice(0, MAX_ITEMS)
     .map((entry) => `\`${truncate(entry, 70)}\``);
@@ -96,6 +101,10 @@ function summarizeLighthouse(lhr, file) {
 const wcagCriteria = (tags) =>
   tags.filter((tag) => /^wcag\d{3,}$/.test(tag)).map((tag) => `${tag[4]}.${tag[5]}.${tag.slice(6)}`);
 
+// axe targets list one selector per frame level; a nested array is a path through shadow roots.
+const axeTarget = (target) =>
+  [].concat(target ?? []).map((part) => (Array.isArray(part) ? part.join(' >>> ') : part)).join(' ');
+
 function summarizeAxe(results, file) {
   const out = [];
   for (const result of results) {
@@ -103,13 +112,13 @@ function summarizeAxe(results, file) {
       (a, b) => IMPACT_ORDER.indexOf(a.impact) - IMPACT_ORDER.indexOf(b.impact),
     );
     out.push(`## axe-core ${result.testEngine?.version ?? ''}: ${result.url}`, '');
-    out.push(`Source: \`${basename(file)}\`. ${violations.length} violations, ${result.incomplete?.length ?? 0} needing manual review.`);
+    out.push(`Source: \`${basename(file)}\`. ${violations.length} violations, ${result.incomplete?.length ?? 0} needing manual review.`, '');
     if (violations.length === 0) continue;
 
-    out.push('', '| Rule id | Impact | WCAG | Nodes | Help | Examples |', '|---|---|---|---|---|---|');
+    out.push('| Rule id | Impact | WCAG | Nodes | Help | Examples |', '|---|---|---|---|---|---|');
     for (const violation of violations) {
       const criteria = wcagCriteria(violation.tags ?? []).join(', ') || 'best practice';
-      const targets = (violation.nodes ?? []).slice(0, MAX_ITEMS).map((node) => `\`${truncate([].concat(node.target).join(' '), 70)}\``);
+      const targets = (violation.nodes ?? []).slice(0, MAX_ITEMS).map((node) => `\`${truncate(axeTarget(node.target), 70)}\``);
       out.push(`| \`${violation.id}\` | ${violation.impact} | ${criteria} | ${violation.nodes?.length ?? 0} | ${truncate(violation.help)} | ${targets.join(' ')} |`);
     }
     out.push('');

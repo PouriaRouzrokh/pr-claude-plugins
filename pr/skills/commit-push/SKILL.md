@@ -1,248 +1,113 @@
 ---
 name: commit-push
-description: Commit changes, prepend an entry to commitlog.md, and push to the remote, optionally merging into main (--merge) or opening a pull request (--pr).
+description: "Commit changes, prepend an entry to commitlog.md, and push to the remote, optionally merging into main (--merge) or opening a pull request (--pr)."
 argument-hint: "[path] [description] [--merge | --pr]"
 disable-model-invocation: true
 ---
 
 # Commit and Push
 
-Commit changes, update commit log, and push to remote repository.
-
-## Core Principles
-
-- **Write clearly**: Use `writing-clearly-and-concisely` for commit messages and PR descriptions. Active voice, omit needless words, avoid AI-isms.
-- **Show before committing**: Display what will be committed before acting.
-- **Update commitlog.md**: Maintain commit history log.
-- **Standardize naming**: Rename commit log variations to `commitlog.md`.
-- **Safe by default**: Never commit sensitive files or force push without request.
-- **Support workflows**: Handle both direct merge and PR-based workflows.
-
----
-
-## Phase 0: Argument Parsing
-
-**Goal**: Parse and understand the user's request
+Commit the user's changes safely, keep `commitlog.md` current, push, and optionally merge or open a PR.
 
 **Arguments**: $ARGUMENTS
 
-The arguments may contain any combination of:
+| Part | Meaning |
+|------|---------|
+| A path | Commit only changes under that file or folder (default: all changes) |
+| Free text | What changed; use it for the commit message and log entry |
+| `--merge` | After pushing, merge the branch into main/master |
+| `--pr` | After pushing, open a pull request (if both flags are given, `--pr` wins as the safer choice) |
 
-1. **A path** (file or folder) - commit only changes in that scope (optional, defaults to all changes)
-2. **`--merge` or `-merge`** - after pushing, merge the current branch into main/master
-3. **`--pr` or `-pr`** - after pushing, create a Pull Request instead of merging directly
-4. **Free text** - description of what was changed (used for commit message context)
+Examples: `/pr:commit-push`, `/pr:commit-push src/auth`, `/pr:commit-push fixed the session bug --pr`.
 
-**Examples**:
-- `/pr:commit-push` → Commit all changes, update commitlog.md, push
-- `/pr:commit-push src/auth` → Commit only changes in src/auth folder
-- `/pr:commit-push --merge` → Commit, push, then merge to main/master
-- `/pr:commit-push --pr` → Commit, push, then create a PR
-- `/pr:commit-push fixed the authentication bug --pr` → With description, create PR
-- `/pr:commit-push src/api added new search endpoints --merge` → Scoped with merge
+Use `writing-clearly-and-concisely` for the commit message, log entry, and PR description.
 
-If both `--merge` and `--pr` are provided, prefer `--pr` (safer workflow).
+## 1. Inspect
 
----
+1. `git status`, `git diff HEAD` (staged and unstaged), and the current branch. Respect the path scope if one was given.
+2. Summarize what will be committed and show it to the user.
+3. **Check for secrets.** Never commit `.env` files, credentials, private keys, or tokens. Look at both file names and the diff content (patterns such as `API_KEY=`, `sk-`, `AKIA`, `-----BEGIN`, `ghp_`, connection strings with passwords). If gitleaks is installed, stage the files and run `gitleaks git --pre-commit --redact --staged --verbose` (`--redact` keeps secret values out of the output). If anything looks sensitive, stop, show it, and ask; suggest adding it to `.gitignore`.
+4. `CLAUDE.md` and the shared parts of `.claude/` (`checkpoints/`, `references/`, `rules/`, `settings.json`) are committed by default because they are the project's shared memory. Exclude them only if the user asks, and then add them to `.gitignore`. Never commit `.claude/settings.local.json` or `CLAUDE.local.md` (personal), or `.claude/worktrees/` (agent worktrees, which git would record as embedded repositories). If they are not ignored yet, offer to add them to `.gitignore`.
+5. **Branch first.** If `--pr` was given and you are on main/master, create the branch now (`git switch -c {type}/{short-slug}`), so the log entry below records the right branch.
 
-## Phase 0.5: Handle .claude/ in Version Control
+## 2. Update commitlog.md
 
-**Default**: `.claude/` and `CLAUDE.md` are included in git (for team collaboration).
+1. Standardize the name: if a variant exists (`commit_log.md`, `COMMITLOG.md`, `commit-log.md`) and `commitlog.md` does not, rename it with `git mv`; if both exist, ask which to keep.
+2. If none exists, create it:
 
-**Actions**:
+   ```markdown
+   # {Project Name} Commit Log
 
-1. If user explicitly requests to ignore `.claude/`, add it to `.gitignore`
-2. Otherwise, commit `.claude/` with other files
+   This file tracks significant commits and changes to the project.
 
-`.claude/` contains documentation (checkpoints, snapshots, RFDs) that helps team collaboration. Users can opt out explicitly.
+   ---
+   ```
 
----
+3. Prepend an entry right after the header, grouping related changes under one entry:
 
-## Phase 0.6: Standardize Commit Log File
+   ```markdown
+   ### {M/D/YYYY} - {HH:MM} ({branch})
 
-**Goal**: Consistent commit log naming
+   - **{Category}: {Short title}**
+     - {What changed}
+     - {Why, when it is not obvious}
 
-**Actions**:
+   ---
+   ```
 
-1. Search for commit log variations: `commit_log.md`, `commit-log.md`, `COMMITLOG.md`, etc.
-2. If variation found and `commitlog.md` doesn't exist, rename with `git mv`
-3. If both exist, ask user which to keep
-4. If none exists, create in Phase 2
+   Categories: Feature, Fix, Improve, Refactor, Docs, Test, Chore, UI, API.
 
----
+## 3. Commit
 
-## Phase 1: Analyze Changes
+1. Stage specific paths (the scope, or each changed file) plus `commitlog.md`. Avoid `git add -A`, which can sweep in files the user never meant to commit.
+2. Commit with a heredoc so formatting survives:
 
-**Goal**: Understand what will be committed
+   ```bash
+   git commit -m "$(cat <<'EOF'
+   {Title, imperative mood, under ~72 characters}
 
-**Actions**:
+   {Body: what and why, wrapped at ~72 columns}
 
-1. Run `git status` to see all changed/staged/untracked files
-2. Run `git diff` to see the actual changes (both staged and unstaged)
-3. If a path scope was provided, filter to only those changes
-4. Identify the current branch name
-5. Present a summary of changes to the user
+   {Attribution lines Claude Code provides for this session, if any}
+   EOF
+   )"
+   ```
 
----
+   Follow the project's convention (check `git log --oneline -20`; use Conventional Commits if the project does).
+3. If a pre-commit hook fails, fix the reported problem, re-stage, and create the commit again. Do not bypass hooks with `--no-verify`, and do not amend unless the user asks.
 
-## Phase 2: Update commitlog.md
+## 4. Push
 
-**Goal**: Maintain project commit history
+Push the current branch (`git push -u origin {branch}` if it has no upstream) and confirm it succeeded. Never force-push unless the user explicitly asks; if the push is rejected because the remote moved, pull with rebase (or ask) and push again.
 
-**Actions**:
+## 5. Merge (`--merge`)
 
-1. Check if `commitlog.md` exists in the project root
+Skip this if you are already on main/master (the push updated it) and say so. Otherwise:
 
-2. **If it does NOT exist**, create it with this template:
+1. `git fetch` and check whether the merge will conflict; if it will, describe the conflicts and ask how to proceed.
+2. Switch to main/master, pull, merge the branch (`--no-ff` unless the history shows fast-forward merges), and push.
+3. Switch back to the feature branch if the user will keep working on it.
 
-```markdown
-# [Project Name] Commit Log
-
-This file tracks significant commits and changes to the project.
-
-### [M/D/YYYY] - [HH:MM] ([branch name])
-
-- **[Category]: [Brief Title of Change]**
-  - [Detail about what was changed]
-  - [Why it was changed if relevant]
-  - [Any important notes]
-```
-
-3. **If it exists**, add a new entry at the TOP (after the header):
-
-```markdown
-### [M/D/YYYY] - [HH:MM] ([branch name])
-
-- **[Category]: [Brief Title of Change]**
-  - [Specific detail about what changed]
-  - [Additional context or reasoning]
-```
-
-**Guidelines for entries**:
-- Use the current date and time
-- Include the current branch name in parentheses
-- Use bold for the main change title
-- Include category prefix when applicable (Fix, Feature, Refactor, UI, API, etc.)
-- Add sub-bullets for important details
-- Keep descriptions concise but informative
-- Group related changes under one timestamp if committing multiple things together
-
----
-
-## Phase 3: Stage and Commit
-
-**Goal**: Create the commit safely
-
-**Actions**:
-
-1. **Stage changes**:
-   - If a path scope was provided, stage only files in that scope: `git add [path]`
-   - If no scope, stage specific files (avoid `git add -A` to prevent accidentally staging sensitive files)
-   - Always include the updated `commitlog.md` in the commit
-   - **NEVER stage sensitive files** (.env, credentials, secrets, API keys) - warn and skip them
-
-2. **Create commit** with a clear, descriptive message using HEREDOC format:
+## 6. Pull Request (`--pr`)
 
 ```bash
-git commit -m "$(cat <<'EOF'
-[Commit title]
-
-[Optional body with more details]
-
-[Attribution lines, if Claude Code provides them]
-EOF
-)"
-```
-
-- Summarize the changes concisely; keep the title under ~72 characters
-- Use conventional commit format if the project uses it (check `git log --oneline -20`)
-- Reference the changes documented in commitlog.md
-- End with the attribution lines Claude Code supplies for this session, if any; do not invent your own
-
----
-
-## Phase 4: Push to Remote
-
-**Goal**: Push changes safely
-
-**Actions**:
-
-1. Push the current branch to its remote tracking branch
-2. If no upstream is set, use `git push -u origin [branch-name]`
-3. Verify the push was successful
-
----
-
-## Phase 5: Handle --merge Flag (if provided)
-
-**Goal**: Merge to main branch if requested
-
-**Precondition**: Current branch is NOT main/master. If it is, the push in Phase 4 already updated main; skip this phase and say so.
-
-**Actions**:
-
-1. **Ask user before merging if there are potential conflicts**
-2. Checkout main/master branch
-3. Pull latest changes
-4. Merge the feature branch into main/master (`git merge --no-ff` unless the project's history shows fast-forward merges)
-5. Push main/master to remote
-6. Switch back to the feature branch if the user plans to keep working on it
-
----
-
-## Phase 6: Handle --pr Flag (if provided)
-
-**Goal**: Create a Pull Request if requested
-
-**Precondition**: A PR needs a feature branch. If you are on main/master, create a descriptively named branch (`git switch -c <type>/<slug>`) before committing in Phase 3, and push that branch in Phase 4.
-
-**Actions**:
-
-1. Use `gh pr create` with the commitlog.md entry as basis for PR description:
-
-```bash
-gh pr create --title "[PR Title]" --body "$(cat <<'EOF'
+gh pr create --title "{title}" --body "$(cat <<'EOF'
 ## Summary
-[Bullet points from commitlog.md entry]
+{Bullets from the commitlog entry}
 
 ## Changes
-[List of changed files/features]
+{Files or areas changed}
 
-[Attribution line, if Claude Code provides one]
+## Testing
+{How it was verified}
+
+{PR attribution line Claude Code provides, if any}
 EOF
 )"
 ```
 
-2. Return the PR URL to the user
+Return the PR URL. If `gh` is missing or not authenticated, give the user the compare URL instead.
 
----
+## 7. Report
 
-## Phase 7: Summary
-
-**Goal**: Report completion
-
-**Actions**:
-
-Present to user:
-- What was committed (files and summary)
-- The commit hash
-- What branch was pushed
-- If merged: confirmation of merge
-- If PR created: the PR URL
-
----
-
-## Safety Guidelines
-
-**DO NOT:**
-- Commit sensitive files (.env, credentials, API keys, secrets)
-- Force push (`--force`) unless explicitly requested
-- Push to main/master directly if `--pr` flag is used
-- Merge without checking for conflicts first
-- Skip the commitlog.md update
-
-**ALWAYS:**
-- Show the user what will be committed before committing
-- Verify git operations succeeded before proceeding to next step
-- Warn if trying to push to main/master from a feature branch without --merge or --pr
-- Ask for confirmation if anything seems unusual
+The commit hash and message, files committed, branch pushed, and the merge result or PR URL.

@@ -15,7 +15,7 @@ Audit a running web app for performance, accessibility, SEO, and best practices,
 - **Production build for performance**: Dev servers inflate LCP and TBT. Accessibility and SEO results are valid on either.
 - **Mobile first**: Run mobile, then desktop. Report them separately.
 - **Values over scores**: Category scores summarize; metric values and failing audits are the evidence.
-- **Automation is partial**: axe finds roughly 20–50% of accessibility barriers. Manual checks are part of the audit, not optional extras.
+- **Automation is partial**: axe and Lighthouse catch only part of accessibility barriers (published estimates range from about a third to just over half). Manual checks are part of the audit, not optional extras.
 - **Leave nothing behind**: Delete report files, downloaded drivers, and servers you started, unless the user wants them kept.
 
 ---
@@ -55,18 +55,19 @@ npx --yes @axe-core/cli "$URL" --tags wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22aa,b
   --save axe.json --dir "$OUT"
 ```
 
-- Lighthouse defaults to mobile emulation. For desktop, use `--preset=desktop`; `--form-factor=desktop` alone changes scoring but not screen emulation.
+- Lighthouse defaults to mobile emulation and throttling. For desktop, use `--preset=desktop`; `--form-factor=desktop` on its own fails with a screen-emulation mismatch error.
 - For several routes, name files per route (`lh-mobile-pricing.json`). axe accepts several URLs in one run.
 - For any performance decision, run the mobile Lighthouse command three times (`lh-mobile-1.json` to `-3`) and report the median.
 - **Authenticated routes**: pass a session cookie with `--extra-headers=<file.json>` (Lighthouse only; keep the file out of git and delete it afterwards). axe CLI cannot send headers, so audit those routes with Lighthouse's accessibility category or Playwright with `@axe-core/playwright`.
 
 **Troubleshooting**:
 
-- **axe: "This version of ChromeDriver only supports Chrome version N"**: install a driver matching the local Chrome major version (from `google-chrome --version`, or on macOS `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version`) and pass it explicitly:
+- **axe: "This version of ChromeDriver only supports Chrome version N"**: `@axe-core/cli` bundles the latest ChromeDriver, which often differs from the installed Chrome. Install a driver for the local Chrome major version and pass its absolute path (on Linux, read the version from `google-chrome --version`):
 
   ```bash
-  OUT=.web-quality-audit; URL=http://localhost:3100/; CHROME_MAJOR=154
-  DRIVER=$(npx --yes @puppeteer/browsers install "chromedriver@$CHROME_MAJOR" --path "$OUT/drivers" --format "{{path}}" | tail -1)
+  OUT=.web-quality-audit; URL=http://localhost:3100/
+  CHROME_MAJOR=$("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version | grep -oE '[0-9]+' | head -1)
+  DRIVER=$(npx --yes @puppeteer/browsers install "chromedriver@$CHROME_MAJOR" --path "$PWD/$OUT/drivers" --format "{{path}}" | tail -1)
   npx --yes @axe-core/cli "$URL" --tags wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22aa,best-practice \
     --chromedriver-path "$DRIVER" --save axe.json --dir "$OUT"
   ```
@@ -90,7 +91,7 @@ node ${CLAUDE_SKILL_DIR}/scripts/summarize.mjs .web-quality-audit/*.json
 For ad-hoc questions, query the JSON directly:
 
 ```bash
-jq '.categories | map_values(.score * 100 | round)' .web-quality-audit/lh-mobile.json
+jq '.categories | map_values(if .score then .score * 100 | round else null end)' .web-quality-audit/lh-mobile.json
 jq '.audits["largest-contentful-paint"].numericValue' .web-quality-audit/lh-mobile.json
 jq '.[0].violations[] | {id, impact, nodes: (.nodes | length)}' .web-quality-audit/axe.json
 ```
@@ -152,7 +153,7 @@ Assign severity from the evidence:
 | **Medium** | axe `moderate`; failing insights with measurable savings; missing sitemap, canonical, or structured data |
 | **Low** | axe `minor`; small savings; informational diagnostics |
 
-Raise severity for failures on primary flows (sign-up, checkout, navigation). Structure the report as:
+Raise severity for failures on primary flows (sign-up, checkout, navigation). Structure the report as follows. The Agentic column is Lighthouse 13's `agentic-browsing` category (see [references/seo.md](references/seo.md)); write `n/a` when the report lacks it, and treat it as informational, not a release gate.
 
 ```markdown
 ## Web Quality Audit: <app> (<date>)
@@ -160,8 +161,8 @@ Raise severity for failures on primary flows (sign-up, checkout, navigation). St
 **Target**: <URLs>, <production build | dev server>, Lighthouse <version>, axe-core <version>
 
 ### Scores
-| Route | Form factor | Perf | A11y | Best practices | SEO | LCP | CLS | TBT |
-|-------|-------------|------|------|----------------|-----|-----|-----|-----|
+| Route | Form factor | Perf | A11y | Best practices | SEO | Agentic | LCP | CLS | TBT |
+|-------|-------------|------|------|----------------|-----|---------|-----|-----|-----|
 
 ### Findings
 | # | Severity | Category | Evidence | Fix | Owner skill |
@@ -189,8 +190,7 @@ Manual accessibility checks done or pending, field INP availability, hypotheses 
 
 ## Safety Guidelines
 
-**DO NOT:**
-- Run Lighthouse or axe against production sites the user does not own, or at a rate that could look like load testing
-- Audit authenticated flows that submit, purchase, or delete data
-- Report a score as proof of quality, or source-only findings as measured failures
-- Promise ranking or Core Web Vitals field improvements; report what was measured
+- Audit only sites the user owns or controls, and space out runs: repeated Lighthouse and axe runs against someone else's production site can look like load testing.
+- Keep authenticated audits to read-only pages. Flows that submit, purchase, or delete data change real state when a tool loads them.
+- Present scores as summaries and source-only findings as hypotheses, because neither proves a measured failure or a pass.
+- Report what was measured rather than promising ranking or field Core Web Vitals gains, which depend on crawling, traffic, and time outside the audit's control.

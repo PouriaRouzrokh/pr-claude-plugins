@@ -31,7 +31,7 @@ Every skill can be run as `/pr:<name>`. Claude also loads most of them automatic
 |-------|--------------|--------|
 | `/pr:clean-codebase [path]` | Removes dead code, stale comments, and outdated docstrings without changing behavior | Yes |
 | `/pr:update-docs [path] [focus]` | Brings README, API docs, and RFDs in line with the code | Yes |
-| `/pr:create-snapshot [path]` | Writes a technical snapshot to a new checkpoint | Yes |
+| `/pr:create-snapshot [path]` | Writes a technical snapshot to a new checkpoint (runs in its own context; covers UI or ML pipelines) | Yes |
 | `/pr:handle-claude-md [path] [docs]` | Creates or updates CLAUDE.md and the checkpoint structure | |
 | `/pr:writing-clearly-and-concisely` | Strunk's rules and a catalog of AI-writing tells for any prose | |
 | `/pr:web-quality-audit [url]` | Lighthouse and axe measurements: Core Web Vitals, WCAG 2.2 AA, SEO | |
@@ -60,9 +60,9 @@ Three read-only subagents support the multi-agent skills. They can read, search,
 
 | Agent | Model | Purpose |
 |-------|-------|---------|
-| `code-explorer` | Sonnet | Traces execution paths and returns the 5–10 files essential to a topic |
-| `code-architect` | Session model | Designs implementation blueprints that follow existing patterns |
-| `code-reviewer` | Session model | Reviews changes and reports only issues at ≥80% confidence |
+| `pr:code-explorer` | Sonnet | Traces execution paths and returns the 5–10 files essential to a topic |
+| `pr:code-architect` | Session model | Designs implementation blueprints that follow existing patterns |
+| `pr:code-reviewer` | Session model | Reviews changes and reports only issues at ≥80% confidence |
 
 ## ATLAS Development Framework
 
@@ -78,7 +78,7 @@ Use full ATLAS for new MVPs and features with integrations or schema changes, th
 
 ## Multi-Agent Strategy
 
-Skills marked "Yes" above launch agents in parallel and accept a flag:
+Skills marked "Yes" above launch agents in parallel. `feature-dev`, `mvp-dev`, `clean-codebase`, and `update-docs` also accept a flag (`create-snapshot` always uses subagents):
 
 | Flag | Behavior |
 |------|----------|
@@ -86,7 +86,7 @@ Skills marked "Yes" above launch agents in parallel and accept a flag:
 | `--subagents` | Always use subagents: lightweight workers that report back |
 | `--team` | Use an [agent team](https://code.claude.com/docs/en/agent-teams): separate sessions that message each other. Experimental; requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
 
-Teams cost more and add coordination overhead. They pay off mainly in architecture debates (`feature-dev`, `mvp-dev`) and cross-cutting integration reviews.
+Teams cost more and add coordination overhead. For architecture debates, the skills first try a cheaper route: named subagents that challenge each other through `SendMessage`, which works without teams. Enable teams for a single session only (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude`): while the variable is set, Claude may turn the subagents it names into teammates even when you did not ask for a team.
 
 ## Documentation Structure
 
@@ -108,6 +108,12 @@ The workflow skills keep project memory in the project itself:
 - **RFD** (Request for Development): one per feature or significant fix, covering request, plan, decisions, tests, and files changed.
 - **Snapshot**: the codebase state at a point in time; never edited after creation.
 
+The workflow skills share one set of conventions ([`shared/checkpoint-system.md`](shared/checkpoint-system.md)) and one helper (`shared/checkpoint.py`) that reports status, numbers RFDs and checkpoints, and creates RFDs from a single template. Claude Code treats `.claude/` as protected, so the first RFD or snapshot write in a session asks for permission; allow edits to the project's `.claude/` folder for the session.
+
+## How the Workflows Review Code
+
+`feature-dev` and `mvp-dev` run Claude Code's built-in `/simplify` (reuse and simplification) first, then `/code-review high` (bugs) and, for sensitive changes, `/security-review`; they fall back to the plugin's `pr:code-reviewer` agents when those are unavailable or the repository has no `origin` remote. `clean-codebase` uses `/simplify` alongside its own `pr:code-reviewer` agents. Approvals happen through questions in the conversation, or through plan-mode approval when the session is in plan mode.
+
 ## Typical Workflows
 
 - **New project**: `/pr:handle-claude-md` → `/pr:create-prd` → `/pr:mvp-dev` → `/pr:create-snapshot`
@@ -115,6 +121,10 @@ The workflow skills keep project memory in the project itself:
 - **Bug**: describe it; `systematic-debugging` and `test-driven-development` guide the fix
 - **Before a release**: `/pr:web-quality-audit` → `/pr:run-public`
 - **Maintenance**: `/pr:clean-codebase`, `/pr:update-docs`, `/pr:create-snapshot`
+
+## License
+
+MIT (see `LICENSE`) for the original content. Vendored skills keep their own licenses, listed below.
 
 ## Third-Party Content
 
@@ -128,7 +138,7 @@ Several skills adapt open-source work; each skill folder's `NOTICE.md` has the d
 
 ## Version
 
-2.1.0
+2.2.0
 
 ## Author
 

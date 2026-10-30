@@ -85,7 +85,7 @@ LLMs regress to statistical means, producing generic, puffy prose. Avoid:
 - **Puffery:** pivotal, crucial, vital, testament, enduring legacy
 - **Empty "-ing" phrases:** ensuring reliability, showcasing features, highlighting capabilities
 - **Promotional adjectives:** groundbreaking, seamless, robust, cutting-edge
-- **Overused AI vocabulary:** delve, leverage, multifaceted, foster, realm, tapestry
+- **Overused AI vocabulary** (shifts by model and year; see `signs-of-ai-writing.md`): leverage, multifaceted, foster, realm, tapestry
 - **Formatting overuse:** excessive bullets, emoji decorations, bold on every other word
 
 Be specific, not grandiose. Say what it actually does.
@@ -100,7 +100,7 @@ Before finalizing any prose, run through these five checks:
 2. **Can I cut words?** — Omit needless words ("because" not "due to the fact that")
 3. **Positive form?** — Say what IS, not what ISN'T ("ignore" not "do not consider")
 4. **Emphatic position?** — Important word at end of sentence ("The key factor is speed" not "Speed is the key factor to consider here")
-5. **AI-free?** — Would Wikipedia editors flag this? No puffery, no "delve", no "leverage"
+5. **AI-free?** — Would Wikipedia editors flag this? No puffery, no trailing "-ing" phrases, no "not X but Y" setups
 
 ## Bottom Line
 

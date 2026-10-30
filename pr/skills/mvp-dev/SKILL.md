@@ -1,500 +1,124 @@
 ---
 name: mvp-dev
-description: Builds an MVP from the PRD at .claude/checkpoints/checkpoint-0/prd.md, one feature at a time, each with its own RFD, self-testing, code review, and user sign-off. Resumes from existing RFDs. Use when the user wants to implement or continue an MVP from a PRD.
-argument-hint: "[optional: specific focus or priority features] [--subagents | --team]"
+description: "Builds an MVP from the PRD at .claude/checkpoints/checkpoint-0/prd.md: extracts and orders the features, designs and validates the foundation (architecture RFD, Link checks), then implements one feature at a time, each with its own RFD, tests, review, and user sign-off. Resumes from existing RFDs. Use when the user wants to implement or continue an MVP from a PRD."
+argument-hint: "[optional: focus or priority features] [--subagents | --team]"
+allowed-tools: Bash(python3 ${CLAUDE_PLUGIN_ROOT}/shared/checkpoint.py *)
 ---
 
-# MVP Development with PRD and RFD Management
+# MVP Development
 
-Implement an MVP from a PRD systematically: understand the PRD, break it into features, design architecture, and implement feature by feature with RFD tracking.
+Turn the PRD into a working MVP, one approved feature at a time. Each feature gets an RFD that records its plan, decisions, tests, and files, so development can pause and resume across sessions without losing context.
 
-## ATLAS Development Philosophy
+**Focus**: $ARGUMENTS
 
-This command implements the full **ATLAS** framework for building production-ready MVPs.
+Project documentation conventions are in `${CLAUDE_PLUGIN_ROOT}/shared/checkpoint-system.md`; read it once per session. The helper used below is `python3 ${CLAUDE_PLUGIN_ROOT}/shared/checkpoint.py`. MVP RFDs live in checkpoint-0: RFD-0 is the architecture, features are 1, 2, 3...
 
-**When to use this command:**
-- Building a new MVP from a PRD
-- Implementing multiple related features systematically
-- Projects requiring architecture planning and integration validation
+This skill applies the full ATLAS framework (see `atlas-development`). For a single feature in an existing product, use `feature-dev` instead.
 
-**When NOT to use this command:**
-- Single feature additions → use `/pr:feature-dev` instead
-- Bug fixes or small changes → just fix directly
-- Quick prototypes where validation isn't critical
+## Agents
 
-### ATLAS Phase Mapping
+This plugin's agents are `pr:code-explorer`, `pr:code-architect`, and `pr:code-reviewer`; use the full names, since other plugins ship agents with the same short names.
 
-| Phase | How This Command Applies It |
-|-------|----------------------------|
-| **A** (Architect) | PRD contains problem, users, success metrics |
-| **T** (Trace) | Phase 2-3 extracts features, designs architecture, maps integrations |
-| **L** (Link) | Phase 3 validates connections before building |
-| **A** (Assemble) | Phase 4 implements features with layered architecture |
-| **S** (Stress-test) | Phase 4.6-4.7 proactively tests and professionalizes code before proceeding |
+- **Default**: subagents for exploration, architecture proposals, and review. To have architects or reviewers challenge each other, name them and let them exchange critiques with `SendMessage`; that does not need agent teams.
+- **`--subagents`**: always subagents.
+- **`--team`**: an agent team, most useful in Phase 2 (architects negotiating shared schema and APIs) and Phase 5 (reviewers cross-checking integration). Experimental; needs `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, works only interactively, and costs several times more. For a small MVP, say so and confirm first.
 
-**Key principle:** Never build before designing. Never skip connection validation. Never ship without testing.
+## Phase 0: Load the PRD and Progress
 
-For complete ATLAS framework, see `atlas-development` skill.
+1. Run `checkpoint.py status`.
+2. If there is no `checkpoint-0/prd.md`, stop and offer `/pr:create-prd`; the PRD is the source of truth for scope.
+3. Read the PRD: vision, users, MVP features (P0/must-have), stack, design direction, success metrics, constraints, out-of-scope items.
+4. **Resuming?** If checkpoint-0 already has RFDs, read them. Completed features are done; an In Progress RFD is where to pick up. Tell the user where things stand and confirm before continuing with Phase 4 for the next feature.
+5. Note whether code already exists (PRD for an existing project) or this is greenfield.
 
-## Multi-Agent Strategy
+## Phase 1: Plan the Features
 
-MVP development involves many agent-assisted phases: exploration, architecture, implementation support, and review. Decide which agent strategy to use based on MVP complexity and user flags.
+Extract the MVP features and propose an order:
 
-### Choosing Between Subagents and Agent Teams
+| # | Feature | Priority | Depends on | Complexity |
+|---|---------|----------|------------|------------|
 
-**Use subagents (default)** — lightweight workers that report results back:
-- Per-feature exploration and architecture (most MVP features are developed sequentially)
-- Code review agents checking different quality dimensions
-- Standard feature-by-feature development where features are relatively independent
+Order by dependencies first, then foundational before advanced, then user value. Present the list and ask the user to confirm or adjust the order and scope.
 
-**Use agent teams** — independent sessions with inter-agent messaging:
-- Architecture planning (Phase 2) for MVPs with tightly coupled features where architects need to coordinate shared components, database schema, and API contracts
-- Integration review (Phase 5) where reviewers should cross-check how features interact, challenge each other's findings, and coordinate on cross-cutting issues
-- Full-stack features where frontend, backend, and data agents need to coordinate file ownership and avoid conflicts
+## Phase 2: Design the Architecture
 
-### User Override
+1. If code exists, launch 2 `pr:code-explorer` agents to map its structure and conventions.
+2. Launch 2 `pr:code-architect` agents: one for the **foundation** (project structure, stack, shared components, database schema, API conventions, auth), one for the **feature map** (how features share code, integration points, build sequence).
+3. Synthesize one recommendation and present it with its main trade-offs. Ask for approval with `AskUserQuestion`; if the session is in plan mode, use `ExitPlanMode` and write the RFD afterwards.
+4. Create the architecture RFD: `checkpoint.py new-rfd "MVP architecture" --checkpoint 0 --number 0 --type Architecture`, and record the design, schema, integrations, and rejected alternatives.
 
-Parse `$ARGUMENTS` for these flags:
-- `--subagents` — Force subagent mode for all agent phases
-- `--team` — Force agent team mode for inter-agent collaboration
+## Phase 3: Foundation and Link Validation
 
-If `--team` is passed but the MVP is simple (few features, no complex integrations), explain the overhead and ask if the user wants to proceed. If `--subagents` is passed, respect their choice.
+1. Set up or adapt the foundation: project scaffolding with current tooling (check versions with Context7 or official docs), directory structure, linting, formatting, test runner, configuration, and the database schema.
+2. **Validate every connection before building features** (ATLAS Link). Problems found now cost minutes; found mid-feature they cost hours.
+   - [ ] Database connects and a trivial query succeeds
+   - [ ] Each external API key works with a real test request
+   - [ ] Auth/OAuth flow completes end to end (if applicable)
+   - [ ] MCP servers or third-party SDKs respond
+   - [ ] Environment variables load in every runtime (dev server, tests, scripts)
+   - [ ] Rate limits and quotas are known
+3. Report the results, fix failures before continuing, and record them in RFD-0.
+4. Suggest committing the foundation (`/pr:commit-push`).
 
-**Without flags**: Default to subagents for individual feature phases. Consider proposing agent teams for architecture planning (Phase 2) and integration review (Phase 5) if the MVP has many interconnected features — explain the benefit before proceeding. Agent teams are experimental, more expensive, and add coordination overhead.
+## Phase 4: Feature Loop
 
----
+Build features one at a time. Each ends with the user's approval and a commit, which keeps every change reviewable and makes pausing safe.
 
-## Core Principles
+### 4.1 Open the feature RFD
 
-- **Use available tools**: Check MCP servers and skills. Use `frontend-design` for UIs, `generate-image`/`generate-svg`/`generate-video` for media, Playwright or the session's browser tools for UI verification, Context7 for documentation, and `web-quality-audit` before calling the MVP done.
-- **PRD is source of truth**: All features come from the PRD.
-- **Sequential development**: ONE feature at a time. Test, review, and approve before moving on. User can pause and resume.
-- **RFD-first**: Create the RFD before starting any feature. It tracks the entire lifecycle.
-- **Test thoroughly**: Both you and user must test each feature before proceeding.
-- **Ask clarifying questions**: Resolve ambiguities before implementing.
-- **Understand before acting**: Read existing code patterns first.
-- **Read files from agents**: Ask agents to return 5-10 key files.
-- **Simple and elegant**: Write readable, maintainable code.
-- **Write clearly**: Use `writing-clearly-and-concisely` for RFDs. Active voice, omit needless words, avoid AI-isms.
-- **Track progress**: Keep a task list (the task tools, or TodoWrite in older sessions) and update it as phases complete.
-- **Validate before building**: Test all integrations and connections before writing feature code.
-- **Test proactively**: Use `test-driven-development` for feature logic. After implementing each feature, test your own work — run endpoints, execute functions, verify behavior — and apply its verification gate before reporting results. Debug failures with `systematic-debugging`. Clean up temporary test artifacts; keep real tests.
-- **Professionalize code**: Before handoff, review all code for professional quality — no redundancies, proper commenting, clean structure, no debug leftovers.
+Announce "Starting feature N: name", re-read its PRD section, and run `checkpoint.py new-rfd "<feature name>"`. It lands in the latest checkpoint: checkpoint-0 for a greenfield MVP, or the current checkpoint when the project already has snapshots. Set **PRD Reference** to the PRD section, fill the request and acceptance criteria, and confirm the criteria with the user.
 
----
+### 4.2 Explore (when code exists)
 
-## Phase 0: PRD Discovery & Context
+Launch 1–2 `pr:code-explorer` agents focused on patterns to follow, components to reuse, and integration points; read the files they return. Skip this for features that only extend code you just wrote.
 
-**Goal**: Load and understand the Product Requirements Document
+### 4.3 Clarify
 
-**Actions**:
+Ask about what the PRD leaves open for this feature: edge cases, errors, design details, integration specifics. Wait for answers and record them in the RFD.
 
-1. Check if `.claude/checkpoints/checkpoint-0/prd.md` exists:
-```bash
-ls .claude/checkpoints/checkpoint-0/prd.md 2>/dev/null
-```
+### 4.4 Design and approve
 
-2. **If PRD does not exist**:
-   - Inform the user: "No PRD found at .claude/checkpoints/checkpoint-0/prd.md"
-   - Suggest: "Would you like me to help create a PRD using /pr:create-prd first?"
-   - **STOP** - Cannot proceed without PRD
+Launch 1–2 `pr:code-architect` agents (or design it yourself for simple features) within the approved architecture. Present the approach, the files it touches, and the checklist; get approval (`AskUserQuestion`, or `ExitPlanMode` in plan mode). Record the plan and set the RFD to In Progress.
 
-3. **If PRD exists**, read it thoroughly:
-   - Read `.claude/checkpoints/checkpoint-0/prd.md`
-   - Extract: project vision, target users, MVP features, tech stack, design guidelines
-   - Note: success metrics, constraints, out-of-scope items
+### 4.5 Implement
 
-4. Check for existing RFDs in checkpoint-0:
-```bash
-find .claude/checkpoints/checkpoint-0/rfd -name "rfd-*.md" 2>/dev/null | sort
-```
+Follow the architecture and conventions, write tests first for logic (`test-driven-development`), track the RFD checklist (plus the session's task tools if available), and log milestones in the RFD.
 
-5. Read any existing RFDs to understand what's already been planned/implemented
+If several upcoming features are truly independent (separate files, no shared schema changes) and the user wants speed, they can be built in parallel by agents launched with `isolation: "worktree"`, each committing on its own branch; merge them one at a time and run the full suite after each merge. Approval and user testing still happen per feature. Worktrees branch from the remote default branch unless the project sets `"worktree": {"baseRef": "head"}` in its settings, and they contain only tracked files. Before launching, commit the foundation and the feature RFDs, confirm `baseRef` is `head` (ask before changing settings), and tell each agent to install dependencies first; gitignored files such as `.env` reach a worktree only through a `.worktreeinclude` file at the project root.
 
-6. Check for existing codebase:
-   - If there's already code, note this as a "PRD for existing project"
-   - If no code exists yet, this is a greenfield MVP
+### 4.6 Verify
 
----
+- Run the full test suite and the new tests; report actual results.
+- Exercise the feature: endpoints, functions, data, and for UI the browser at mobile and desktop widths (Playwright or the session's browser tools).
+- Use `systematic-debugging` for any failure rather than guessing.
+- Apply the verification gate: claim only what fresh output shows.
+- Remove temporary scripts, debug output, and test data; keep real tests.
 
-## Phase 1: Feature Extraction
+### 4.7 Review and professionalize
 
-**Goal**: Break down the PRD into implementable features with clear priorities
+Run `/simplify` first and re-run the tests, so the bug review sees the final code. Then run `/code-review high` (type the level: without one, it reuses whatever level the user typed last); it runs as a background agent, so wait for its findings before editing, fix the confirmed ones, and re-run the tests. Run `/security-review` for auth, payments, uploads, or personal data; it needs an `origin` remote, so without one launch a `pr:code-reviewer` agent with a security brief instead. Without the built-ins, launch `pr:code-reviewer` agents for correctness, simplicity, and conventions. Finish by reading every changed file as its future maintainer would.
 
-**Actions**:
+### 4.8 User acceptance
 
-1. From the PRD, extract all MVP features (typically marked P0/P1 or "Must Have")
+Present what was built, how to try it (URL, commands, test accounts), and screenshots for UI. Wait for the user to test. Address feedback, re-verify, and repeat until they approve. Record the feedback and changes in the RFD.
 
-2. Create a prioritized feature list:
+### 4.9 Complete
 
-| # | Feature Name | Priority | Dependencies | Complexity |
-|---|--------------|----------|--------------|------------|
-| 1 | [Feature 1]  | P0       | None         | Low/Med/High |
-| 2 | [Feature 2]  | P0       | Feature 1    | Low/Med/High |
-| ... | ... | ... | ... | ... |
+1. Finalize the RFD: Completed, criteria checked, every file changed with what and why (cross-check `git status`), decisions, test evidence, follow-ups.
+2. Ask whether to commit (`/pr:commit-push`).
+3. Offer to continue with the next feature or pause. On pause, summarize progress and note that running `/pr:mvp-dev` again resumes from the RFDs.
 
-3. Identify the optimal implementation order based on:
-   - Dependencies (what features require other features)
-   - Technical complexity (simpler foundation first)
-   - User value (core functionality first)
+## Phase 5: Integration
 
-4. Present the feature breakdown to the user:
-   - List all MVP features with estimated complexity
-   - Proposed implementation order
-   - **Ask user to confirm or adjust the order**
+After the last feature:
 
-5. Create master todo list with all features
+1. Review the whole MVP for how features interact. The features are committed by now, so give `/code-review` a range: `/code-review high <first-MVP-commit>..HEAD` (or launch `pr:code-reviewer` agents for integration, security, and performance; they can challenge each other through `SendMessage`, or as a team with `--team`). Add `/security-review`, or a security-focused `pr:code-reviewer` agent when there is no `origin` remote. Offer the user `/code-review ultra` as well, a deeper multi-agent review in the cloud (a few free runs on Pro and Max, then usage credits); run it only if they agree.
+2. Make conventions consistent across features: naming, error handling, shared abstractions, duplicated helpers.
+3. Run the full test suite; for web apps, run `web-quality-audit`.
+4. Check the PRD's success metrics one by one and report which are met.
 
----
+## Phase 6: Wrap Up
 
-## Phase 2: Architecture Planning
-
-**Goal**: Design MVP architecture before implementing features
-
-**Actions**:
-
-1. If existing codebase, launch 2 code-explorer agents (subagents) to understand patterns
-
-2. Launch 2 code-architect agents (subagents by default, or agent team if `--team`):
-   - **Foundation Architecture**: Project structure, tech stack, shared components, database schema, API patterns
-   - **Feature Architecture Map**: How features fit together, shared code, integration points, build sequence
-
-   *This phase benefits most from agent teams — architects can negotiate shared components, debate schema decisions, and ensure foundation and feature architectures are consistent. With subagents, you synthesize their proposals yourself.*
-
-3. Form recommendation and present to user. Ask for approval.
-
-4. Create Architecture RFD (RFD-0) at `.claude/checkpoints/checkpoint-0/rfd/0-architecture/`
-
----
-
-## Phase 3: Foundation Setup & Link Validation
-
-**Goal**: Set up project foundation AND validate all connections before implementing features
-
-This phase implements ATLAS **Link** step: validate everything works before building.
-
-**Actions**:
-
-1. If greenfield project, create initial project structure:
-   - Initialize project (npm init, poetry init, etc.)
-   - Set up tech stack from PRD
-   - Create directory structure
-   - Set up linting, formatting, testing infrastructure
-   - Create initial configuration files
-   - Set up database schema (if applicable)
-
-2. If existing project, verify foundation supports MVP:
-   - Check if tech stack matches PRD
-   - Identify any gaps in infrastructure
-   - Set up any missing components
-
-3. **Link Validation** (CRITICAL — do not skip):
-   - [ ] Database connection tested (query returns data or empty, not error)
-   - [ ] All API keys verified (make test requests)
-   - [ ] MCP servers responding (list tools, test one operation)
-   - [ ] OAuth flows working (if applicable)
-   - [ ] Environment variables set correctly
-   - [ ] Rate limits documented
-
-   Present validation results to user. If anything fails, fix before proceeding.
-
-4. Update Architecture RFD with foundation implementation status and validation results
-
-5. **Commit foundation** (suggest user run /pr:commit-push)
-
----
-
-## Phase 4: Feature Development Loop
-
-**Goal**: Implement each feature with its own RFD, testing and approval before moving on
-
-Sequential process: complete, test, and approve each feature before starting the next. User can pause and resume later.
-
----
-
-### For each feature, execute Steps 4.1 through 4.9:
-
----
-
-### 4.1: Create Feature RFD (Before Any Work)
-
-Create the RFD first—it tracks the entire feature lifecycle.
-
-**Actions**:
-
-1. Announce: "Starting Feature {N}: {Feature Name}"
-2. Re-read relevant PRD section
-3. Determine the next RFD number by finding the highest existing RFD number and adding 1 (do NOT simply count directories — numbering may have gaps):
-   ```bash
-   # Find highest RFD number in checkpoint-0
-   HIGHEST_RFD=$(ls -d .claude/checkpoints/checkpoint-0/rfd/*/ 2>/dev/null | grep -oE '/([0-9]+)-' | grep -oE '[0-9]+' | sort -n | tail -1)
-   NEXT_RFD=$((HIGHEST_RFD + 1))
-   ```
-   - Validate sequential numbering before creating; if gaps found, warn user
-4. Create RFD at `.claude/checkpoints/checkpoint-0/rfd/{NEXT_RFD}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`
-   - Use [references/rfd-template.md](references/rfd-template.md); fill in the feature request, acceptance criteria (checkboxes), and status: Planning
-5. Confirm RFD creation with user
-
----
-
-### 4.2: Feature Exploration (if existing code)
-
-**Actions**:
-
-1. Launch 1-2 code-explorer agents:
-   ```
-   Analyze the codebase for implementing [feature]. Focus on:
-   - Existing patterns to follow
-   - Components to reuse
-   - Integration points
-   - Similar features for reference
-
-   Return 5-10 key files to read.
-   ```
-
-2. Read files identified by agents
-3. **Update RFD** → Add "Context" section with exploration findings
-
----
-
-### 4.3: Feature Clarification
-
-**Actions**:
-
-1. Review PRD requirements for this feature
-2. Identify any ambiguities or gaps:
-   - Edge cases not covered
-   - Error handling not specified
-   - Design preferences unclear
-   - Integration details missing
-
-3. **Present clarifying questions to user**
-4. **Wait for answers before proceeding**
-
-5. **Update RFD** → Add clarified requirements and out-of-scope items
-
----
-
-### 4.4: Feature Architecture & Planning
-
-**Actions**:
-
-1. Launch 1-2 code-architect agents:
-   ```
-   Design the implementation for [feature] that fits within the MVP architecture.
-   Requirements: [from PRD]
-   Constraints: [from clarification]
-
-   Provide:
-   - Files to create/modify
-   - Component design
-   - Implementation steps as checklist
-   ```
-
-2. Review and select approach
-
-3. **Update RFD** → Add complete implementation plan:
-   - Chosen architecture
-   - Files to create/modify
-   - Step-by-step implementation phases (as checkboxes)
-
-4. Present to user:
-   - Implementation approach summary
-   - Files that will be created/modified
-   - **Ask for approval to proceed with implementation**
-
-5. **Update RFD status: In Progress**
-
----
-
-### 4.5: Feature Implementation
-
-**Actions**:
-
-1. Implement following the chosen architecture
-2. Follow codebase conventions strictly
-3. Write clean, well-documented code
-4. Update todos as you progress
-5. **Update RFD progress log** with milestones as you complete implementation phases
-6. Check off implementation phases in RFD as they're completed
-
----
-
-### 4.6: Proactive Testing & Verification
-
-**CRITICAL**: Test your own work before asking the user to test. Do not hand off untested code.
-
-**Actions**:
-
-1. **Self-testing** (do this yourself, proactively):
-   - **Backend**: Call API endpoints, invoke functions, run database queries — verify correct responses and data flow
-   - **Frontend**: Use Playwright for UI testing, screenshots, behavior verification (if available)
-   - **Logic**: Write and run quick validation scripts to confirm business logic works as expected
-   - **Integration**: Test that new code works correctly with existing features
-   - Run existing test suites and verify all pass
-
-2. **Clean up test artifacts**: After testing passes, remove all temporary test scripts, debug print statements, console.logs, temporary routes, hardcoded test data, and any code added solely for testing purposes. The codebase must contain zero testing residue.
-
-3. Launch 2 code-reviewer agents for bugs, quality, security (confidence >= 80)
-
-4. Fix issues found
-
-5. Check off acceptance criteria in RFD
-6. Update RFD with testing results (what was tested, what passed, what was fixed)
-
----
-
-### 4.7: Code Professionalization
-
-**CRITICAL**: Before any user-facing handoff, review and professionalize all code written in this feature. The code must read as if written by a senior engineer.
-
-**Actions**:
-
-1. **Read every file you created or modified** in this feature — line by line
-2. **Check for and fix**:
-   - Redundant or duplicated code blocks — consolidate into shared functions where appropriate
-   - Dead code, unused imports, unused variables — remove completely
-   - Debug artifacts — remove all console.log, print statements, TODO/FIXME/HACK comments left from development
-   - Inconsistent naming — ensure variables, functions, and files follow the project's conventions
-   - Missing or excessive comments — add comments only where logic is non-obvious; remove obvious or redundant comments
-   - Overly complex logic — simplify where possible without changing behavior
-   - Inconsistent formatting — ensure consistent indentation, spacing, and style throughout
-   - Hardcoded values that should be constants or configuration
-   - Error messages that are vague or unhelpful
-3. **Verify the code reads cleanly**: A developer opening this file for the first time should find it well-organized, well-named, and easy to follow
-4. Update RFD with professionalization notes (what was cleaned up)
-
----
-
-### 4.8: User Presentation & Feedback
-
-**Actions**:
-
-1. Present to user: summary of what was built, how to test, screenshots if available
-2. Wait for user testing and feedback
-3. Address any issues or changes requested by user
-4. Re-test and re-professionalize after making changes
-5. **Update RFD** → Document feedback received and changes made
-6. Repeat until user confirms they're satisfied with the feature
-
----
-
-### 4.9: Feature Completion & Checkpoint
-
-**This is a formal checkpoint before moving to the next feature.**
-
-**Actions**:
-
-1. **Finalize RFD**:
-   - Update status: **Completed**
-   - Verify all acceptance criteria are checked off
-   - Add final progress log entry with completion summary
-   - List all files created/modified with descriptions of what changed in each
-   - Verify ALL changes from this feature are documented — cross-reference git history and modified files against the RFD content. No change should be missing.
-   - Document any technical debt or future improvements noted
-   - Be thorough: include architectural decisions, rationale, and specific details. Do not over-summarize.
-
-2. **Present completion summary to user**:
-   ```
-   ## Feature {N} Complete: {Feature Name}
-
-   ### What was built
-   [Summary]
-
-   ### Files created/modified
-   [List]
-
-   ### RFD location
-   [Path to RFD]
-
-   ### Ready to commit and continue?
-   ```
-
-3. **Ask user for permission to commit**:
-   - "Ready to commit this feature? (You can run /pr:commit-push)"
-   - Wait for user to confirm commit
-
-4. **After commit, ask about next steps**:
-   - If more features remain: "Ready to start Feature {N+1}: {Next Feature Name}? Or would you like to pause and continue later?"
-   - If this was the last feature: Proceed to Phase 5 (MVP Integration)
-
-5. **If user wants to pause**:
-   - Summarize current MVP progress
-   - Note which feature is next
-   - Inform user: "You can resume MVP development anytime by running /pr:mvp-dev again. I'll detect the existing RFDs and continue from Feature {N+1}."
-
----
-
-### Resuming MVP Development
-
-When user runs /pr:mvp-dev on a project with existing RFDs:
-
-1. Read all existing RFDs in checkpoint-0
-2. Identify completed features (Status: Completed)
-3. Identify the next feature to implement
-4. Present status: "Found existing MVP progress. Features 1-{N} are complete. Ready to continue with Feature {N+1}: {Feature Name}?"
-5. Resume from Step 4.1 for the next feature
-
----
-
-## Phase 5: MVP Integration
-
-**Goal**: Ensure all features work together as a cohesive MVP
-
-**Actions**:
-
-1. Launch integration review agents (subagents by default, or agent team if `--team`):
-   ```
-   Review the complete MVP implementation for:
-   - Integration between features
-   - Consistent patterns across codebase
-   - Missing error handling
-   - Performance concerns
-   - Security vulnerabilities
-
-   Focus on how features interact with each other.
-   ```
-
-   *Agent teams add value here — reviewers covering security, performance, and integration can challenge each other's findings and flag cross-cutting issues (e.g., a performance reviewer noticing that a security fix introduces latency). With subagents, you consolidate findings yourself.*
-
-2. Address any integration issues found
-
-3. **Final code professionalization**: Review the entire codebase for consistency across all features — naming conventions, code style, comment quality, and shared abstractions. Fix any cross-feature redundancies or inconsistencies that emerged during sequential development.
-
-4. Run full test suite (if tests exist)
-
-5. Verify MVP meets PRD success criteria
-
----
-
-## Phase 6: MVP Summary & Documentation
-
-**Goal**: Document the completed MVP and finalize all RFDs
-
-**Actions**:
-
-1. Mark all todos complete
-
-2. Update all RFDs to Completed status. For each RFD, verify ALL changes from its feature are thoroughly documented — cross-reference git history and modified files against RFD content. No change should be missing. Include specific file paths, what changed, and why.
-
-3. Write the MVP completion summary using the template in [references/rfd-template.md](references/rfd-template.md#mvp-completion-summary) (features with RFD links, files created and modified, key decisions, next steps).
-
-4. Suggest creating a snapshot: "/pr:create-snapshot to capture this state"
-
-5. Suggest commit for final MVP state
-
----
-
-## RFD Structure for MVP Features
-
-Every feature RFD follows [references/rfd-template.md](references/rfd-template.md): metadata, the PRD requirements and acceptance criteria, context, implementation plan, testing (self-testing, review, user testing), progress log, decisions, and files created or modified. Read it before creating the first feature RFD.
-
----
-
-## Rules of Thumb
-
-- **One feature at a time.** Each feature ends with user approval and a commit; the user can pause and resume because RFDs preserve progress.
-- **RFD first.** Create the feature RFD before any work and update it after clarification, architecture, implementation milestones, review, and completion.
-- **RFD organization.** MVP RFDs live in `checkpoint-0/rfd/`: RFD-0 is the architecture, features are numbered 1, 2, 3... Post-MVP features go in later checkpoints. Status values: Planning, In Progress, Completed, On Hold. Naming: `{N}-{feature-slug}/rfd-{YYYY-MM-DD}-{HHMM}.md`.
-- **Wait for the user** before each feature, after clarifying questions, after architecture design, after implementation (for testing), and before committing.
-- **Done means**: self-tested with evidence, temporary test artifacts removed, review agents run, code professionalized, user tested and approved, and every acceptance criterion checked in the RFD.
+1. Confirm every MVP RFD is Completed and complete.
+2. Present a summary: features with their RFD paths, key decisions, notable files, deviations from the PRD, and recommended post-MVP work.
+3. Recommend `/pr:create-snapshot` to capture the MVP as checkpoint-1 (future feature RFDs then go there), and a final commit.

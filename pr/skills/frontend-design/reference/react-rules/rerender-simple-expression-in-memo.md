@@ -33,3 +33,5 @@ function Header({ user, notifications }: Props) {
   // return some markup
 }
 ```
+
+With React Compiler enabled, write the plain expression and let the compiler decide what to cache.

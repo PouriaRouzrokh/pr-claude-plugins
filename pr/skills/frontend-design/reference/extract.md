@@ -6,7 +6,7 @@ Identify reusable patterns, components, and design tokens, then extract and cons
 
 Find the design system, component library, or shared UI directory. Understand its structure: component organization, naming conventions, design token structure, import/export conventions.
 
-**CRITICAL**: If no design system exists, do not create one yet. Ask the user with the AskUserQuestion tool. Understand the preferred location and structure first.
+If no design system exists, ask the user (AskUserQuestion tool) where shared components and tokens should live before creating one; a design system's location and structure are hard to change later.
 
 ## Step 2: Identify Patterns
 
@@ -31,7 +31,7 @@ Create a systematic plan:
 - **Naming conventions**: Component names, token names, prop names that match existing patterns
 - **Migration path**: How to refactor existing uses to consume the new shared versions
 
-**IMPORTANT**: Design systems grow incrementally. Extract what is clearly reusable now, not everything that might someday be reusable.
+Design systems grow incrementally. Extract what is clearly reusable now, not everything that might someday be.
 
 ## Step 4: Extract & Enrich
 
@@ -59,10 +59,10 @@ Update design system documentation:
 - Add examples and guidelines
 - Update any Storybook or component catalog
 
-**NEVER**:
-- Extract one-off, context-specific implementations without generalization
-- Create components so generic they are useless
-- Extract without considering existing design system conventions
-- Skip proper TypeScript types or prop documentation
-- Create tokens for every single value (tokens should have semantic meaning)
-- Extract things that differ in intent (two buttons that look similar but serve different purposes should stay separate)
+Avoid:
+- Extracting one-off, context-specific implementations
+- Components so generic they are useless
+- Ignoring the existing design system's conventions
+- Skipping TypeScript types or prop documentation
+- Tokens for every single value (tokens should carry semantic meaning)
+- Merging things that differ in intent (two buttons that look similar but serve different purposes should stay separate)

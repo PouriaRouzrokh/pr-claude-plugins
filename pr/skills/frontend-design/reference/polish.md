@@ -1,8 +1,6 @@
 # Polish
 
-> **Additional context needed**: quality bar and shipping constraints.
-
-Polish is refinement, never concealed redesign. Preserve the incumbent visual world, content, behavior, and everything outside scope. If the concept itself is wrong, say so and recommend redesign or `bolder` instead of smuggling in a replacement.
+Polish is refinement, never concealed redesign. Preserve the incumbent visual world, content, behavior, and everything outside scope. If the concept itself is wrong, say so and recommend a redesign ([new-work.md](new-work.md)) or a [bolder](bolder.md) pass instead of smuggling in a replacement. Know the quality bar and shipping constraints before starting; ask if they matter and are unclear.
 
 A clean mechanical scan is defect evidence, not proof of quality. Inspect the rendered experience and real interaction path.
 
@@ -21,7 +19,7 @@ Fix the cause at the narrowest correct level. Ask when a binding system principl
 
 ## 2. Gather the evidence
 
-Use the feature yourself at the surface's representative sizes: desktop and mobile on the web; on a native platform, the shipped device classes on the simulator, emulator, or hardware. Determine:
+Use the feature yourself in the browser at desktop and mobile widths. Determine:
 
 - whether the path is functionally complete;
 - the intended quality bar and time available;
@@ -82,10 +80,10 @@ Do not perfect one corner while leaving the rest below the same quality bar.
 
 Walk the complete path again with mouse, keyboard, and touch where applicable. Check:
 
-- mobile, intermediate, and wide layouts on the web; phone and tablet size classes in both supported orientations on native;
+- mobile, intermediate, and wide layouts;
 - loading, empty, error, success, disabled, long-content, and missing-content states;
 - zoom, contrast, focus, semantics, and screen-reader names;
-- console errors, layout shift, interaction latency, and image loading everywhere; supported browsers on the web; supported OS versions, runtime warnings, and dropped frames on native;
+- console errors, layout shift, interaction latency, and image loading, in the browsers the project supports;
 - agreement with the recorded design context, neighboring features, and the user's scope.
 
 Re-read [craft-floor.md](craft-floor.md) and check the build against it, then run the project's own QA commands (lint, type-check, tests). Fix real defects and document only narrow intentional exceptions. A clean scan does not replace visual judgment.

@@ -3,6 +3,7 @@
 # requires-python = ">=3.10"
 # dependencies = ["google-genai>=2.3,<3"]
 # ///
+# Pins verified against PyPI on 2026-10-30: google-genai 2.34.0.
 """Generate, edit, and extend videos with Gemini Omni Flash (Gemini API).
 
 Uses the Interactions API. Generation is synchronous and can take several
@@ -63,7 +64,14 @@ ASPECT_RATIOS = {"16:9", "9:16"}
 RESOLUTIONS = {"360p", "720p", "1080p", "4k"}
 URI_DELIVERY = {"1080p", "4k"}  # large outputs exceed the 4 MB inline limit
 TASKS = {"text_to_video", "image_to_video", "reference_to_video", "edit", "extend"}
-RETRYABLE_STATUS = {429, 500, 502, 503, 504}
+# Only 429 and 503 are retried: they mean the request was rejected before generation started.
+# A 500/502/504 can arrive after the server has already rendered (and billed) the clip, so a
+# blind retry could pay twice.
+RETRYABLE_STATUS = {429, 503}
+# Source: ai.google.dev/gemini-api/docs/pricing, checked 2026-10-30: about $0.10 per second of
+# 720p output for gemini-omni-1.1-flash. The page lists no other rate, so the estimate uses it
+# for every resolution.
+PRICE_PER_SECOND = {"gemini-omni-1.1-flash": 0.10}
 RETRY_DELAYS = (15, 45)
 POLL_SECONDS = 5
 
@@ -247,8 +255,36 @@ def create_interaction(client, request: dict, timeout: int):
                 400: "Check the prompt and inputs; safety blocks and unsupported regions also return 400.",
                 403: "Omni Flash needs a paid-tier key, and video editing is unavailable in the EEA, UK, and Switzerland.",
                 429: "Rate limit or quota exceeded. Wait and retry, or check billing.",
+                500: "Server error, not retried automatically: the clip may already have been generated and billed. Check your usage before retrying.",
+                502: "Server error, not retried automatically: the clip may already have been generated and billed. Check your usage before retrying.",
+                504: "Gateway timeout, not retried automatically: the clip may already have been generated and billed. Check your usage before retrying.",
             }.get(code, "")
             sys.exit(f"Error: {error}\n{hint}".rstrip())
+
+
+def video_seconds(path: pathlib.Path) -> float | None:
+    """Clip length from the MP4 movie header (mvhd box), or None when it cannot be read."""
+    try:
+        data = path.read_bytes()
+        i = data.find(b"mvhd")
+        if i < 0:
+            return None
+        version = data[i + 4]
+        offset = i + 4 + (20 if version == 1 else 12)
+        timescale = int.from_bytes(data[offset:offset + 4], "big")
+        size = 8 if version == 1 else 4
+        duration = int.from_bytes(data[offset + 4:offset + 4 + size], "big")
+        return duration / timescale if timescale else None
+    except (OSError, IndexError):
+        return None
+
+
+def cost_line(model: str, path: pathlib.Path) -> str | None:
+    rate = PRICE_PER_SECOND.get(model)
+    seconds = video_seconds(path)
+    if rate is None or not seconds:
+        return None
+    return f"Estimated cost: about ${rate * seconds:.2f} ({seconds:.0f} s at ${rate:.2f}/s, 720p rate)"
 
 
 def save_video(client, video, path: pathlib.Path, deadline: float) -> None:
@@ -302,6 +338,9 @@ def main() -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     save_video(client, video, path, deadline)
     print(f"Video saved: {path} ({path.stat().st_size / 1e6:.1f} MB, {time.time() - started:.0f}s)")
+    estimate = cost_line(settings["model"], path)
+    if estimate:
+        print(estimate)
     if getattr(interaction, "id", None):
         print(f"Interaction ID: {interaction.id}  (pass --continue {interaction.id} to edit or extend)")
 

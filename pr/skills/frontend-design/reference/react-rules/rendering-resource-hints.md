@@ -82,4 +82,6 @@ function Navigation() {
 | `preinit` | Stylesheets/scripts that must execute early |
 | `preinitModule` | ES modules that must execute early |
 
+**In Next.js**, several of these hints are already handled: `next/font` self-hosts and preloads font files, `<Link>` prefetches routes and their code, and `next/image` with `preload` (which replaced the deprecated `priority` prop in Next.js 16) preloads an LCP image. Use the React DOM APIs for what the framework doesn't cover, such as third-party origins and non-route modules.
+
 Reference: [React DOM Resource Preloading APIs](https://react.dev/reference/react-dom#resource-preloading-apis)

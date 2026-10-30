@@ -36,3 +36,7 @@ function Profile({ name }: { name: string }) {
   return <div>{name}</div>
 }
 ```
+
+The same boundary is a security concern: every field you pass reaches the browser. Return minimal objects (DTOs) from a `server-only` data layer rather than raw database rows.
+
+Reference: [Next.js data security guide](https://nextjs.org/docs/app/guides/data-security)

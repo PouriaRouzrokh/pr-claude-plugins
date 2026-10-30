@@ -14,7 +14,10 @@ Generate SVG markup with Gemini by running the bundled script. **Do not hand-wri
 | Alias | Model ID | Use for |
 |-------|----------|---------|
 | `flash` (default) | `gemini-3.8-flash` | Icons, logos, components, most illustrations. Fast and strong at code. |
-| `pro` | `gemini-3.1-pro-preview` | Intricate illustrations and layered hero scenes. Slower; paid tier only. |
+| `pro` | `gemini-3.1-pro-preview` | Intricate illustrations and layered hero scenes. Slower; paid tier only. A **preview** model, so Google may change or retire it. |
+| `argon` | `gemini-4-argon` | Gemini 4 Argon, Google's stable flagship reasoning model ("built for complex software engineering"). Paid tier only. |
+
+Prices per 1M tokens, input / output (ai.google.dev pricing page, checked 2026-10-30): `flash` $0.75 / $3.75 through 2026-12-31, then $1.50 / $7.50; `pro` $2 / $12; `argon` $2 / $10 through 2026-11-30, then **$4 / $20 from 2026-12-01**. `flash` stays the default. Nobody has compared `argon` and `pro` on SVG quality yet, so offer `-m argon` for hard scenes and compare when it matters.
 
 `--thinking low|medium|high` trades latency for care; use `high` for complex scenes.
 
@@ -34,13 +37,20 @@ PROMPT
 |------|--------|-------|
 | `-t` | `hero`, `icon`, `illustration`, `logo`, `component` | Sets default size and type-specific design rules. Default `illustration`. |
 | `-o` | path ending `.svg` | Default `generated.svg`. Never overwrites: appends `-1`, `-2`. |
-| `--width`, `--height` | px | Defaults: hero 1200×600, icon 24×24, illustration 800×600, logo 200×200, component 400×300. |
-| `-m` | `flash`, `pro`, or a model ID | |
+| `--width`, `--height` | px (1-10000) | Defaults: hero 1200×600, icon 24×24, illustration 800×600, logo 200×200, component 400×300. |
+| `-m` | `flash`, `pro`, `argon`, or a model ID | |
 | `-e` | existing `.svg` | Edit mode: applies the description as changes and keeps the rest. |
-| `--preview` | | Renders `<name>.preview.png` (min 512px wide) for visual review. |
+| `--preview` | | Renders `<name>.preview.png` (min 512px wide) for visual review; never overwrites an existing preview. If the renderer cannot draw the SVG, the SVG is still saved and a warning is printed. |
 | `--optimize` | | Runs `npx svgo` (needs Node.js); typically 20–60% smaller. |
 
-The script rejects output that is not well-formed SVG (after one automatic repair request) and strips `<script>`, event-handler attributes, and `javascript:` links.
+The script rejects output that is not well-formed SVG (after one automatic repair request) and stops with a clear message when the model hits its output limit mid-document. It then parses the SVG and removes:
+
+- the elements `<script>`, `<foreignObject>`, `<iframe>`, `<embed>`, `<object>`, `<audio>`, `<video>`, `<canvas>`, and any `<set>` or `<animate*>` that targets `href`;
+- every `on*` event-handler attribute and any attribute value starting with `javascript:`;
+- every `href` or `xlink:href` that is not an in-document `#fragment` (inline PNG/JPEG/GIF/WebP data on `<image>` is kept);
+- CSS `@import` and external `url(...)` references (`url(#id)` and inline images stay).
+
+Clean output is saved unchanged. This is a safety net, not a full sanitizer: review the file before embedding SVG from an untrusted prompt.
 
 ## Workflow
 

@@ -61,4 +61,4 @@ useEffect(() => {
 }, [pageTitle])
 ```
 
-**Note:** If your project has [React Compiler](https://react.dev/learn/react-compiler) enabled, it automatically optimizes dependency tracking and may handle some of these cases for you.
+> **Note (2026):** With [React Compiler](https://react.dev/learn/react-compiler) enabled, write the filter and sort as plain expressions; the compiler memoizes each value against its own inputs, which gives you the `useMemo` split automatically. It does not split effects, so the `useEffect` half of this rule still applies.

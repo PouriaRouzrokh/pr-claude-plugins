@@ -3,6 +3,7 @@
 # requires-python = ">=3.10"
 # dependencies = ["google-genai>=2.3,<3", "openai>=2,<4"]
 # ///
+# Pins verified against PyPI on 2026-10-30: google-genai 2.34.0, openai 3.41.0.
 """Generate and edit images with Google Nano Banana or OpenAI GPT Image models.
 
 One interface, two providers, chosen by model alias:
@@ -124,6 +125,19 @@ GPT_PRICES = {
     "gpt-image-2.5-sunburst": (5.0, 8.0, 30.0),
     "gpt-image-2.5-flare": (5.0, 8.0, 30.0),
     "gpt-image-2": (5.0, 8.0, 30.0),
+    "gpt-image-1.5": (5.0, 8.0, 32.0),
+    "chatgpt-image-latest": (5.0, 8.0, 32.0),
+}
+# Source: developers.openai.com/api/docs/pricing, standard processing, checked 2026-10-30.
+
+# USD per generated image by output size. Source: ai.google.dev/gemini-api/docs/pricing, checked
+# 2026-10-30. Output only: input images and thinking tokens are billed separately and add a little.
+# "1K" is the API default when no size is given.
+GEMINI_IMAGE_PRICES = {
+    "gemini-nano-banana-2.1": {"1K": 0.0336, "2K": 0.0504, "4K": 0.113},
+    "gemini-3-pro-image": {"1K": 0.134, "2K": 0.134, "4K": 0.24},
+    "gemini-3.1-flash-image": {"512": 0.045, "1K": 0.067, "2K": 0.101, "4K": 0.151},
+    "gemini-3.1-flash-lite-image": {"1K": 0.0336},
 }
 
 MAX_INPUTS = {"google": 14, "openai": 16}
@@ -457,8 +471,11 @@ def run_google(settings: dict, prompt: str, mime: str) -> dict:
         "images": [(base64.b64decode(image.data), getattr(image, "mime_type", None) or mime)],
         "text": getattr(interaction, "output_text", None),
         "suggestions": search_suggestions(interaction),
-        "footer": (f"Interaction ID: {interaction.id}  (pass --continue {interaction.id} to refine)"
-                   if getattr(interaction, "id", None) else None),
+        "footer": "\n".join(line for line in (
+            gemini_cost_line(settings["model"], settings["size"]),
+            f"Interaction ID: {interaction.id}  (pass --continue {interaction.id} to refine)"
+            if getattr(interaction, "id", None) else None,
+        ) if line) or None,
     }
 
 
@@ -485,14 +502,26 @@ def openai_params(settings: dict, prompt: str, mime: str) -> dict:
 
 def estimate_cost(model: str, usage) -> str | None:
     prices = GPT_PRICES.get(model)
-    if not prices or usage is None:
+    if usage is None:
         return None
+    if not prices:
+        return f"Usage: {getattr(usage, 'total_tokens', 0):,} tokens (cost unknown for {model}; see the OpenAI pricing page)"
     details = getattr(usage, "input_tokens_details", None)
     text_in = getattr(details, "text_tokens", None) or 0
     image_in = getattr(details, "image_tokens", None) or 0
     output = getattr(usage, "output_tokens", None) or 0
     cost = (text_in * prices[0] + image_in * prices[1] + output * prices[2]) / 1_000_000
     return f"Usage: {getattr(usage, 'total_tokens', 0):,} tokens (≈ ${cost:.3f})"
+
+
+def gemini_cost_line(model: str, size: str | None) -> str | None:
+    prices = GEMINI_IMAGE_PRICES.get(model)
+    if not prices:
+        return None
+    key = size or "1K"
+    if key not in prices:
+        return None
+    return f"Estimated cost: about ${prices[key]:.3f} for the {key} image (output only)"
 
 
 def run_openai(settings: dict, prompt: str, mime: str) -> dict:
@@ -571,7 +600,7 @@ def main() -> None:
         print(f"Image saved: {path}")
 
     if result["suggestions"]:
-        sources = saved[0].with_name(saved[0].stem + ".search.html")
+        sources = unique_path(saved[0].with_name(saved[0].stem + ".search.html"))
         sources.write_text("\n".join(result["suggestions"]))
         print(f"Search suggestions (show these to the user): {sources}")
     if result["footer"]:

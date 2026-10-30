@@ -1,11 +1,11 @@
 ---
-title: useEffectEvent for Stable Callback Refs
+title: useEffectEvent for Latest-Value Callbacks in Effects
 impact: LOW
 impactDescription: prevents effect re-runs
 tags: advanced, hooks, useEffectEvent, refs, optimization
 ---
 
-## useEffectEvent for Stable Callback Refs
+## useEffectEvent for Latest-Value Callbacks in Effects
 
 Access latest values in callbacks without adding them to dependency arrays. Prevents effect re-runs while avoiding stale closures.
 
@@ -37,3 +37,7 @@ function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
   }, [query])
 }
 ```
+
+`useEffectEvent` is stable since React 19.2. Use it only for logic that is genuinely an event fired from an Effect, not to silence the dependency linter; on older React, use the ref pattern in [Store Event Handlers in Refs](./advanced-event-handler-refs.md).
+
+Reference: [useEffectEvent](https://react.dev/reference/react/useEffectEvent)

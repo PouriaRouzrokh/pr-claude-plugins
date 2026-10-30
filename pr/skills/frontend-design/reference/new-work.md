@@ -26,7 +26,7 @@ A section, component, feature, or state inside an established surface inherits t
 
 ## 2. Ask what will change the work
 
-Before implementation, ask the user with the AskUserQuestion tool: two or three related questions, or a compact confirmation when the request is precise. Skip settled facts, not the confirmation.
+Before implementation, ask the user with the AskUserQuestion tool: two or three related questions, or a compact confirmation when the request is precise. Skip settled facts, not the confirmation. When you will also offer directions (section 3), keep the total to two rounds.
 
 - **Persuade:** who must act, what they should believe, which real proof, content, or assets earn that belief.
 - **Operate:** the task, information, important states, frequency, constraints.
@@ -46,7 +46,7 @@ Across modes, ask what success looks like, what must remain untouched, and what 
 1. Name the product's unique mechanism in one sentence, the audience's real scene, its cultural home, and what this first surface must prove. Name the page this category always ships and its predictable opposite: both are the rut.
 2. From the audience's world, list seven concrete visual systems, artifacts, places, or rituals they know by heart. For each, note why it resonates and how it looks (ground and main colors, type voices, the one signature that makes it recognizable). Include the audience's graphic and screen traditions: notation, publications, identity programs, data graphics. On an Operate or Read surface, never take the tools the audience operates (a terminal, a scope, a control panel) as the world; they come back as costumes. When more than three candidates share one material family, keep digging until the list spans at least three.
 3. Turn the strongest candidates into complete directions, each joining a reusable visual world to a concrete first-surface experience: world, first viewport, visitor path, signature interaction, honest risk.
-4. Present two or three directions with the AskUserQuestion tool, the most resonant first, with each option's description carrying its world and its risk. Always include one quiet alternative: the category standard, played straight. Never recommend it; if the user picks it, ask for two or three products it should sit alongside and execute it at their craft level, without irony.
+4. Present two or three directions with the AskUserQuestion tool (skip this when the user already named a direction), the most resonant first, with each option's description carrying its world and its risk. Always include one quiet alternative: the category standard, played straight. Never recommend it; if the user picks it, ask for two or three products it should sit alongside and execute it at their craft level, without irony.
 
 Every direction must be viable: every claim it visualizes true, a real palette and component family, workable within the available assets and performance budget. Demonstration data is design material: author it at full fidelity and label it as sample data. Commercial and factual claims (prices, customers, benchmarks, capabilities) are never invented.
 
@@ -71,11 +71,11 @@ The mode names what the visitor's success looks like on this surface. Choose it 
 
 Before code, write the chosen direction as a short contract (about 150 words) in the design context, under a `### Direction: <surface>` heading:
 
-- **THESIS:** the one idea this surface owns, and the category-default arrangement it refuses.
-- **OWN-WORLD:** the palette and component language, specific enough to recognize with all content removed.
-- **STORY:** what the visitor understands, believes, and does.
-- **FIRST VIEWPORT:** the exact composition, what is where and at what scale, and where the primary action sits.
-- **SIGNATURE:** the one interaction or motion moment this surface is remembered for.
+- **Thesis:** the one idea this surface owns, and the category-default arrangement it refuses.
+- **Own world:** the palette and component language, specific enough to recognize with all content removed.
+- **Story:** what the visitor understands, believes, and does.
+- **First viewport:** the exact composition, what is where and at what scale, and where the primary action sits.
+- **Signature:** the one interaction or motion moment this surface is remembered for.
 
 If a block reads like a mood, the direction is not decided yet. Never copy the contract into implementation source or anything shipped to the browser (comments, hidden DOM, `data-*` attributes, metadata).
 
@@ -99,6 +99,6 @@ Inspect in bounded passes. Capture desktop (1440px) and mobile (390px) screensho
 
 A capture is evidence only when it is valid: settle or disable entrance motion first, capture full-page shots from the document top, and open every file to confirm it shows what its name claims (no blank regions, no half-loaded state).
 
-For substantial work, hand the final review to a fresh subagent with no access to the build conversation: pass it the original request, the direction contract, the screenshot paths, and [craft-floor.md](craft-floor.md), and ask for a ship-or-fix verdict with specific findings. Apply its fixes in one batch, recapture, and stop when a round resolves nothing new.
+For substantial work, hand the final review to a fresh subagent with no access to the build conversation: pass it the original request, the direction contract, the screenshot paths, and [craft-floor.md](craft-floor.md), and ask for a ship-or-fix verdict with specific findings. Apply its fixes in one batch, recapture once to confirm, and stop; report anything left unresolved instead of starting another loop.
 
 After a new or replacement world ships, record its visual system (color tokens, type roles, spacing scale, component language) in DESIGN.md or the design context, written from the built result rather than from the plan.

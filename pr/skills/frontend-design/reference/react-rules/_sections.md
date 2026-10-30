@@ -23,12 +23,12 @@ The section ID (in parentheses) is the filename prefix used to group rules.
 ## 4. Client-Side Data Fetching (client)
 
 **Impact:** MEDIUM-HIGH  
-**Description:** Automatic deduplication and efficient data fetching patterns reduce redundant network requests.
+**Description:** Automatic deduplication and efficient data fetching patterns (SWR, TanStack Query) reduce redundant network requests.
 
 ## 5. Re-render Optimization (rerender)
 
 **Impact:** MEDIUM  
-**Description:** Reducing unnecessary re-renders minimizes wasted computation and improves UI responsiveness.
+**Description:** Reducing unnecessary re-renders minimizes wasted computation and improves UI responsiveness. With React Compiler enabled, the compiler handles most manual memoization (`memo`, `useMemo`, `useCallback`); the structural rules (derived state, effect placement, no inline components) still apply.
 
 ## 6. Rendering Performance (rendering)
 

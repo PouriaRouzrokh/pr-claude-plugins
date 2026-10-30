@@ -1,245 +1,84 @@
 # Onboard
 
-> **Additional context needed**: the "aha moment" you want users to reach, and users' experience level.
-
-Get users to first value as fast as possible. Onboarding's job is not to teach the product. Its job is to get people to the moment that proves the product is worth their time.
+Get people to first value as fast as possible. Onboarding's job is not to teach the whole product; it is to reach the moment that proves the product is worth their time. Before designing, know that moment (the first project created, the first report run) and the users' experience level; infer them from the design context and product, and ask only if they remain unclear.
 
 ## Contents
 
-- [Assess Onboarding Needs](#assess-onboarding-needs)
-- [Onboarding Principles](#onboarding-principles)
-- [Design Onboarding Experiences](#design-onboarding-experiences)
-- [Empty State Design](#empty-state-design)
-- [Implementation Patterns](#implementation-patterns)
-- [Verify Onboarding Quality](#verify-onboarding-quality)
+- [Assess](#assess)
+- [Principles](#principles)
+- [Patterns](#patterns)
+- [Empty states](#empty-states)
+- [Implementation](#implementation)
+- [Verify](#verify)
 
-## Assess Onboarding Needs
+## Assess
 
-Understand what users need to learn and why:
+1. **The job:** what users are trying to accomplish, where they get stuck or drop off, and what the first-value moment is.
+2. **The users:** experience level (new to the category, switching from a competitor, expert), motivation (exploring vs. required by work), and the time they will give it.
+3. **Success:** the minimum they must learn, the one key action, and how you would know it worked (completion rate, time to first value).
 
-1. **Identify the challenge**:
-   - What are users trying to accomplish?
-   - What's confusing or unclear about current experience?
-   - Where do users get stuck or drop off?
-   - What's the "aha moment" we want users to reach?
+## Principles
 
-2. **Understand the users**:
-   - What's their experience level? (Beginners, power users, mixed?)
-   - What's their motivation? (Excited and exploring? Required by work?)
-   - What's their time commitment? (5 minutes? 30 minutes?)
-   - What alternatives do they know? (Coming from competitor? New to category?)
+- **Show, don't tell.** Use real functionality with working examples rather than a separate tutorial mode.
+- **Make it skippable.** Experienced users can skip or dismiss everything, and nothing blocks access to the product.
+- **Time to value.** Front-load the few concepts that deliver most of the value; save advanced features for discovery in context.
+- **Context over ceremony.** Teach a feature when the user reaches it; empty states and point-of-use hints beat upfront tours.
+- **Respect intelligence.** Don't explain standard patterns; be brief.
 
-3. **Define success**:
-   - What's the minimum users need to learn to be successful?
-   - What's the key action we want them to take? (First project? First invite?)
-   - How do we know onboarding worked? (Completion rate? Time to value?)
+## Patterns
 
-**CRITICAL**: Onboarding should get users to value as quickly as possible, not teach everything possible.
+**First run**
+- **Welcome:** what the product does for this user and, if there is a setup flow, how long it takes, with a visible way to skip.
+- **Account setup:** ask for the minimum now and the rest later; explain non-obvious requests; prefill sensible defaults.
+- **Core concepts:** introduce one to three, interactively where possible, with progress shown ("Step 1 of 3").
+- **First success:** guide the user to something real, offer templates or sample data so actions work immediately, acknowledge completion in proportion to the effort ([delight.md](delight.md)), and point to the next step.
 
-## Onboarding Principles
+**Ongoing discovery**
+- **Contextual hints:** appear the first time a user reaches a feature, point at the relevant control, explain the benefit in a line, and dismiss permanently.
+- **Feature announcements:** say what changed and why it matters, let users try it immediately, and stay dismissible.
+- **Progressive unlocking:** reveal advanced options as users show they need them.
 
-Follow these core principles:
+**Guided tours** suit complex tools, major redesigns, and domain-heavy products. Keep them to 3–7 steps, focused on a workflow ("Create a project") rather than a feature inventory ("This is the project button"); let users click the real interface during the tour; offer "Skip tour"; and make the tour replayable from help.
 
-### Show, Don't Tell
-- Demonstrate with working examples, not just descriptions
-- Provide real functionality in onboarding, not separate tutorial mode
-- Use progressive disclosure, teach one thing at a time
+**Interactive tutorials** suit high-stakes or unfamiliar work: a sandbox with sample data, a clear objective ("Create a chart of sales by region"), validation that the user did it, and a clear finish.
 
-### Make It Optional (When Possible)
-- Let experienced users skip onboarding
-- Don't block access to product
-- Provide "Skip" or "I'll explore on my own" options
+**In-product help:** contextual help links, a searchable help center, and visible keyboard shortcut hints (for example, `⌘K` shown in the search field).
 
-### Time to Value
-- Get users to their "aha moment" ASAP
-- Front-load most important concepts
-- Teach 20% that delivers 80% of value
-- Save advanced features for contextual discovery
+## Empty states
 
-### Context Over Ceremony
-- Teach features when users need them, not upfront
-- Empty states are onboarding opportunities
-- Tooltips and hints at point of use
+Every empty state answers three questions and offers an action:
 
-### Respect User Intelligence
-- Don't patronize or over-explain
-- Be concise and clear
-- Assume users can figure out standard patterns
+- **What will be here:** "Your projects will appear here."
+- **Why it matters:** "Projects keep your files and your team's work in one place."
+- **How to start:** [Create project] or [Start from a template]
 
-## Design Onboarding Experiences
+Add an image only if it comes from the product's own visual world ([craft-floor.md](craft-floor.md) refuses generic illustration). Distinguish the kinds of emptiness, because each needs a different response:
 
-Create appropriate onboarding for the context:
+| Type | Response |
+|------|----------|
+| First use | Emphasize value; offer a template or sample data |
+| User cleared everything | Light touch; easy to start again |
+| No results | Suggest a different query; offer to clear filters |
+| No permission | Explain why and how to get access |
+| Failed to load | Say what happened; offer a retry |
 
-### Initial Product Onboarding
+Copy patterns for these states are in [clarify.md](clarify.md#loading-empty-and-success-states).
 
-**Welcome Screen**:
-- Clear value proposition (what is this product?)
-- What users will learn/accomplish
-- Time estimate (honest about commitment)
-- Option to skip (for experienced users)
+## Implementation
 
-**Account Setup**:
-- Minimal required information (collect more later)
-- Explain why you're asking for each piece of information
-- Smart defaults where possible
-- Social login when appropriate
+- **Hints and popovers:** the Popover API with CSS anchor positioning covers most tooltip and coach-mark needs natively ([operate.md](operate.md#overlays)); Floating UI is the library fallback.
+- **Tours:** use the project's existing tour library if it has one (for example Shepherd.js or React Joyride); otherwise popovers plus a small state machine are often enough.
+- **Dialogs:** native `<dialog>` with `showModal()` for anything modal.
+- **Remembering progress:** store completed steps and dismissed hints server-side for signed-in users, so they follow the user across devices; `localStorage` is fine for anonymous visitors. Never show the same onboarding twice.
+- **Measurement:** instrument completion, skip, and drop-off per step so the flow can be tuned.
 
-**Core Concept Introduction**:
-- Introduce 1-3 core concepts (not everything)
-- Use simple language and examples
-- Interactive when possible (do, don't just read)
-- Progress indication (step 1 of 3)
+Avoid: long mandatory onboarding before first use; tours that block the whole UI; tutorial modes disconnected from the real product; hidden or hard-to-find "Skip"; information dumps up front; re-running first-run onboarding for returning users.
 
-**First Success**:
-- Guide users to accomplish something real
-- Pre-populated examples or templates
-- Celebrate completion (but don't overdo it)
-- Clear next steps
+## Verify
 
-### Feature Discovery & Adoption
+- Walk the flow as a new user in a fresh profile (cleared storage), then as a returning user: first value should arrive in minutes, and nothing should repeat.
+- Every step can be skipped or dismissed, works by keyboard, and announces itself to screen readers.
+- Each empty-state type above renders with its own message and action.
+- Note which success metrics are instrumented; real-user completion and time-to-value numbers come later, so say what to watch.
 
-**Empty States**:
-Instead of blank space, show:
-- What will appear here (description + screenshot/illustration)
-- Why it's valuable
-- Clear CTA to create first item
-- Example or template option
-
-Example:
-```
-No projects yet
-Projects help you organize your work and collaborate with your team.
-[Create your first project] or [Start from template]
-```
-
-**Contextual Tooltips**:
-- Appear at relevant moment (first time user sees feature)
-- Point directly at relevant UI element
-- Brief explanation + benefit
-- Dismissable (with "Don't show again" option)
-- Optional "Learn more" link
-
-**Feature Announcements**:
-- Highlight new features when they're released
-- Show what's new and why it matters
-- Let users try immediately
-- Dismissable
-
-**Progressive Onboarding**:
-- Teach features when users encounter them
-- Badges or indicators on new/unused features
-- Unlock complexity gradually (don't show all options immediately)
-
-### Guided Tours & Walkthroughs
-
-**When to use**:
-- Complex interfaces with many features
-- Significant changes to existing product
-- Industry-specific tools needing domain knowledge
-
-**How to design**:
-- Spotlight specific UI elements (dim rest of page)
-- Keep steps short (3-7 steps max per tour)
-- Allow users to click through tour freely
-- Include "Skip tour" option
-- Make replayable (help menu)
-
-**Best practices**:
-- Interactive over passive (let users click real buttons)
-- Focus on workflow, not features ("Create a project" not "This is the project button")
-- Provide sample data so actions work
-
-### Interactive Tutorials
-
-**When to use**:
-- Users need hands-on practice
-- Concepts are complex or unfamiliar
-- High stakes (better to practice in safe environment)
-
-**How to design**:
-- Sandbox environment with sample data
-- Clear objectives ("Create a chart showing sales by region")
-- Step-by-step guidance
-- Validation (confirm they did it right)
-- Graduation moment (you're ready!)
-
-### Documentation & Help
-
-**In-product help**:
-- Contextual help links throughout interface
-- Keyboard shortcut reference
-- Search-able help center
-- Video tutorials for complex workflows
-
-**Help patterns**:
-- `?` icon near complex features
-- "Learn more" links in tooltips
-- Keyboard shortcut hints (`⌘K` shown on search box)
-
-## Empty State Design
-
-Every empty state needs:
-
-### What Will Be Here
-"Your recent projects will appear here"
-
-### Why It Matters
-"Projects help you organize your work and collaborate with your team"
-
-### How to Get Started
-[Create project] or [Import from template]
-
-### Visual Interest
-Illustration or icon (not just text on blank page)
-
-### Contextual Help
-"Need help getting started? [Watch 2-min tutorial]"
-
-**Empty state types**:
-- **First use**: Never used this feature (emphasize value, provide template)
-- **User cleared**: Intentionally deleted everything (light touch, easy to recreate)
-- **No results**: Search or filter returned nothing (suggest different query, clear filters)
-- **No permissions**: Can't access (explain why, how to get access)
-- **Error state**: Failed to load (explain what happened, retry option)
-
-## Implementation Patterns
-
-### Technical approaches:
-
-**Tooltip libraries**: Tippy.js, Popper.js
-**Tour libraries**: Intro.js, Shepherd.js, React Joyride
-**Modal patterns**: Focus trap, backdrop, ESC to close
-**Progress tracking**: LocalStorage for "seen" states
-**Analytics**: Track completion, drop-off points
-
-**Storage patterns**:
-```javascript
-// Track which onboarding steps user has seen
-localStorage.setItem('onboarding-completed', 'true');
-localStorage.setItem('feature-tooltip-seen-reports', 'true');
-```
-
-**IMPORTANT**: Don't show same onboarding twice (annoying). Track completion and respect dismissals.
-
-**NEVER**:
-- Force users through long onboarding before they can use product
-- Patronize users with obvious explanations
-- Show same tooltip repeatedly (respect dismissals)
-- Block all UI during tour (let users explore)
-- Create separate tutorial mode disconnected from real product
-- Overwhelm with information upfront (progressive disclosure!)
-- Hide "Skip" or make it hard to find
-- Forget about returning users (don't show initial onboarding again)
-
-## Verify Onboarding Quality
-
-Test with real users:
-
-- **Time to completion**: Can users complete onboarding quickly?
-- **Comprehension**: Do users understand after completing?
-- **Action**: Do users take desired next step?
-- **Skip rate**: Are too many users skipping? (Maybe it's too long or not valuable)
-- **Completion rate**: Are users completing? (If low, simplify)
-- **Time to value**: How long until users get first value?
-
-When users hit the aha moment fast and don't drop off, finish with a polish pass ([polish.md](polish.md)).
+When users reach first value quickly, finish with a polish pass ([polish.md](polish.md)).

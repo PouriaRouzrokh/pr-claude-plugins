@@ -1,11 +1,27 @@
 {
   "name": "pr",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Personal development toolkit: ATLAS-guided feature and MVP development with RFD/PRD/checkpoint documentation, systematic debugging, TDD, code cleanup, docs, local and public deployment, git workflows, frontend design, web quality audits, and Gemini-powered image, SVG, and video generation.",
   "author": {
     "name": "Pouria Rouzrokh"
   },
   "homepage": "https://github.com/PouriaRouzrokh/pr-claude-plugins",
   "repository": "https://github.com/PouriaRouzrokh/pr-claude-plugins",
-  "keywords": ["feature-development", "mvp", "rfd", "atlas", "debugging", "tdd", "frontend-design", "image-generation", "openai", "svg", "video-generation", "gemini", "documentation", "git"]
+  "keywords": [
+    "feature-development",
+    "mvp",
+    "rfd",
+    "atlas",
+    "debugging",
+    "tdd",
+    "frontend-design",
+    "image-generation",
+    "openai",
+    "svg",
+    "video-generation",
+    "gemini",
+    "documentation",
+    "git"
+  ],
+  "license": "MIT"
 }

@@ -38,3 +38,7 @@ function ScrollTracker() {
   }, [])
 }
 ```
+
+A transition keeps input responsive but still re-renders on every scroll event. If the UI only cares about a threshold (for example "scrolled past 100px"), store that boolean instead ([Subscribe to Derived State](./rerender-derived-state.md)), and for values used only by imperative code, keep them in a ref ([Use useRef for Transient Values](./rerender-use-ref-transient-values.md)).
+
+Reference: [startTransition](https://react.dev/reference/react/startTransition)

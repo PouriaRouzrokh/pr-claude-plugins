@@ -5,3 +5,5 @@ claude-code-docs/
 skill-zips/
 __pycache__/
 .pytest_cache/
+.claude/settings.local.json
+.claude/worktrees/

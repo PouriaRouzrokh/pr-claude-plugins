@@ -1,10 +1,6 @@
 # Colorize
 
-> **Additional context needed**: existing brand colors.
-
 Introduce color as hierarchy, meaning, and atmosphere. Preserve confirmed brand and semantic conventions; do not replace a visual world under the guise of colorizing it.
-
----
 
 ## Contents
 
@@ -53,7 +49,7 @@ Use the project's existing color space. For a new web palette, prefer OKLCH beca
 
 - Let the strongest color own a deliberate region or role instead of scattering tiny accents.
 - Keep the primary action easy to find; do not spend its color on decoration.
-- Tint neutrals only when the brand hue genuinely creates cohesion. Neutral gray is valid when it serves the world.
+- Tint neutrals only when the brand hue genuinely creates cohesion. Neutral gray is valid when it serves the world. A faintly tinted near-black or warm off-white used by habit is one of the AI design clusters in SKILL.md; choose the dark or light surface's hue and lightness deliberately.
 - On colored surfaces, derive secondary text from the foreground or surface hue rather than using washed-out generic gray.
 - Keep semantic meanings consistent, but respect platform and domain conventions instead of assuming fixed hues.
 - For data, use distinct lightness, chroma, shape, label, or pattern so color is not the only code.
@@ -64,13 +60,7 @@ Decoration without a relationship to hierarchy, state, content, or the visual wo
 
 ## Contrast and perception
 
-Verify computed foreground/background pairs:
-
-| Content | WCAG AA minimum |
-|---|---|
-| body text | 4.5:1 |
-| large text | 3:1 |
-| controls, icons, focus indicators | 3:1 |
+Verify computed foreground/background pairs against WCAG 2.2 AA: 4.5:1 for body text, 3:1 for large text and for controls, icons, and focus indicators ([details](#contrast-details)).
 
 Do not rely on eyesight alone. Check interactive states, overlays, text on images, disabled content, and both themes. Simulate common vision deficiencies. Information conveyed by color also needs text, shape, iconography, or position.
 
@@ -127,8 +117,8 @@ Skip secondary and tertiary brand colors unless a real role needs them. For a Re
 | Content | AA minimum | AAA target |
 |---------|------------|------------|
 | Body text | 4.5:1 | 7:1 |
-| Large text (18px+, or 14px+ bold) | 3:1 | 4.5:1 |
-| UI components, icons | 3:1 | 4.5:1 |
+| Large text (24px+, or 18.66px+ bold; WCAG's 18pt / 14pt bold) | 3:1 | 4.5:1 |
+| UI components, icons, focus indicators | 3:1 | no AAA level |
 
 Placeholder text still needs 4.5:1. Combinations that commonly fail: light gray on white, gray text on any colored surface (use a darker shade of that surface's hue), red against green, blue on red (vibrates), yellow on white, and thin light text over images. Test with the [WebAIM contrast checker](https://webaim.org/resources/contrastchecker/) and the browser's emulated vision deficiencies.
 
@@ -137,7 +127,7 @@ Placeholder text still needs 4.5:1. Combinations that commonly fail: light gray 
 | Light theme | Dark theme |
 |-------------|------------|
 | Shadows convey depth | Lighter surfaces convey depth |
-| Dark text on light | Light text on dark, slightly lighter weight |
+| Dark text on light | Light text on dark; check rendered weight and add a little line height ([typeset.md](typeset.md#apply)) |
 | Vibrant accents | Slightly desaturated accents |
 
 ```css
@@ -145,8 +135,27 @@ Placeholder text still needs 4.5:1. Combinations that commonly fail: light gray 
   --surface-1: oklch(15% 0.01 250);
   --surface-2: oklch(20% 0.01 250); /* "higher" surfaces are lighter */
   --surface-3: oklch(25% 0.01 250);
-  --body-weight: 350;
 }
 ```
 
 Use two token layers: primitives (`--blue-500`) and semantic roles (`--color-primary: var(--blue-500)`). A theme redefines only the semantic layer.
+
+### Modern color functions
+
+- **`light-dark()`** (Baseline 2024) picks a value from the element's `color-scheme`, so one declaration covers both themes. It needs `color-scheme: light dark` on `:root` (or a scoped element), which also themes native controls and scrollbars.
+- **`color-mix()`** (Baseline widely available) derives hover states, borders, and tints without new primitives. Mix in `oklch` for predictable results.
+- **Relative color syntax** (Baseline 2024) adjusts one channel of an existing token.
+- **`contrast-color()`** (Baseline April 2026: Chrome 147, Firefox 146, Safari 26) returns black or white, whichever contrasts more with a given color, so text on a user-supplied or generated background (badges, tags, theme pickers) stays legible without a hand-set pair. It picks only black or white and does not guarantee a ratio, so still verify contrast on brand surfaces and check the result with the real palette.
+
+```css
+:root {
+  color-scheme: light dark;
+  --surface: light-dark(oklch(98% 0.005 80), oklch(17% 0.01 250));
+  --text: light-dark(oklch(22% 0.01 250), oklch(93% 0.005 80));
+  --accent: oklch(62% 0.17 35);
+  --accent-hover: oklch(from var(--accent) calc(l - 0.06) c h);
+  --accent-subtle: color-mix(in oklch, var(--accent) 12%, var(--surface));
+}
+:root[data-theme="light"] { color-scheme: light; } /* manual override */
+:root[data-theme="dark"]  { color-scheme: dark; }
+```

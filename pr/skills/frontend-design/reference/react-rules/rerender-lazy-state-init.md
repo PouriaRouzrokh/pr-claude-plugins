@@ -56,3 +56,5 @@ function UserProfile() {
 Use lazy initialization when computing initial values from localStorage/sessionStorage, building data structures (indexes, maps), reading from the DOM, or performing heavy transformations.
 
 For simple primitives (`useState(0)`), direct references (`useState(props.value)`), or cheap literals (`useState({})`), the function form is unnecessary.
+
+Reading `localStorage` in an initializer only works in client-only rendering. During SSR it throws (no `localStorage`) or, if guarded, produces a hydration mismatch; see [Prevent Hydration Mismatch Without Flickering](./rendering-hydration-no-flicker.md).

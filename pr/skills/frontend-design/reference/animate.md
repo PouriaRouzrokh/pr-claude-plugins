@@ -1,10 +1,6 @@
 # Animate
 
-> **Additional context needed**: performance constraints.
-
-Use motion to explain state, relationship, and hierarchy, or to create one authored moment the surface has earned. Decoration without purpose is animation debt.
-
----
+Use motion to explain state, relationship, and hierarchy, or to create one authored moment the surface has earned. Decoration without purpose is animation debt. Check the performance budget and target devices before choosing techniques.
 
 ## Contents
 
@@ -71,14 +67,14 @@ Timing should express distance and consequence:
 | 300–500 ms | layout, overlay, or view transition |
 | 500–800 ms | a deliberately authored focal entrance |
 
-Exit faster than entrance. Use natural deceleration such as `cubic-bezier(0.16, 1, 0.3, 1)` for confident arrivals; do not use bounce or elastic curves by reflex. Long feedback feels like latency.
+Exit faster than entrance. Use natural deceleration such as `cubic-bezier(0.16, 1, 0.3, 1)` for confident arrivals. Avoid bounce and elastic curves: they read as dated and draw attention to the motion instead of the change. Long feedback feels like latency.
 
 ## Implement to the runtime
 
 - Use CSS transitions and keyframes for declarative state and bounded sequences.
 - Use Web Animations API or the project's existing motion library for interruption, sequencing, and dynamic values.
-- Use View Transitions or shared-element techniques when continuity across states is the point.
-- Use scroll-driven motion only when the scroll relationship itself carries meaning, with a robust fallback.
+- Use View Transitions or shared-element techniques when continuity across states is the point. Same-document transitions are Baseline (October 2025); in React 19.3+ use `<ViewTransition>` ([react-view-transitions.md](react-view-transitions.md)); cross-document transitions are not yet in Firefox, where navigation simply happens without the animation.
+- Use scroll-driven motion only when the scroll relationship itself carries meaning. It ships in Chromium and Safari 26 but not yet in stable Firefox, so wrap it in `@supports (animation-timeline: view())` with a static fallback.
 - Do not add a dependency for an effect the existing stack can express cleanly.
 
 Keep content visible in the default state so failed scripts do not hide the page. Avoid casually animating layout-driving properties such as `width`, `height`, `top`, `left`, and margins; use FLIP, transforms, or grid techniques when appropriate. Bound blur, filter, shadow, canvas, and shader work to isolated regions. Apply `will-change` only during known animation. Measure on target viewports and devices rather than assuming transform means fast.
@@ -125,10 +121,34 @@ Exit durations run about 75% of the matching entrance. Define durations and easi
 
 ### Common patterns
 
-- **Height reveals:** transition `grid-template-rows` from `0fr` to `1fr` instead of animating `height`.
+- **Height reveals:** transition `grid-template-rows` from `0fr` to `1fr` instead of animating `height`. `interpolate-size: allow-keywords` (animating to `height: auto`) is Chromium-only; use it only as an enhancement.
 - **List stagger:** `animation-delay: calc(var(--i, 0) * 50ms)` with `style="--i: 0"` on each item. Cap the total: ten items at 50ms is already 500ms.
-- **Scroll-triggered reveals:** use `IntersectionObserver` rather than scroll listeners, and unobserve after the first run.
+- **Scroll-triggered reveals:** use `IntersectionObserver` rather than scroll listeners, and unobserve after the first run. Start from visible content and add the hidden state only once the script runs, so a failed script never hides the page.
 - **`will-change`:** set it only while an animation is imminent (`:hover`, an `.animating` class), never at rest.
+
+### Entry and exit with CSS
+
+`@starting-style` and `transition-behavior: allow-discrete` (both Baseline 2024) animate elements appearing from `display: none`, including `<dialog>` and popovers, without JavaScript:
+
+```css
+[popover], dialog {
+  transition: opacity 200ms, translate 200ms var(--ease-out-quart),
+              display 200ms allow-discrete, overlay 200ms allow-discrete;
+  opacity: 0;
+  translate: 0 8px;
+}
+[popover]:popover-open, dialog[open] {
+  opacity: 1;
+  translate: 0;
+  @starting-style { opacity: 0; translate: 0 8px; }
+}
+```
+
+Transitioning `overlay` keeps the element in the top layer during exit in Chromium; other engines ignore it. Browsers without support simply show and hide the element instantly.
+
+### Spring-like easing
+
+`linear()` (Baseline) approximates springs and other custom curves in pure CSS; generate the point list with a tool rather than by hand. Keep overshoot subtle; a visible wobble is the bounce this file advises against.
 
 ### Reduced motion
 
@@ -146,7 +166,7 @@ Progress bars, loading indicators (slowed), and focus indicators keep working wi
 
 ### Perceived performance
 
-- Responses under about 80ms feel instant; that is the target for micro-interactions.
+- Responses within about 100ms feel instant; that is the target for micro-interactions. Interaction to Next Paint (INP) should stay at or under 200ms ([optimize.md](optimize.md#responsiveness-inp)).
 - Start transitions immediately while work continues (skeletons, progressive images, streamed content); passive waiting feels longer than visible progress.
 - Use optimistic updates for low-stakes actions (likes, follows), never for payments or destructive operations.
 - Very fast results can feel untrustworthy for complex operations (search, analysis); a brief, honest progress state can signal real work.

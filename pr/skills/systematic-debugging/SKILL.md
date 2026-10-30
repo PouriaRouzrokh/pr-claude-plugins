@@ -37,7 +37,7 @@ Complete each phase before moving to the next.
 1. **Read the error completely.** Stack traces, line numbers, error codes, warnings above the failure. They often contain the answer.
 2. **Reproduce consistently.** Find the exact steps. If it is not reproducible, gather more data instead of guessing.
 3. **Check recent changes.** `git log -p`, `git diff`, dependency bumps (lockfile diff), config and environment differences. `git bisect run <test>` finds the breaking commit mechanically.
-4. **Gather evidence at component boundaries.** In multi-component systems (UI → API → service → database, CI → build → deploy), log what enters and exits each boundary, run once, and let the evidence show which layer breaks. Then investigate that layer.
+4. **Gather evidence at component boundaries.** In multi-component systems (UI → API → service → database, CI → build → deploy), log what enters and exits each boundary, run once, and let the evidence show which layer breaks. Then investigate that layer. When logging environment or secret state, print only set or unset, never the value.
 5. **Trace data flow backward.** When a bad value surfaces deep in a call stack, ask what called this with that value, and keep going up until you find where it originated. Fix at the source. Technique: [references/root-cause-tracing.md](references/root-cause-tracing.md).
 
 ### Phase 2: Pattern Analysis
@@ -107,6 +107,6 @@ If investigation shows the issue is truly environmental, timing-dependent, or ex
 
 ## Fit With This Toolkit
 
-- A non-trivial bug fix gets an RFD (see `feature-dev`) recording the symptom, root cause, evidence, and fix.
+- A non-trivial bug fix gets an RFD recording the symptom, root cause, evidence, and fix: create it with `python3 ${CLAUDE_PLUGIN_ROOT}/shared/checkpoint.py new-rfd "<title>" --type "Bug fix"`, following `${CLAUDE_PLUGIN_ROOT}/shared/checkpoint-system.md`.
 - Remove all temporary instrumentation (logging, debug prints, scratch scripts) before handing off.
 - Use `test-driven-development` for the regression test and its verification gate before claiming the bug is fixed.

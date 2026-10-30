@@ -2,12 +2,10 @@
 
 Layout turns product priority into reading order, grouping, rhythm, and usable space. Diagnose the structural problem before moving boxes.
 
----
-
 ## Contents
 
 - [Visitor mode](#visitor-mode)
-- [Two isolated assessments](#two-isolated-assessments)
+- [Assess](#assess)
 - [Set the spatial thesis](#set-the-spatial-thesis)
 - [Apply](#apply)
 - [Verify](#verify)
@@ -20,9 +18,9 @@ Layout turns product priority into reading order, grouping, rhythm, and usable s
 
 Preserve the established visual world. A layout pass changes structure inside it; identity replacement belongs to [new-work.md](new-work.md).
 
-## Two isolated assessments
+## Assess
 
-When a sub-agent tool is available and permitted, run these independently; otherwise run them yourself in this order.
+Do the design read first and the mechanical scan second, so scan hits don't anchor your judgment of hierarchy and rhythm. For a large surface, the two can run as parallel subagents.
 
 1. **Layout assessment:** inspect representative states and viewports. Answer every question below with rendered or source evidence:
    - **Reading order:** Apply the squint test. With detail blurred, can you still identify the primary element, the secondary element, and the major groups in order?
@@ -56,7 +54,7 @@ Choose the simplest structural model that expresses those relationships. Use lay
 - Make responsive behavior structural: reorder, collapse, reflow, or reveal based on what remains important.
 - Prefer container-aware components when the same component appears in different contexts.
 - Use `gap` for sibling rhythm when it expresses the relationship more directly than child margins.
-- Keep touch targets usable even when their visible marks are small.
+- Keep touch targets usable even when their visible marks are small: at least 24×24 CSS px (WCAG 2.2 AA), 44×44px for primary touch controls.
 - Use depth only when it clarifies state or hierarchy.
 - Make optical corrections only after inspecting the rendered result.
 
@@ -87,7 +85,7 @@ A 4px base gives the useful middle steps an 8-only scale lacks: 4, 8, 12, 16, 24
 
 ### Grids
 
-`grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))` gives a responsive grid without breakpoints: columns of at least 280px, as many as fit, leftovers stretched. For complex page layouts, use named `grid-template-areas` and redefine them at breakpoints.
+`grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr))` gives a responsive grid without breakpoints: columns of at least 280px, as many as fit, leftovers stretched; the `min()` keeps a single column from overflowing containers narrower than 280px. For complex page layouts, use named `grid-template-areas` and redefine them at breakpoints. Use `subgrid` (Baseline widely available) when nested items, such as card titles, prices, and buttons across a row, must align to the parent's tracks.
 
 ### Hierarchy dimensions
 
@@ -115,7 +113,7 @@ Viewport queries are for page layout; container queries are for components.
 }
 ```
 
-The same card stays compact in a sidebar and expands in the main column without viewport hacks.
+The same card stays compact in a sidebar and expands in the main column without viewport hacks. Container query units (`cqi`, `cqb`) size type and spacing relative to the container. Style queries on custom properties (`@container style(--variant: compact)`) became Baseline in May 2026; treat them as an enhancement where older browsers matter.
 
 ### Optical adjustments
 
@@ -124,7 +122,7 @@ The same card stays compact in a sidebar and expands in the main column without 
 
 ### Touch targets
 
-Keep interactive targets at least 44x44px even when the visible mark is smaller:
+WCAG 2.2 AA requires targets of at least 24×24 CSS px (or enough spacing around smaller ones); aim for 44×44px on primary touch controls. Extend the hit area when the visible mark is smaller:
 
 ```css
 .icon-button { position: relative; width: 24px; height: 24px; }

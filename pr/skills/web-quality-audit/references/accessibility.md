@@ -14,7 +14,7 @@ Read this reference when axe or Lighthouse reports accessibility violations, and
 
 ## What automation covers
 
-axe-core and Lighthouse (which runs axe internally) detect roughly 20–50% of accessibility barriers. A score of 100 does not mean WCAG conformance. Treat axe violations as confirmed defects, axe `incomplete` results as items needing manual review, and every criterion marked **manual** below as untested until someone checks it.
+axe-core and Lighthouse (which runs axe internally) catch only part of accessibility barriers; published estimates range from about a third to just over half. A score of 100 does not mean WCAG conformance. Treat axe violations as confirmed defects, axe `incomplete` results as items needing manual review, and every criterion marked **manual** below as untested until someone checks it.
 
 ## Severity from axe impact
 
@@ -39,7 +39,7 @@ Level AA conformance requires every Level A and Level AA criterion. **Auto** mea
 - [ ] **1.3.2 Meaningful sequence (A, manual):** DOM order matches reading order.
 - [ ] **1.3.3 Sensory characteristics (A, manual):** Instructions do not rely only on shape, position, or sound.
 - [ ] **1.3.4 Orientation (AA, manual):** Content works in portrait and landscape.
-- [ ] **1.3.5 Identify input purpose (AA, auto):** Personal-data fields have correct `autocomplete` values.
+- [ ] **1.3.5 Identify input purpose (AA, auto + manual):** Personal-data fields have correct `autocomplete` values. axe flags invalid values but not missing ones.
 - [ ] **1.4.1 Use of color (A, manual):** Color is never the only signal (errors, links, status).
 - [ ] **1.4.2 Audio control (A, manual):** Auto-playing audio can be paused or muted.
 - [ ] **1.4.3 Contrast (AA, auto):** Text contrast is at least 4.5:1; large text (24 px, or 18.66 px bold) at least 3:1.
@@ -85,7 +85,7 @@ Level AA conformance requires every Level A and Level AA criterion. **Auto** mea
 - [ ] **3.3.3 Error suggestion (AA, manual):** Error messages say how to fix the problem.
 - [ ] **3.3.4 Error prevention (AA, manual):** Legal, financial, and data-deleting actions can be reviewed, confirmed, or undone.
 - [ ] **3.3.7 Redundant entry (A, manual, new in 2.2):** Users are not asked to re-enter data they already gave in the same flow.
-- [ ] **3.3.8 Accessible authentication (AA, manual, new in 2.2):** Login allows paste and password managers, or offers passkeys, magic links, or SSO; no puzzle-only CAPTCHA.
+- [ ] **3.3.8 Accessible authentication (AA, manual, new in 2.2):** Login allows paste and password managers, or offers passkeys, magic links, or SSO. No step requires a cognitive test such as transcribing distorted text or solving a puzzle unless an alternative exists (object-recognition CAPTCHAs are allowed at AA).
 
 ### Robust
 
@@ -125,11 +125,10 @@ When browser automation is available (Playwright MCP or Claude in Chrome), use i
 }
 ```
 
-**Visible focus without showing rings on mouse click:**
+**Visible focus.** Browsers already skip focus rings on mouse clicks for buttons and links, so style `:focus-visible` and never remove outlines with a bare `:focus { outline: none }`:
 
 ```css
 :focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
-:focus:not(:focus-visible) { outline: none; }
 html { scroll-padding-top: 5rem; } /* keeps focused items clear of a sticky header (2.4.11) */
 ```
 

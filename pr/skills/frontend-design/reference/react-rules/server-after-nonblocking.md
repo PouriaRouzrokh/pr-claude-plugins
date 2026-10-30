@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     const userAgent = (await headers()).get('user-agent') || 'unknown'
     const sessionCookie = (await cookies()).get('session-id')?.value || 'anonymous'
     
-    logUserAction({ sessionCookie, userAgent })
+    await logUserAction({ sessionCookie, userAgent })
   })
   
   return new Response(JSON.stringify({ status: 'success' }), {
@@ -67,7 +67,10 @@ The response is sent immediately while logging happens in the background.
 
 **Important notes:**
 
-- `after()` runs even if the response fails or redirects
-- Works in Server Actions, Route Handlers, and Server Components
+- Stable since Next.js 15.1. Works in Server Components (including `generateMetadata`), Server Functions, Route Handlers, and Proxy.
+- `after()` runs even when the response errors, or when `notFound()` or `redirect()` is called.
+- `cookies()` and `headers()` can be called inside the callback only in Route Handlers and Server Functions. In Server Components, read them during render and pass the values into the callback; calling them inside `after()` throws.
+- `after()` is not a request-time API, so it doesn't make a route dynamic. On a prerendered page the callback runs at build or revalidation time.
+- The callback runs within the route's max duration. Serverless platforms need `waitUntil` support (built in on Vercel; self-hosted Node.js and Docker work out of the box).
 
 Reference: [https://nextjs.org/docs/app/api-reference/functions/after](https://nextjs.org/docs/app/api-reference/functions/after)

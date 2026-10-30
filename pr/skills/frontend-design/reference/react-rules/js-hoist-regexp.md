@@ -34,6 +34,8 @@ function Highlighter({ text, query }: Props) {
 }
 ```
 
+Hoist regexes that don't depend on props or state (like `EMAIL_REGEX`) to module scope. With React Compiler enabled, the `useMemo` around a dynamic regex is applied automatically.
+
 **Warning (global regex has mutable state):**
 
 Global regex (`/g`) has mutable `lastIndex` state:

@@ -49,9 +49,11 @@ function SearchResults() {
     setQuery(value) // Update input immediately
     
     startTransition(async () => {
-      // Fetch and update results
       const data = await fetchResults(value)
-      setResults(data)
+      // State updates after an await must be wrapped again to count as a transition
+      startTransition(() => {
+        setResults(data)
+      })
     })
   }
 
@@ -67,9 +69,13 @@ function SearchResults() {
 
 **Benefits:**
 
-- **Automatic pending state**: No need to manually manage `setIsLoading(true/false)`
-- **Error resilience**: Pending state correctly resets even if the transition throws
-- **Better responsiveness**: Keeps the UI responsive during updates
-- **Interrupt handling**: New transitions automatically cancel pending ones
+- **Automatic pending state**: `isPending` stays true until the whole async Action, including awaited work, finishes
+- **Error resilience**: An error thrown inside the Action resets the pending state and reaches the nearest error boundary
+- **Better responsiveness**: The input update stays urgent while the results update renders at lower priority
+
+**Caveats:**
+
+- React loses the transition context after `await`, so state updates that follow an `await` need their own `startTransition` (shown above). React plans to remove this limitation once `AsyncContext` is available.
+- Transitions do not cancel earlier ones, and async Actions don't guarantee completion order: a slow earlier search can finish after a newer one and overwrite its results. Use `useActionState` or form actions, which order updates for you, or track the latest request and ignore stale responses (an `AbortController` also saves the wasted fetch).
 
 Reference: [useTransition](https://react.dev/reference/react/useTransition)

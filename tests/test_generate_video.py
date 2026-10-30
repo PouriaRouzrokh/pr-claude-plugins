@@ -80,3 +80,36 @@ def test_no_video(run):
     with pytest.raises(SystemExit) as e:
         run(["x"], response=ns(id="v", status="failed", output_text=None, output_video=None, errors=[ns(message="unsafe")]))
     assert "status: failed" in str(e.value) and "unsafe" in str(e.value)
+
+
+def mvhd_mp4(seconds, timescale=1000):
+    body = b"\x00\x00\x00\x00" + b"\x00" * 8 + timescale.to_bytes(4, "big") + (seconds * timescale).to_bytes(4, "big")
+    return b"\x00\x00\x00\x20ftypmp42" + (len(body) + 8).to_bytes(4, "big") + b"mvhd" + body
+
+
+def test_cost_estimate_from_clip_length(run, capsys):
+    data = base64.b64encode(mvhd_mp4(8)).decode()
+    run(["x"], response=ns(id="v1", status="completed", output_text=None,
+                           output_video=ns(data=data, uri=None), errors=None))
+    assert "Estimated cost: about $0.80 (8 s at $0.10/s" in capsys.readouterr().out
+
+
+def test_cost_line_skipped_when_length_unknown(run, capsys):
+    run(["x"])
+    assert "Estimated cost" not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("code,calls", [(429, 3), (503, 3), (500, 1), (502, 1), (504, 1)])
+def test_only_429_and_503_are_retried(tmp_path, monkeypatch, code, calls):
+    monkeypatch.chdir(tmp_path); monkeypatch.setenv("GEMINI_API_KEY", "k")
+    m = load()
+    err = Exception("boom"); err.code = code
+    seen = []
+    class I:
+        def create(self, **req): seen.append(req); raise err
+    monkeypatch.setattr(m.genai, "Client", lambda api_key: ns(interactions=I()))
+    monkeypatch.setattr(m.time, "sleep", lambda s: None)
+    monkeypatch.setattr(sys, "argv", ["generate_video.py", "x"])
+    with pytest.raises(SystemExit):
+        m.main()
+    assert len(seen) == calls

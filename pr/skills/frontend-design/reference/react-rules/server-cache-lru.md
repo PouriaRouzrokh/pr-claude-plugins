@@ -38,4 +38,6 @@ Use when sequential user actions hit multiple endpoints needing the same data wi
 
 **In traditional serverless:** Each invocation runs in isolation, so consider Redis for cross-process caching.
 
+> **Note (2026):** In Next.js 16 with Cache Components enabled (the default for new apps since 16.4), prefer the framework cache: put `'use cache'` at the top of the data function and pair it with `cacheLife()` and `cacheTag()`. Arguments become the cache key, results are stored in memory per instance by default, `'use cache: remote'` moves them to a shared cache handler, and `updateTag()` / `revalidateTag(tag, 'max')` invalidate them. A hand-rolled LRU still fits outside Next.js, for non-serializable values, or when you need explicit eviction control.
+
 Reference: [https://github.com/isaacs/node-lru-cache](https://github.com/isaacs/node-lru-cache)
